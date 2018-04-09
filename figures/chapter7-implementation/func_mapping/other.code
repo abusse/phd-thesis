@@ -1,0 +1,10 @@
+/*****************
+* Implementation
+* without OS
+* specific support
+*****************/
+os_malloc()
+{
+	find_mem();
+	reserve();
+}

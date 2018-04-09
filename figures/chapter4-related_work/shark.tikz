@@ -1,0 +1,32 @@
+\begin{scaletikzpicturetowidth}{0.8\textwidth}
+	\begin{tikzpicture}[scale=\tikzscale, every node/.style={transform shape}]
+		\begin{scope}[shift={(0,0)}]
+			\draw[densely dashed] (0,0) rectangle ++(6,4.5);
+			\draw (1.25,0.25) rectangle ++(3.5,1.75) node[pos=0.5] {\breakC{Specific Algorithm \\ (Scheduling, \\ Resource, \ldots)}};
+			\draw[rounded corners=0.5em] (1.75,3.25) rectangle ++(2.5,0.75) node[pos=0.5] {QOS Mapper};
+		
+			\draw[->, line width=1pt] (3,3.25) -- node[anchor=east, xshift=0.5em] {\footnotesize \breakC{Internal\\Data Structures}} ++(0,-1.25);
+			\node[anchor=north east, inner sep=0.5em] at (6,4.5) {Module~1};
+		\end{scope}
+
+		\begin{scope}[shift={(8,0)}]
+			\draw[densely dashed] (0,0) rectangle ++(6,4.5);
+			\draw (1.25,0.25) rectangle ++(3.5,1.75) node[pos=0.5] {\breakC{Specific Algorithm \\ (Scheduling, \\ Resource, \ldots)}};
+			\draw[rounded corners=0.5em] (1.75,3.25) rectangle ++(2.5,0.75) node[pos=0.5] {QOS Mapper};
+		
+			\draw[->, line width=1pt] (3,3.25) -- node[anchor=east, xshift=0.5em] {\footnotesize \breakC{Internal\\Data Structures}} ++(0,-1.25);
+			\node[anchor=north east, inner sep=0.5em] at (6,4.5) {Module~2};
+		\end{scope}
+
+		\draw[rounded corners=0.5em] (5.5,6) rectangle ++(3,1) node[pos=0.5] {\breakC{Generic\\Model Mapper}};
+		\draw[->, line width=1pt] (6.5,6) .. controls (6.5,4.25) and (2.75,6)  .. node[anchor=south, yshift=0.25em] {\small Model~2}(3,4);
+		\draw[->, line width=1pt] (7.5,6) .. controls (7.5,4.25) and (11.25,6) .. node[anchor=south, yshift=0.25em] {\small Model~1}(11,4);
+		
+		\draw (4,8.5) rectangle ++(2,0.75) node[pos=0.5] {New Task};
+		\draw (8,8.5) rectangle ++(2,0.75) node[pos=0.5] {New Task};
+		
+		\draw[->, line width=1pt] (5,8.5) .. controls (5,7.75) and (6.675,8.25) .. node[anchor=east, yshift=-0.5em] {\small Model~1}(6.5,7);
+		\draw[->, line width=1pt] (9,8.5) .. controls (9,7.75) and (7.325,8.25) .. node[anchor=west, yshift=-0.5em] {\small Model~2}(7.5,7);
+		
+	\end{tikzpicture}
+\end{scaletikzpicturetowidth}

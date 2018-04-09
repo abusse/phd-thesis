@@ -1,0 +1,16 @@
+\begin{scaletikzpicturetowidth}{0.9\textwidth}
+	\begin{tikzpicture}[scale=\tikzscale, every node/.style={transform shape}]
+
+		\node[rectangle, draw, fill=Component, anchor=west, minimum height=1.8cm, minimum width=1.8cm, inner sep=0] at (2,0) (load) {\breakC{Load-\\Balancing}};
+		\node[rectangle, draw, fill=Component, anchor=west, minimum height=1cm, minimum width=1.8cm, inner sep=0] at (6,1) (rr2) {\breakC{Round-\\Robin}};
+		\node[rectangle, draw, fill=Component, anchor=west, minimum height=1cm, minimum width=1.8cm, inner sep=0] at (6,-1) (rr3) {\breakC{Round-\\Robin}};
+
+		\path [->, draw] (1,0)      -- node[anchor=south, align=center]{} (load);
+		\path [->, draw] (load.10)  -- node[anchor=south, align=center]{} (rr2.180);
+		\path [->, draw] (load.350) -- node[anchor=south, align=center]{} (rr3.180);
+
+		\path [->, draw] (rr2.0) -- node[anchor=south, align=center]{} ++(1,0) node[anchor=west] {\breakC{PE~0, PE~1}};
+		\path [->, draw] (rr3.0) -- node[anchor=south, align=center]{} ++(1,0) node[anchor=west] {\breakC{PE~2, PE~3}};
+
+	\end{tikzpicture}
+\end{scaletikzpicturetowidth}

@@ -1,0 +1,9 @@
+/*****************
+* OS independed
+* implemenation
+* for CoBaS
+*****************/
+
+fw_malloc() {
+	os_malloc();
+}

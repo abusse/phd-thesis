@@ -1,0 +1,43 @@
+\begin{tikzpicture}
+	%define colors as colorbrewer doesn't work with bar charts
+	\definecolor{graph1}{rgb}{0.106,0.620,0.467}
+	\definecolor{graph2}{rgb}{0.851,0.373,0.008}
+	\definecolor{graph3}{rgb}{0.459,0.439,0.702}
+
+	\begin{axis}[width = \textwidth,
+				 height = 0.375\textheight,
+				 ybar,
+				 scaled y ticks = false,
+				 enlarge x limits=0.062,
+				 ymin=-0.085,
+				 ymax=0.01,
+				 ytick={-0.08,-0.06,-0.04,-0.02,0,0.02},
+				 yticklabels={0.92,0.94,0.96,0.98,1,1.02},
+				 ytick pos=left,
+				 ylabel={Speedup $\frac{\text{CFS}}{\text{CoBaS}}$},
+				 y label style={at={(-0.075,0.5)}},
+				 xlabel={NAS Benchmark},
+				 xtick=data,
+				 xtick pos=right,
+				 xticklabel style={yshift=-1ex},
+				 symbolic x coords={bt,cg,ep,ft,is,lu,mg,sp,ua},
+				 xticklabels={BT,CG,EP,FT,IS,LU,MG,SP,UA},
+				 bar width=7pt,
+				 major x tick style = {color=white},
+				 minor x tick style = {color=gray},
+				 minor x tick num = 1,
+				 minor tick length=2ex,
+				 ymajorgrids,
+				 legend pos=south east]
+
+		\addplot+[draw=graph1,fill=graph1!60!white] table [col sep=comma, x=nas, y expr=\thisrow{ratio}-1] {figures/chapter8-studies/performance/results-A.dat};
+		\addlegendentry{\small Input Size~A}
+		\addplot+[draw=graph2,fill=graph2!60!white] table [col sep=comma, x=nas, y expr=\thisrow{ratio}-1] {figures/chapter8-studies/performance/results-B.dat};
+		\addlegendentry{\small Input Size~B}
+		\addplot+[draw=graph3,fill=graph3!60!white] table [col sep=comma, x=nas, y expr=\thisrow{ratio}-1] {figures/chapter8-studies/performance/results-C.dat};
+		\addlegendentry{\small Input Size~C}
+
+		% highlight the "0" line
+		\draw ({rel axis cs:0,0}|-{axis cs:bt,0}) -- ({rel axis cs:1,0}|-{axis cs:ua,0});
+	\end{axis}
+\end{tikzpicture}

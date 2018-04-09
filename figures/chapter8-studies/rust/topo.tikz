@@ -1,0 +1,30 @@
+\begin{tikzpicture}[scale=0.7, every node/.style={transform shape}]
+	
+	\node[rectangle, draw, anchor=west, minimum height=1.8cm, minimum width=1.8cm, inner sep=0, fill=yellow!30] at (2,0) (load) {\breakC{Load-\\Balancing}};
+	\node[rectangle, draw, anchor=west, minimum height=1cm,   minimum width=1.8cm, inner sep=0, fill=yellow!30] at (6,3) (rr1) {\breakC{Head\\Queue}};
+	\node[rectangle, draw, anchor=west, minimum height=1cm,   minimum width=1.8cm, inner sep=0, fill=yellow!30] at (6,1.66) (rr2) {\breakC{Rusty}};
+	\node[rectangle, draw, anchor=west, minimum height=1cm,   minimum width=1.8cm, inner sep=0, fill=yellow!30] at (6,-1.66) (rr3) {\breakC{Head\\Queue}};
+	\node[rectangle, draw, anchor=west, minimum height=1cm,   minimum width=1.8cm, inner sep=0, fill=yellow!30] at (6,-3) (rr4) {\breakC{Rusty}};
+	
+	\path [<-, draw] (load.150) -- ++(-2,0);
+	\path [<-, draw] (load.165) -- ++(-2,0);
+	\path [<-, draw] (load.195) -- ++(-2,0);
+	\path [<-, draw] (load.210) -- ++(-2,0);
+	\path [->, draw] (load.30) -- (rr1.180);
+	\path [->, draw] (load.15) -- (rr2.180);
+	\path [->, draw] (load.345) -- (rr3.180);
+	\path [->, draw] (load.330) -- (rr4.180);
+	
+	\path (load.180) -- node[anchor=center, align=center] {\textbullet~\textbullet~\textbullet} ++(-2,0);
+
+	\path [->, draw] (rr1.0) -- ++(2,0) node[anchor=west, align=center] {PE~0} ;
+	\path [->, draw] (rr2.0) -- ++(2,0) node[anchor=west, align=center] {PE~1} ;
+	\path [->, draw] (rr3.0) -- ++(2,0) node[anchor=west, align=center] {PE~$n$-1} ;
+	\path [->, draw] (rr4.0) -- ++(2,0) node[anchor=west, align=center] {PE~$n$} ;
+	
+	\node[anchor=west, minimum height=1cm, minimum width=1.8cm, inner sep=0] at (6,0) (dots) {\breakC{\textbullet \\ \textbullet \\ \textbullet}};
+	
+	\node[rectangle, draw, anchor=west, minimum height=1cm, minimum width=1.8cm, inner sep=0, fill=yellow!30] at (0.25,2.75) (affinity) {Affinity};
+	\node[rectangle, draw, anchor=west, minimum height=1cm, minimum width=1.8cm, inner sep=0, fill=yellow!30] at (2.5,2.75) (marker) {Marker};
+
+\end{tikzpicture}

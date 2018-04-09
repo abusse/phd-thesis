@@ -1,0 +1,166 @@
+\begin{scaletikzpicturetowidth}{0.95\textwidth}
+\begin{tikzpicture}[scale=\tikzscale, every node/.style={transform shape,font=\sf}]
+	\colorlet{outerpipe}{gray!80}
+	\colorlet{innerpipe}{gray!25}
+	\colorlet{shadow}{yellow!40}
+	\colorlet{main}{yellow!20}
+	
+	\draw[color=white] (-5.5,-2.5) rectangle (16.25,11.5); 
+	
+	\def\side{2}
+
+	\def\xoffset{-1}
+	\def\yoffset{4}
+	\draw[top color=main,     bottom color=main] (\xoffset,0+\yoffset,-0.5) -- ++(\side,0,0) -- ++(0,1,0) -- ++(-\side,0,0) -- cycle;
+	\draw[top color=shadow  , bottom color=main] (\side+\xoffset,0+\yoffset,-0.5) -- ++(0,0,-1) -- ++(0,1,0) -- ++(0,0,1);
+	\draw[top color=shadow  , bottom color=main] (\side+\xoffset,1+\yoffset,-1.5) -- ++(-\side,0,0) -- ++(0,0,1) -- ++(\side,0,0);
+	\path (\xoffset+1,\yoffset+0.5,-0.5) node [align=center, anchor=center] {\breakC{Affinities}};
+
+	\def\xoffset{-4.5}
+	\def\yoffset{4}
+	\draw[top color=main,        bottom color=main] (0+\xoffset,0+\yoffset,-0.5) -- ++(\side,0,0) -- ++(0,1,0) -- ++(-\side,0,0) -- cycle;
+	\draw[top color=shadow  , bottom color=main] (\side+\xoffset,0+\yoffset,-0.5) -- ++(0,0,-1) -- ++(0,1,0) -- ++(0,0,1);
+	\draw[top color=shadow  , bottom color=main] (\side+\xoffset,1+\yoffset,-1.5) -- ++(-\side,0,0) -- ++(0,0,1) -- ++(\side,0,0);
+	\path (\xoffset+1,\yoffset+0.5,-0.5) node [align=center, anchor=center] {\breakC{Priorities}};
+	
+	
+	% left cube
+	\def\xoffset{-\side - 5.5}
+	\def\yoffset{0}
+
+	% pipe fw
+	\path [top color = outerpipe, bottom color = outerpipe, middle color = innerpipe]
+			(\side+\xoffset,\yoffset+1.3,-1) -- ++(5.5,0) arc (90:-90:-0.15 and 0.3) -- ++(-5.5,0) arc (-90:90:-0.15 and 0.3);
+
+	\path[draw, ->, line width=1pt, rounded corners=6pt] (\side+\xoffset+0.5,\yoffset+1.5,-1) -- node [align=center, anchor=south] {\textsf{update\_pipe()}} ++(4,0,0) ;
+
+	% load balancer
+	\def\xoffset{0}
+	\def\yoffset{0}
+	\draw[top color=main,     bottom color=main] (0+\xoffset,0+\yoffset,0) -- ++(\side,0,0) -- ++(0,\side,0) -- ++(-\side,0,0) -- cycle;
+	\draw[top color=shadow  , bottom color=main] (\side+\xoffset,0+\yoffset,0) -- ++(0,0,-\side) -- ++(0,\side,0) -- ++(0,0,\side);
+	\draw[top color=shadow  , bottom color=main] (\side+\xoffset,\side+\yoffset,-\side) -- ++(-\side,0,0) -- ++(0,0,\side) -- ++(\side,0,0);
+
+	\path (0+\xoffset+1,0+\yoffset+1,0) node [align=center, anchor=center] {\breakC{Load-\\Balancing}};
+
+	\shade[ball color=green!80!white]  (\xoffset - 1.0 ,\yoffset+1,-1) circle (0.225);
+	\shade[ball color=yellow!80!white] (\xoffset - 1.6 ,\yoffset+1,-1) circle (0.225);
+	\shade[ball color=red!80!white]    (\xoffset - 2.2 ,\yoffset+1,-1) circle (0.225);
+	\shade[ball color=teal!80!white]   (\xoffset - 2.8 ,\yoffset+1,-1) circle (0.225);
+	\shade[ball color=orange!80!white](\xoffset - 3.4 ,\yoffset+1,-1) circle (0.225);
+	\shade[ball color=magenta!80!white] (\xoffset - 4.0 ,\yoffset+1,-1) circle (0.225);
+
+
+	% upper load balancer
+	\path [top color = outerpipe, bottom color = outerpipe, middle color = innerpipe]
+			(\side,1.2,-1) arc (-90:90:-0.15 and 0.3) -- ++(1.1,0) -- ++(0.6,-0.6) -- ++(-1.7,0) ;
+	\path [left color = outerpipe, right color = outerpipe, middle color = innerpipe]
+			(\side+1.7,1.2,-1) -- ++(0,1.7) -- ++(-0.6,0.6) -- ++(0,-1.7) ;
+	
+	\def\yoffset{2.2}
+	\def\xoffset{\side+7.5}
+	\path [top color = outerpipe, bottom color = outerpipe, middle color = innerpipe]
+			(\side+1.5,\yoffset+0.7,-1) -- ++(6,0) arc (-90:90:-0.15 and 0.3) -- ++(-6.4,0) -- ++(0.6,-0.6);
+
+
+	\path [top color = outerpipe, bottom color = outerpipe, middle color = innerpipe]
+			(\side,0.2,-1) arc (-90:90:-0.15 and 0.3) -- ++(1.7,0) -- ++(-0.6,-0.6) -- ++(-1.3,0) ;
+	\path [left color = outerpipe, right color = outerpipe, middle color = innerpipe]
+			(\side+1.7,0.8,-1) -- ++(0,-1.7) -- ++(-0.6,-0.6) -- ++(0,1.7) ;
+
+
+	\def\yoffset{-2.2}
+	\def\xoffset{\side+4.5}
+	\path [top color = outerpipe, bottom color = outerpipe, middle color = innerpipe]
+			(\side+2.1,\yoffset+0.7,-1) -- ++(2.3,0) arc (-90:90:-0.15 and 0.3) -- ++(-2.7,0) -- ++(-0.6,-0.6);
+
+	\shade[ball color=red!80!white]    (\xoffset - 1.0 ,\yoffset+1,-1) circle (0.225);
+	\shade[ball color=teal!80!white]   (\xoffset - 1.6 ,\yoffset+1,-1) circle (0.225);
+%	\shade[ball color=magenta!80!white] (\xoffset - 2.2 ,\yoffset+1,-1) circle (0.225);
+
+
+	% left cube
+	\def\xoffset{\side+7.5}
+	\def\yoffset{2.2}
+	\draw[top color=main,   bottom color=main] (0+\xoffset,0+\yoffset,0) -- ++(\side,0,0) -- ++(0,\side,0) -- ++(-\side,0,0) -- cycle;
+	\draw[top color=shadow, bottom color=main] (\side+\xoffset,0+\yoffset,0) -- ++(0,0,-\side) -- ++(0,\side,0) -- ++(0,0,\side);
+	\draw[top color=shadow, bottom color=main] (\side+\xoffset,\side+\yoffset,-\side) -- ++(-\side,0,0) -- ++(0,0,\side) -- ++(\side,0,0);
+
+	\path (\xoffset+1,\yoffset+1,0) node [align=center, anchor=center] {\breakC{Priority\\Policy}};
+
+	\path [top color = outerpipe, bottom color = outerpipe, middle color = innerpipe]
+			(\side+\xoffset,\yoffset+1.3,-1) -- ++(4,0) arc (90:-90:-0.15 and 0.3) -- ++(-4,0) arc (-90:90:-0.15 and 0.3);
+	\path [top color = innerpipe, bottom color = innerpipe, middle color = outerpipe, draw=outerpipe] 
+			(\side+\xoffset+4,\yoffset+1.3,-1) arc (90:-90:-0.15 and 0.3) arc (-90:90:0.15 and 0.3);
+			
+
+	\shade[ball color=yellow!80!white]  (\xoffset - 1.0 ,\yoffset+1,-1) circle (0.225);
+	\shade[ball color=green!80!white]  (\xoffset - 1.6 ,\yoffset+1,-1) circle (0.225);
+	\shade[ball color=orange!80!white]   (\xoffset - 2.2 ,\yoffset+1,-1) circle (0.225);
+
+
+
+	\def\xoffset{14.5}
+
+	\shade[ball color=yellow!80!white]  (\xoffset - 0.0 ,\yoffset+1,-1) circle (0.225);
+	\shade[ball color=orange!80!white]  (\xoffset - 0.6 ,\yoffset+1,-1) circle (0.225);
+	\shade[ball color=green!80!white]   (\xoffset - 1.2 ,\yoffset+1,-1) circle (0.225);
+
+	\node[anchor=west] at (\xoffset+1.25,\yoffset+1,-1) {\LARGE \breakC{Assigned\\to PE~1}};
+
+	\def\xoffset{\side+4.5}
+	\def\yoffset{-2.2}
+	\draw[top color=main,   bottom color=main] (0+\xoffset,0+\yoffset,0) -- ++(\side,0,0) -- ++(0,\side,0) -- ++(-\side,0,0) -- cycle;
+	\draw[top color=shadow, bottom color=main] (\side+\xoffset,0+\yoffset,0) -- ++(0,0,-\side) -- ++(0,\side,0) -- ++(0,0,\side);
+	\draw[top color=shadow, bottom color=main] (\side+\xoffset,\side+\yoffset,-\side) -- ++(-\side,0,0) -- ++(0,0,\side) -- ++(\side,0,0);
+
+	\path (0+\xoffset+1,0+\yoffset+1,0) node [align=center, anchor=center] {\breakC{Round-\\Robin\\Policy}};
+
+	\path [top color = outerpipe, bottom color = outerpipe, middle color = innerpipe]
+			(\side+\xoffset,\yoffset+1.3,-1) -- ++(4,0) arc (90:-90:-0.15 and 0.3) -- ++(-4,0) arc (-90:90:-0.15 and 0.3);
+	\path [top color = innerpipe, bottom color = innerpipe, middle color = outerpipe, draw=outerpipe] 
+			(\side+\xoffset+4,\yoffset+1.3,-1) arc (90:-90:-0.15 and 0.3) arc (-90:90:0.15 and 0.3);
+
+%	\path[draw, ->, line width=1pt, rounded corners=6pt] (\side+0.5,\yoffset+0.5,-1) -- node [align=center, anchor=north] {\textsf{update\_pipe()}} ++(3,0,0) ;
+	
+%	\path[draw, ->, line width=1pt, rounded corners=6pt] (\side+\xoffset+0.5,\yoffset+0.5,-1) -- node [align=center, anchor=north] {\textsf{update\_pipe()}} ++(3,0,0) ;
+
+	\def\xoffset{12.5}
+
+	\shade[ball color=red!80!white]    (\xoffset - 1.0 ,\yoffset+1,-1) circle (0.225);
+	\shade[ball color=teal!80!white]   (\xoffset - 1.6 ,\yoffset+1,-1) circle (0.225);
+%	\shade[ball color=magenta!80!white] (\xoffset - 2.2 ,\yoffset+1,-1) circle (0.225);
+
+	\node[anchor=west] at (\xoffset+0.25,\yoffset+1,-1) {\LARGE \breakC{Assigned\\to PE~2}};
+
+	\path[draw, <-, line width=1pt, rounded corners=6pt] (1.33,\side,-1) -- ++(0,1,0)  -|  (7,8,-1);
+	\path[align=center] (4.24,\side+0.33,-1) node [align=center, anchor=south] {\textsf{reply(}\texttt{AFFINITY},$\langle$\taskball{magenta}{0.175},\textsf{1\&2}$\rangle$\textsf{)}};	
+	
+	\path[draw, ->, line width=1pt, rounded corners=6pt] (0.67,\side,-1) -- ++(0,1.5,0)  -|  (6,7.5,-1);
+	\path[align=center] (3.5,\side+1.5,-1) node [align=center, anchor=south] {\textsf{request(}\texttt{AFFINITY},$\langle$\taskball{magenta}{0.175}$\rangle$\textsf{)}};	
+	
+	
+	\path[draw, ->, line width=1pt, rounded corners=6pt] (4.5,8,-1) -- ++(0,-1.75,0)  -|  (0.33,5,-1);
+	\path[align=center] (2.75,6.25,-1) node [align=center, anchor=north] {\textsf{request(}\texttt{AFFINITY},$\langle$\taskball{magenta}{0.175}$\rangle$\textsf{)}};	
+	
+	\path[draw, ->, line width=1pt, rounded corners=6pt] (-0.33,5,-1) -- ++(0,1.75,0)  -|  (3.5,7.5,-1);
+	\path[align=center] (1,6.75,-1) node [align=center, anchor=south] {\textsf{reply(}\texttt{AFFINITY},$\langle$\taskball{magenta}{0.175},\textsf{1\&2}$\rangle$\textsf{)}};	
+
+	\colorlet{shadow}{blue!20}
+	\colorlet{main}{blue!10}
+	
+	\def\xoffset{2.5}
+	\def\yoffset{8}
+	\draw[top color=main,   bottom color = main] (\xoffset,\yoffset,0) -- ++(6,0,0) -- ++(0,1,0) -- ++(-6,0,0) -- cycle;
+	\draw[top color=shadow, bottom color = main] (6+\xoffset,\yoffset,0) -- ++(0,0,-\side) -- ++(0,1,0) -- ++(0,0,\side);
+	\draw[top color=shadow, bottom color = main] (6+\xoffset,1+\yoffset,-\side) -- ++(-6,0,0) -- ++(0,0,\side) -- ++(6,0,0);
+	\path (\xoffset+3,\yoffset+0.5,0) node [align=center, anchor=center] {\breakC{\cobas Broker}};	
+	
+%	\path[draw, ->, line width=1pt, rounded corners=6pt] (-5.5,10.5,-1) -| (6,9,-1);
+%	\path[align=center] (-0.5,10.5,-1) node [align=center, anchor=south] {\textsf{notify(}\texttt{ADMIT},$\langle$\taskball{magenta}{0.175}$\rangle$\textsf{)}};
+%	
+%	\path[draw, <-, line width=1pt, rounded corners=6pt] (-5.5,10,-1) -| (5,9,-1);
+%	\path[align=center] (-0.5,10,-1) node [align=center, anchor=north] {\textsf{notify(}\texttt{ADMIT},$\langle$\taskball{magenta}{0.175}$\rangle$\textsf{)}};
+	
+\end{tikzpicture}
+\end{scaletikzpicturetowidth}

@@ -1,0 +1,22 @@
+\begin{tikzpicture}[scale=0.7, every node/.style={transform shape}]
+	
+	\node[rectangle, draw, fill=Component, anchor=west, minimum height=1.8cm, minimum width=1.8cm, inner sep=0] at (2,0) (load) {\breakC{Load-\\Balancing}};
+	\node[rectangle, draw, fill=Component, anchor=west, minimum height=1cm, minimum width=1.8cm, inner sep=0] at (6,2) (rr1) {\breakC{Round-\\Robin}};
+	\node[rectangle, draw, fill=Component, anchor=west, minimum height=1cm, minimum width=1.8cm, inner sep=0] at (6,0.66) (rr2) {\breakC{Round-\\Robin}};
+	\node[rectangle, draw, fill=Component, anchor=west, minimum height=1cm, minimum width=1.8cm, inner sep=0] at (6,-0.66) (rr3) {\breakC{Round-\\Robin}};
+	\node[rectangle, draw, fill=Component, anchor=west, minimum height=1cm, minimum width=1.8cm, inner sep=0] at (6,-2) (rr4) {\breakC{Round-\\Robin}};
+	
+			\node[rectangle, draw, fill=Component, anchor=west, minimum height=1cm, minimum width=1.8cm, inner sep=0] at (1,2.5) (affinity) {Affinity};
+	
+	\path [->, draw] (0,0)      -- node[anchor=south, align=center]{} (load);
+	\path [->, draw] (load.30)  -- node[anchor=south, align=center]{} (rr1.180);
+	\path [->, draw] (load.10)  -- node[anchor=south, align=center]{} (rr2.180);
+	\path [->, draw] (load.350) -- node[anchor=south, align=center]{} (rr3.180);
+	\path [->, draw] (load.330) -- node[anchor=south, align=center]{} (rr4.180);
+
+	\path [->, draw] (rr1.0) -- node[anchor=south, align=center]{} ++(1,0) node[anchor=west] {\breakC{PE~0}};
+	\path [->, draw] (rr2.0) -- node[anchor=south, align=center]{} ++(1,0) node[anchor=west] {\breakC{PE~1}};
+	\path [->, draw] (rr3.0) -- node[anchor=south, align=center]{} ++(1,0) node[anchor=west] {\breakC{PE~2}};
+	\path [->, draw] (rr4.0) -- node[anchor=south, align=center]{} ++(1,0) node[anchor=west] {\breakC{PE~3}};
+
+\end{tikzpicture}

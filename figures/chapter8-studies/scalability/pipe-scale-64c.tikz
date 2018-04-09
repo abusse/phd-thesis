@@ -1,0 +1,147 @@
+\pgfplotsset{scaled y ticks=false}
+\pgfplotsset{cycle list/Set1-4}
+
+\begin{tikzpicture}
+	\begin{groupplot}[xtick={1,2,4,8,16,32,64},
+					  grid=major,
+					  width = 0.46\textwidth,
+					  y tick label style={/pgf/number format/.cd,sci,precision=5},
+					  ymode=log,
+					  xmode=log,
+					  log basis x={2},
+					  log ticks with fixed point,
+					  label style={font=\footnotesize},
+					  tick label style={font=\footnotesize},
+					  xticklabel=\pgfmathparse{2^\tick}\pgfmathprintnumber{\pgfmathresult},
+					  ylabel={Real Time in \,$\mu{}s$},
+					  group style = {group size= 2 by 3, 
+					  				 horizontal sep=1.5cm, 
+					  				 vertical sep=1.5cm,
+					  				 ylabels at=edge right,
+									 yticklabels at=all,
+									 group name=scale-64c-time},
+					  xtick=\empty,
+					  ]
+
+
+% Ticks on the right side in uS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+		\nextgroupplot[title={\code[style=bw,fontsize=\footnotesize]{activate_task}},title style={yshift=-1ex},tension=0.1,yticklabel pos=right] 
+			\addplot+[line width=0pt, mark=none] table [col sep=comma,x={pipes}, y expr=\thisrow{activate_task}/1000000]{figures/chapter8-studies/scalability/data/m5out-64c-0b.dat};
+			\addplot+[line width=0pt, mark=none] table [col sep=comma,x={pipes}, y expr=\thisrow{activate_task}/1000000]{figures/chapter8-studies/scalability/data/m5out-64c-500b.dat};
+			\addplot+[line width=0pt, mark=none] table [col sep=comma,x={pipes}, y expr=\thisrow{activate_task}/1000000]{figures/chapter8-studies/scalability/data/m5out-64c-1000b.dat};
+			\addplot+[line width=0pt, mark=none] table [col sep=comma,x={pipes}, y expr=\thisrow{activate_task}/1000000]{figures/chapter8-studies/scalability/data/m5out-64c-2000b.dat};
+		
+		\nextgroupplot[title={\code[style=bw,fontsize=\footnotesize]{__schedule}},title style={yshift=-1ex},tension=0.1,yticklabel pos=right]
+			\addplot+[line width=0pt, mark=none] table [col sep=comma,x={pipes},y={__schedule}, y expr=\thisrow{__schedule}/1000000]{figures/chapter8-studies/scalability/data/m5out-64c-0b.dat};
+			\addplot+[line width=0pt, mark=none] table [col sep=comma,x={pipes},y={__schedule}, y expr=\thisrow{__schedule}/1000000]{figures/chapter8-studies/scalability/data/m5out-64c-500b.dat};
+			\addplot+[line width=0pt, mark=none] table [col sep=comma,x={pipes},y={__schedule}, y expr=\thisrow{__schedule}/1000000]{figures/chapter8-studies/scalability/data/m5out-64c-1000b.dat};
+			\addplot+[line width=0pt, mark=none] table [col sep=comma,x={pipes},y={__schedule}, y expr=\thisrow{__schedule}/1000000]{figures/chapter8-studies/scalability/data/m5out-64c-2000b.dat};
+		
+		\nextgroupplot[title={\code[style=bw,fontsize=\footnotesize]{__fw_admit}},title style={yshift=-1ex},tension=0.1,yticklabel pos=right,
+					   ymin=5.8, ymax=15]
+			\addplot+[line width=0pt, mark=none] table [col sep=comma,x={pipes},y={__fw_admit}, y expr=\thisrow{__fw_admit}/1000000]{figures/chapter8-studies/scalability/data/m5out-64c-0b.dat};
+			\addplot+[line width=0pt, mark=none] table [col sep=comma,x={pipes},y={__fw_admit}, y expr=\thisrow{__fw_admit}/1000000]{figures/chapter8-studies/scalability/data/m5out-64c-500b.dat};
+			\addplot+[line width=0pt, mark=none] table [col sep=comma,x={pipes},y={__fw_admit}, y expr=\thisrow{__fw_admit}/1000000]{figures/chapter8-studies/scalability/data/m5out-64c-1000b.dat};
+			\addplot+[line width=0pt, mark=none] table [col sep=comma,x={pipes},y={__fw_admit}, y expr=\thisrow{__fw_admit}/1000000]{figures/chapter8-studies/scalability/data/m5out-64c-2000b.dat};
+		
+		\nextgroupplot[title={\code[style=bw,fontsize=\footnotesize]{__fw_dispatch}},title style={yshift=-1ex},tension=0.1,yticklabel pos=right]
+			\addplot+[line width=0pt, mark=none] table [col sep=comma,x={pipes},y={__fw_dispatch}, y expr=\thisrow{__fw_dispatch}/1000000]{figures/chapter8-studies/scalability/data/m5out-64c-0b.dat};
+			\addplot+[line width=0pt, mark=none] table [col sep=comma,x={pipes},y={__fw_dispatch}, y expr=\thisrow{__fw_dispatch}/1000000]{figures/chapter8-studies/scalability/data/m5out-64c-500b.dat};
+			\addplot+[line width=0pt, mark=none] table [col sep=comma,x={pipes},y={__fw_dispatch}, y expr=\thisrow{__fw_dispatch}/1000000]{figures/chapter8-studies/scalability/data/m5out-64c-1000b.dat};
+			\addplot+[line width=0pt, mark=none] table [col sep=comma,x={pipes},y={__fw_dispatch}, y expr=\thisrow{__fw_dispatch}/1000000]{figures/chapter8-studies/scalability/data/m5out-64c-2000b.dat};
+		
+		\nextgroupplot[title={\code[style=bw,fontsize=\footnotesize]{__fw_reqlinquish}},title style={yshift=-1ex},tension=0.1,yticklabel pos=right] 
+			\addplot+[line width=0pt, mark=none] table [col sep=comma,x={pipes},y={__fw_relinquish}, y expr=\thisrow{__fw_relinquish}/1000000]{figures/chapter8-studies/scalability/data/m5out-64c-0b.dat};
+			\addplot+[line width=0pt, mark=none] table [col sep=comma,x={pipes},y={__fw_relinquish}, y expr=\thisrow{__fw_relinquish}/1000000]{figures/chapter8-studies/scalability/data/m5out-64c-500b.dat};
+			\addplot+[line width=0pt, mark=none] table [col sep=comma,x={pipes},y={__fw_relinquish}, y expr=\thisrow{__fw_relinquish}/1000000]{figures/chapter8-studies/scalability/data/m5out-64c-1000b.dat};
+			\addplot+[line width=0pt, mark=none] table [col sep=comma,x={pipes},y={__fw_relinquish}, y expr=\thisrow{__fw_relinquish}/1000000]{figures/chapter8-studies/scalability/data/m5out-64c-2000b.dat};
+		
+		\nextgroupplot[title={\code[style=bw,fontsize=\footnotesize]{__fw_unblock}},title style={yshift=-1ex},tension=0.1,yticklabel pos=right] 
+			\addplot+[line width=0pt, mark=none] table [col sep=comma,x={pipes},y={__fw_unblock}, y expr=\thisrow{__fw_unblock}/1000000]{figures/chapter8-studies/scalability/data/m5out-64c-0b.dat};
+			\addplot+[line width=0pt, mark=none] table [col sep=comma,x={pipes},y={__fw_unblock}, y expr=\thisrow{__fw_unblock}/1000000]{figures/chapter8-studies/scalability/data/m5out-64c-500b.dat};
+			\addplot+[line width=0pt, mark=none] table [col sep=comma,x={pipes},y={__fw_unblock}, y expr=\thisrow{__fw_unblock}/1000000]{figures/chapter8-studies/scalability/data/m5out-64c-1000b.dat};
+			\addplot+[line width=0pt, mark=none] table [col sep=comma,x={pipes},y={__fw_unblock}, y expr=\thisrow{__fw_unblock}/1000000]{figures/chapter8-studies/scalability/data/m5out-64c-2000b.dat};
+	\end{groupplot}
+
+	\begin{groupplot}[xtick={1,2,4,8,16,32,64},
+					  grid=major,
+					  width = 0.46\textwidth,
+					  y tick label style={/pgf/number format/.cd,sci,precision=5},
+					  ymode=log,
+					  xmode=log,
+					  log basis x={2},
+					  label style={font=\footnotesize},
+					  tick label style={font=\footnotesize},
+					  xticklabel=\pgfmathparse{2^\tick}\pgfmathprintnumber{\pgfmathresult},
+					  xlabel={Scheduling Pipes}, 
+					  ylabel={Simulation Ticks},
+					  group style = {group size= 2 by 3, 
+					  				 horizontal sep=1.5cm, 
+					  				 vertical sep=1.5cm,
+					  				 xlabels at=edge bottom, 
+					  				 ylabels at=edge left, 
+									 group name=scale-64c},
+					  every axis y label/.style={at={(0,0.5)}, xshift=-3em, rotate=90, font=\footnotesize}
+					  ]
+
+% Plots %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	
+		\nextgroupplot[title={\code[style=bw,fontsize=\footnotesize]{activate_task}},title style={yshift=-1ex},tension=0.1,cycle list name=Set1-4] 
+			\addplot+[smooth, line width=1pt, mark=none, error bars/.cd, y dir=both,y explicit] table [col sep=comma,x={pipes},y={activate_task},y error=Eactivate_task]{figures/chapter8-studies/scalability/data/m5out-64c-0b.dat};\label{plots:plot-m5out-64c1}
+			\addplot+[smooth, line width=1pt, mark=none, error bars/.cd, y dir=both,y explicit] table [col sep=comma,x={pipes},y={activate_task},y error=Eactivate_task]{figures/chapter8-studies/scalability/data/m5out-64c-500b.dat};\label{plots:plot-m5out-64c2}
+			\addplot+[smooth, line width=1pt, mark=none, error bars/.cd, y dir=both,y explicit] table [col sep=comma,x={pipes},y={activate_task},y error=Eactivate_task]{figures/chapter8-studies/scalability/data/m5out-64c-1000b.dat};\label{plots:plot-m5out-64c3}
+			\addplot+[smooth, line width=1pt, mark=none, error bars/.cd, y dir=both,y explicit] table [col sep=comma,x={pipes},y={activate_task},y error=Eactivate_task]{figures/chapter8-studies/scalability/data/m5out-64c-2000b.dat};\label{plots:plot-m5out-64c4}
+		
+		\nextgroupplot[title={\code[style=bw,fontsize=\footnotesize]{__schedule}},title style={yshift=-1ex},tension=0.1]
+			\addplot+[smooth, line width=1pt, mark=none, error bars/.cd, y dir=both,y explicit] table [col sep=comma,x={pipes},y={__schedule},y error=E__schedule]{figures/chapter8-studies/scalability/data/m5out-64c-0b.dat};
+			\addplot+[smooth, line width=1pt, mark=none, error bars/.cd, y dir=both,y explicit] table [col sep=comma,x={pipes},y={__schedule},y error=E__schedule]{figures/chapter8-studies/scalability/data/m5out-64c-500b.dat};
+			\addplot+[smooth, line width=1pt, mark=none, error bars/.cd, y dir=both,y explicit] table [col sep=comma,x={pipes},y={__schedule},y error=E__schedule]{figures/chapter8-studies/scalability/data/m5out-64c-1000b.dat};
+			\addplot+[smooth, line width=1pt, mark=none, error bars/.cd, y dir=both,y explicit] table [col sep=comma,x={pipes},y={__schedule},y error=E__schedule]{figures/chapter8-studies/scalability/data/m5out-64c-2000b.dat};
+		
+		\nextgroupplot[title={\code[style=bw,fontsize=\footnotesize]{__fw_admit}},title style={yshift=-1ex},tension=0.1,
+					   ymin=5800000, ymax=15000000]
+			\addplot+[smooth, line width=1pt, mark=none, error bars/.cd, y dir=both,y explicit] table [col sep=comma,x={pipes},y={__fw_admit},y error=E__fw_admit]{figures/chapter8-studies/scalability/data/m5out-64c-0b.dat};
+			\addplot+[smooth, line width=1pt, mark=none, error bars/.cd, y dir=both,y explicit] table [col sep=comma,x={pipes},y={__fw_admit},y error=E__fw_admit]{figures/chapter8-studies/scalability/data/m5out-64c-500b.dat};
+			\addplot+[smooth, line width=1pt, mark=none, error bars/.cd, y dir=both,y explicit] table [col sep=comma,x={pipes},y={__fw_admit},y error=E__fw_admit]{figures/chapter8-studies/scalability/data/m5out-64c-1000b.dat};
+			\addplot+[smooth, line width=1pt, mark=none, error bars/.cd, y dir=both,y explicit] table [col sep=comma,x={pipes},y={__fw_admit},y error=E__fw_admit]{figures/chapter8-studies/scalability/data/m5out-64c-2000b.dat};
+		
+		\nextgroupplot[title={\code[style=bw,fontsize=\footnotesize]{__fw_dispatch}},title style={yshift=-1ex},tension=0.1]
+			\addplot+[smooth, line width=1pt, mark=none, error bars/.cd, y dir=both,y explicit] table [col sep=comma,x={pipes},y={__fw_dispatch},y error=E__fw_dispatch]{figures/chapter8-studies/scalability/data/m5out-64c-0b.dat};
+			\addplot+[smooth, line width=1pt, mark=none, error bars/.cd, y dir=both,y explicit] table [col sep=comma,x={pipes},y={__fw_dispatch},y error=E__fw_dispatch]{figures/chapter8-studies/scalability/data/m5out-64c-500b.dat};
+			\addplot+[smooth, line width=1pt, mark=none, error bars/.cd, y dir=both,y explicit] table [col sep=comma,x={pipes},y={__fw_dispatch},y error=E__fw_dispatch]{figures/chapter8-studies/scalability/data/m5out-64c-1000b.dat};
+			\addplot+[smooth, line width=1pt, mark=none, error bars/.cd, y dir=both,y explicit] table [col sep=comma,x={pipes},y={__fw_dispatch},y error=E__fw_dispatch]{figures/chapter8-studies/scalability/data/m5out-64c-2000b.dat};
+		
+		\nextgroupplot[title={\code[style=bw,fontsize=\footnotesize]{__fw_reqlinquish}},title style={yshift=-1ex},tension=0.1] 
+			\addplot+[smooth, line width=1pt, mark=none, error bars/.cd, y dir=both,y explicit] table [col sep=comma,x={pipes},y={__fw_relinquish},y error=E__fw_relinquish]{figures/chapter8-studies/scalability/data/m5out-64c-0b.dat};
+			\addplot+[smooth, line width=1pt, mark=none, error bars/.cd, y dir=both,y explicit] table [col sep=comma,x={pipes},y={__fw_relinquish},y error=E__fw_relinquish]{figures/chapter8-studies/scalability/data/m5out-64c-500b.dat};
+			\addplot+[smooth, line width=1pt, mark=none, error bars/.cd, y dir=both,y explicit] table [col sep=comma,x={pipes},y={__fw_relinquish},y error=E__fw_relinquish]{figures/chapter8-studies/scalability/data/m5out-64c-1000b.dat};
+			\addplot+[smooth, line width=1pt, mark=none, error bars/.cd, y dir=both,y explicit] table [col sep=comma,x={pipes},y={__fw_relinquish},y error=E__fw_relinquish]{figures/chapter8-studies/scalability/data/m5out-64c-2000b.dat};
+		
+		\nextgroupplot[title={\code[style=bw,fontsize=\footnotesize]{__fw_unblock}},title style={yshift=-1ex},tension=0.1] 
+			\addplot+[smooth, line width=1pt, mark=none, error bars/.cd, y dir=both,y explicit] table [col sep=comma,x={pipes},y={__fw_unblock},y error=E__fw_unblock]{figures/chapter8-studies/scalability/data/m5out-64c-0b.dat};
+			\addplot+[smooth, line width=1pt, mark=none, error bars/.cd, y dir=both,y explicit] table [col sep=comma,x={pipes},y={__fw_unblock},y error=E__fw_unblock]{figures/chapter8-studies/scalability/data/m5out-64c-500b.dat};
+			\addplot+[smooth, line width=1pt, mark=none, error bars/.cd, y dir=both,y explicit] table [col sep=comma,x={pipes},y={__fw_unblock},y error=E__fw_unblock]{figures/chapter8-studies/scalability/data/m5out-64c-1000b.dat};
+			\addplot+[smooth, line width=1pt, mark=none, error bars/.cd, y dir=both,y explicit] table [col sep=comma,x={pipes},y={__fw_unblock},y error=E__fw_unblock]{figures/chapter8-studies/scalability/data/m5out-64c-2000b.dat};
+	\end{groupplot}
+
+% Legend %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+	\path (scale-64c c1r1.north west|-current bounding box.north)--
+		   coordinate(legendpos)
+		  (scale-64c c2r1.north east|-current bounding box.north);
+	\matrix[matrix of nodes,
+			anchor=south,
+			inner sep=0.2em,
+			line width=5pt,
+			nodes={font=\footnotesize}
+	] at ([yshift=1ex]legendpos) {\ref{plots:plot-m5out-64c1}& \SI{0   }{\micro\second} Workload &[5pt]
+								  \ref{plots:plot-m5out-64c2}& \SI{1.25}{\micro\second} Workload &[5pt]
+								  \ref{plots:plot-m5out-64c3}& \SI{2.5 }{\micro\second} Workload &[5pt]
+								  \ref{plots:plot-m5out-64c4}& \SI{5   }{\micro\second} Workload \\
+	};
+\end{tikzpicture}
+

@@ -1,0 +1,66 @@
+\begin{scaletikzpicturetowidth}{0.95\textwidth}
+\begin{tikzpicture}[scale=\tikzscale, every node/.style={transform shape}]
+
+	% "kernel Binary"
+	\path[draw] (0,5) -- ++(0,5) \irregularlineh{0.08cm}{5} -- ++(5,0) -- ++(0,-5);
+	\path[draw] (0,5) -- ++(0,-3) \irregularlineh{0.08cm}{5} -- ++(5,0) -- ++(0,3);
+	
+	\node[align=center] at (2.5,10.7) {Runtime System Binary \\ (\eg~\code{vmlinux} for Linux)};
+	
+	\path[draw] (0,7.25) -- ++(5,0);
+	\node[align=left, anchor=west] at (0,7) {\code[fontsize=\scriptsize]{__cobas_components_init_start}};
+	\path[draw] (0,6.75) -- ++(5,0);
+	\node[align=left, anchor=west] at (0,6.5) {\code[fontsize=\scriptsize]{af_init()}};
+	\path[draw] (0,6.25) -- ++(5,0);
+	\node[align=left, anchor=west] at (0,6) {\code[fontsize=\scriptsize]{lb_init()}};
+	\path[draw] (0,5.75) -- ++(5,0);
+	\node[align=left, anchor=west] at (0,5.5) {\code[fontsize=\scriptsize]{rr_init()}};
+	\path[draw] (0,5.25) -- ++(5,0);
+	\node[align=left, anchor=west] at (0,5) {\code[fontsize=\scriptsize]{__cobas_components_init_end}};
+	\path[draw] (0,4.75) -- ++(5,0);
+
+	\path [draw, line width=1pt, color=gray, fill=gray!14] (6,7) arc (90:-90:0.33 and 1);
+
+	% Component files
+	\node (af) [shape=document, draw, fill=white, text width=3.2cm, minimum height=4.23cm,]  at (10,10) {};
+	\node[anchor=south, align=center,text width=3.2cm] at (af.north) {\code[fontsize=\scriptsize]{affinity.c}};
+	\node[anchor=south, align=left,text width=3.2cm] at (af.south) {\inputminted[tabsize=2,linenos=false,showtabs=false,frame=none,fontsize=\tiny]{c}{figures/chapter7-implementation/init/af.code}};
+	\coordinate[] (af_init) at (10.25,10.35);
+	\coordinate[] (af_register) at (11.5,8.125);
+	\draw [->, line width=0.75pt, bend left]  (af_init) to [out=40,in=125] ++(2,-0.5) to [out=45,in=120] (af_register);
+	\draw [->, line width=0.75pt, rounded corners=0.5cm, name path={af}] (af_register) ++ (-3.15,0) -- ++(-1.25,0) |- (4.5,6.5);
+
+	\node (lb) [shape=document, draw, fill=white, text width=3.2cm, minimum height=4.23cm,]  at (15,7.85) {};
+	\node[anchor=south, align=center,text width=3.2cm] at (lb.north) {\code[fontsize=\scriptsize]{load_balancing.c}};
+	\node[anchor=south, align=left,text width=3.2cm] at (lb.south) {\inputminted[tabsize=2,linenos=false,showtabs=false,frame=none,fontsize=\tiny]{c}{figures/chapter7-implementation/init/lb.code}};
+	\coordinate[] (lb_init) at (15.25,8.2);
+	\coordinate[] (lb_register) at (16.5,6);
+	\draw [->, line width=0.75pt, bend left]  (lb_init) to [out=40,in=125] ++(2,-0.5) to [out=45,in=120] (lb_register);
+	\draw [->, line width=0.75pt, name path={lb}] (lb_register) ++ (-3.15,0) -- (4.5,6);
+
+	\node (rr) [shape=document, draw, fill=white, text width=3.2cm, minimum height=4.23cm,]  at (10,3) {};
+	\node[anchor=south, align=center,text width=3.2cm] at (rr.north) {\code[fontsize=\scriptsize]{round_robin.c}};
+	\node[anchor=south, align=left,text width=3.2cm] at (rr.south) {\inputminted[tabsize=2,linenos=false,showtabs=false,frame=none,fontsize=\tiny]{c}{figures/chapter7-implementation/init/rr.code}};
+	\coordinate[] (rr_init) at (10.25,3.35);
+	\coordinate[] (rr_register) at (11.5,1.125);
+	\draw [->, line width=0.75pt, bend left]  (rr_init) to [out=40,in=125] ++(2,-0.5) to [out=45,in=120] (rr_register);
+	\draw [->, line width=0.75pt, rounded corners=0.5cm, name path={rr}] (rr_register) ++ (-3.15,0) -- ++(-1.25,0) |- (4.5,5.5);
+	%%%%%%
+
+	\path [draw, line width=1pt, color=gray, fill=gray!14, name path={circle}] (6,7) arc (90:-90:-0.33 and 1);
+	\path [name path={line}] (6,7) -- ++(0,-2);
+	
+	% complicated workaround to avoid transparency
+	\draw[draw, line width=0.75pt, color=gray!50, name intersections={of=circle and rr, by={first intersect}}, name intersections={of=line and rr, by={second intersect}}] (first intersect) -- (second intersect);
+	\draw[draw, line width=0.75pt, color=gray!50, name intersections={of=circle and lb, by={first intersect}}, name intersections={of=line and lb, by={second intersect}}] (first intersect) -- (second intersect);
+	\draw[draw, line width=0.75pt, color=gray!50, name intersections={of=circle and af, by={first intersect}}, name intersections={of=line and af, by={second intersect}}] (first intersect) -- (second intersect);
+	\path[draw, line width=1pt, color=gray] (6,7) arc (90:-90:-0.33 and 1);
+	%%%%%%
+	
+	\node[align=center] at (6,7.3) {Linker};
+
+	\path[->, line width=0.75pt, draw] (-0.25,7) -- ++(0,-2);
+	\node[align=center, anchor=east] at (-0.3,6) {\small iteration \\ \small during \cobas \\ \small initialization};
+
+\end{tikzpicture}
+\end{scaletikzpicturetowidth}

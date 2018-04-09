@@ -1,0 +1,32 @@
+\begin{scaletikzpicturetowidth}{0.9\textwidth}
+	\begin{tikzpicture}[scale=\tikzscale, every node/.style={transform shape}]
+		\draw[rounded corners=0.25em] (0,0) rectangle ++(12,0.8) node[pos=0.5] {\Large Hardware Abstraction Layer};
+		\draw[rounded corners=0.25em] (0,1) rectangle ++(12,5) node[anchor=south west, pos=0.01] {\Large Kernel};
+		\draw[rounded corners=0.25em] (12.2,0) rectangle ++(5,6) node[anchor=south west, pos=0.01] {\Large Drivers};
+
+		\draw[rounded corners=0.25em] (0.5,2) rectangle ++(2,1) node[pos=0.5] {\breakC{Native\\Scheduler}};
+		\node[ellipse, draw, inner sep=0] (other) at (9.75,5) {\small \breakC{Other Kernel\\Components}};
+
+		\draw[rounded corners=0.25em] (13,2) rectangle ++(2,1) node[pos=0.5] {\breakC{Loaded\\Scheduler}};
+		\node[ellipse, draw, inner sep=-0.75em, text width=3cm, align=center] (driver) at (14.7,4.75) {\vspace{2mm}\begin{spacing}{1} \scriptsize  Other dynamically loaded drivers (file systems, network protocols, device drivers, redirectors, etc.)\end{spacing}};
+		
+		\draw[rounded corners=0.25em] (4.75,7) rectangle ++(2.5,1) node[pos=0.5] {\breakC{Application\\Thread}};
+
+		\draw[->, shorten >=1pt, thick] (5.5,2.5) -- node[anchor=south, inner sep=0.2em] {\small Request Decision} ++(-3,0);
+		\draw[<-, shorten <=1pt, thick,rounded corners=0.25em] (7.66,3.125) -- (8,3.5)  -- node[anchor=south west, inner sep=0.2em, pos=0.15] {\small Register Scheduler} ++(5,0) -- ++(0.33,-0.5);
+		\draw[->, shorten >=1pt, thick] (8,2.75)  -- node[anchor=south west, inner sep=0.2em, pos=0.15] {\small Request Decision} ++(5,0);
+		\draw[->, shorten >=1pt, thick,rounded corners=0.25em, name path={message to scheduler}] (6,7) -- node[anchor=north east, pos=0.6] {\small MessageToScheduler} (7.75,2.25)  -- ++(5.25,0);
+		\draw[<-, shorten <=1pt, thick,rounded corners=0.25em] (7.66,1.875) -- (8,1.5)  -- node[anchor=south west, inner sep=0.2em, pos=0.15] {\small SetSchedulerEvent} ++(5,0) -- ++(0.33,0.5);
+		\draw[->, shorten >=1pt, thick] (5.5,7) -- node[anchor=north west] {\small SetThreadPriority} (1.5,3);
+		
+		\draw[<->, shorten >=1pt, shorten <=1pt, thick] (6.5,7) -- node[anchor=south west, inner sep=0.2em] {\small Specific APIs} (other.165);
+		\draw[<->, shorten >=1pt, shorten <=1pt, thick] (7.25,7.4) to [bend left=20] node[anchor=south west, inner sep=0.2em] {\small I/O Request Packets} (driver.160);
+		
+		\draw[->, shorten >=1pt, thick] (6.75,0.8) -- node[anchor=east] {\small Clock IRQ} ++(0,1.05);
+		
+		% complicated workaround to avoid transparency
+		\draw[very thick, text=white, name path={vasall dispatcher}] (5.5,1.875) rectangle ++(2.5,1.25) node[pos=0.5] {\breakC{Vassal\\Dispatcher}};
+		\draw[gray, thick, rounded corners=0.25em, name intersections={of=message to scheduler and vasall dispatcher, by={first intersect, second intersect}}] (first intersect) -- (7.75,2.25) -- (second intersect);
+		\draw[very thick] (5.5,1.875) rectangle ++(2.5,1.25) node[pos=0.5] {\breakC{Vassal\\Dispatcher}};
+	\end{tikzpicture}
+\end{scaletikzpicturetowidth}

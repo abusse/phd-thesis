@@ -1,0 +1,78 @@
+\chapter{Conclusions}%
+\label{chap:conclusion}
+
+This dissertation was set out to explore a novel approach to process scheduler design. The introduction and problem analysis expressed the motivation for that research: Computer architecture is changing dramatically and is becoming more and more heterogeneous, while the pace of that change is increasing drastically. This introduces two challenges at the same time that have contradicting solutions. On the one hand, the scheduler has to evolve faster to keep up with the pace of changes; on the other hand, it has to become more and more sophisticated to cope with complex architectures. These two solutions are contradicting in a way that the development process is losing momentum, when the system becomes bigger and more complex. Without changes to the scheduler architecture as it is common today, it would not be possible to cope with the future challenges.
+
+With the \cobas{} framework, this dissertation introduced a new architecture for process schedulers that solves theses issues. The component-based architecture and dynamic properties of the \cobas{} framework enables developers and researcher to address the challenges introduced by new hardware architectures and computing concepts in a timely manner. The component-based approach also enables a high degree of reusability that is even further improved by simple means to integrate the framework into existing runtime systems. Using the framework approach makes it easier to use specific scheduler implementations in multiple runtime systems, requiring only the port of the framework and not of each individual scheduler implementation. The claims of the dissertation were substantiated by an extensive qualitative and quantitative evaluation. They have shown that the \cobas{} architecture can scale for a high number of cores, has a justifiable overhead regarding the whole system, and can compete in real world scenarios with a native scheduler implementation.
+
+This chapter concludes this dissertation. It starts in \cref{sec:concl:claims} by revisiting the claims initially stated in \cref{sec:intro:contributions} and verifying that each of them has been addressed. \Cref{sec:concl:strengths,sec:concl:weaknesses} are discussing strengths and weaknesses of the approach of the \cobas{} framework respectively. Finally, the last section concludes this dissertation by discussing directions for future research.
+
+\section{Contributions Revisited}%
+\label{sec:concl:claims}
+
+The introduction outlined the four main contributions of this dissertation in \cref{sec:intro:contributions}. This section revisits each of them and discusses them in the context of the previous chapters. Every subsection addresses one of the contributions with a brief review.
+
+\subsection{Heterogeneous Many-Core Support}
+
+Heterogeneous many-core systems introduce two challenges for the scheduler: on the one hand, the sheer number of cores, on the other hand, the different properties and execution models. \Cref{sec:studies:scale} has shown that the \cobas{} framework scales even for hundreds of cores. This suggests that it is feasible to implement meaningful scheduling algorithms for many-core systems encapsulated in the \cobas{} framework. The Topologies used in the framework enable an easy identification of the information flow and the identification of possible bottlenecks.
+
+The generic task model of the framework keep the architecture inside the boundaries of a specific execution model. This allows the management of arbitrary kinds of \acp{PE}. The \cobas{} architecture ultimately puts the operating system in a position where it can finally manage all available resources by itself again.
+
+\subsection{Adaptability}
+
+Through its component based approach and its Topologies, the \cobas{} framework is highly adaptable to new requirements. The architecture allows to modify the scheduler even at runtime. The benefits of this capability have been demonstrated through an experiment that has shown that the adaptation of the scheduling policy can result in a significant performance improvement. Furthermore, the reusable Components allow the fast creation of a new scheduler through existing partial solutions. In combination with its message broker system, the \cobas{} architecture can react to changes both in requirements and in hardware facilities.
+
+\subsection{Composability}
+
+Composability is the foundation of the \cobas{} framework with its component based approach. Components in the \cobas{} framework have two main facilities that enable composition: Pipes and the Broker. Pipes allow a \cobas{} Component to manipulate the order of tasks and the assignment to a \ac{PE}. \Cref{sec:prop:compo} has given a dissection on the properties of Components and a classification that gives a coarse reference whether specific Components are composable with each other or not. It was especially the study in \cref{sec:studies:performance} that has shown how a specific working set can profit from a composable scheduler.
+
+The composability significantly facilitates the reuse of existing implementation parts. Without composability, the reuse of existing implementations for \cobas{} would be limited to the whole scheduler implementation and not to smaller parts. The experiments in \cref{chap:study}, for example, greatly profited from the reuse of Components as only a limited set of Components was necessary to conduct the experiments.
+
+\subsection{Runtime System Independence}
+
+The independence of a scheduler architecture from the underlying runtime system was discussed in \cref{sec:requirements:independence}. The necessity for the independence stems mainly from non-functional challenges like the implementation of a completely new operating systems. This dissertation has shown that the introduced framework enables the use of existing scheduler implementations in multiple operating systems. It was used in the Linux and FreeBSD kernel as main scheduling facility and the adaptation effort was quantified in means of lines of code.
+
+The evaluation in \cref{sec:studies:language} has also shown that, through its well defined interfaces, the \cobas{} framework can support foreign programming languages. This suggests that it is on the one hand possible to create and integrate a \ac{DSL} for the process scheduler domain; on the other hand, it seems feasible to augment the process scheduler with a hardware based acceleration through, \eg{}, \ac{FPGA} technology.
+
+\section{Strengths of the Approach}%
+\label{sec:concl:strengths}
+
+The \cobas{} architecture was designed to cope with the challenges process scheduler design is facing in the coming years. Its greatest strength is its flexibility and adaptability. As discussed in the introduction on the example of the introduction of the Bulldozer architecture by AMD (\cf{} \cref{sec:intro:challenges:innovation}) and the introduction of the big.LITTLE architecture by ARM (\cf{} \cref{sec:intro:challenges:hetero}), system software developers struggle to keep up with changes to hardware architecture. Today, performance gains are mainly achieved due to an increased number of cores and specialization. Because of the end of \emph{Dennard scaling} and limitations through \emph{Amdahl's law}, the later option will become the vastly dominating factor that enables future performance improvements. In order to use such systems to their fullest potential, the operating system scheduler has to be tailored to such architectures. With the \cobas{} framework, the adaptation to such systems can be easily facilitated as shown in the evaluation. A new scheduler can be created by reusing parts of existing solutions. This permits the implementation of changes to the process scheduler in a timely manner. Furthermore, the encapsulation of the scheduler logic into a dedicated framework allows the development and implementation of scheduling policies without extensive knowledge about the specific runtime system. This can make it easier to test new scheduling approaches and compare them amongst each other in research.
+
+The usage of explicit Topologies makes it, especially in the many core scenario, easier to identify potential bottlenecks. The Topologies allow the explicit and visible assignment of specific scheduling strategies to specific \acp{PE}. This does not only simplify the development process, but also supports a better understanding of the whole scheduler implementation.
+
+Furthermore, the implementations for the \cobas{} framework are portable between different runtime systems that support the \cobas{} framework. This makes it easier for smaller development projects to profit from advances in scheduler design and might enable diversity among operating systems. Moreover, the framework approach enforces much cleaner and more precise interfaces than the internal interfaces most current operating systems provide. By decoupling the scheduler implementation from the underlaying runtime system, the interfaces can be stable over a longer period of time. This facilitates the development of new implementations and the comprehension of exiting ones. The evaluation has also shown that the clean interface makes it straight forward to implement the scheduler in a different programming language than that of the runtime system. This paves the way for a scheduler implementation in a \ac{DSL} or with hardware acceleration.
+
+\section{Weaknesses of the Approach}%
+\label{sec:concl:weaknesses}
+
+The main weakness of \cobas{} can clearly be identified in the additional overhead that the framework introduces into the system. The overhead was quantified for the prototypical implementation throughout \cref{chap:study}. Even though it has been shown that the \cobas{} architecture scales even for many-core systems, an overhead remains that can, in general, be considered proportional to the number of used processing instances. The overhead is inherent to the system and cannot be eliminated as a separation and the introduction of additional interfaces hinder a tight integration and optimization and always introduces an overhead. Therefore, it remains to be seen whether the benefits like a cleaner design, reuse, and flexibility outweigh the downsides of the additional overhead.
+
+A minor weakness can be identified in the missing support for real-time systems. Guaranties for a deadline and a dynamic system are hard to bring in line as everything has to be deterministic to give such guarantees. However, contrary to the overhead, the dynamics are given by the system but do not necessarily have to be used. Therefore, it might be possible to design a subset of the \cobas{} architecture and its features that can guarantee hard real-time.
+
+A final constraint of the \cobas{} approach might be the necessity to adapt an existing operating system to it. This dissertation has discussed the necessary steps and quantified the overhead to adapt both the Linux and FreeBSD kernel to use \cobas{} as their main scheduling facility. The necessary effort is undeniable, however, this effort is not necessarily higher than implementing a distinguished scheduling algorithm and will pay out as soon as another algorithm shall be used. This dissertation has also shown that the overhead for maintaining the \cobas{} integration is manageable.
+
+\section{Future Directions}%
+\label{sec:concl:future_work}
+
+The current state of research to employ a general process scheduler architecture for future systems can be seen as a first step towards a general tool for building such schedulers. This section discusses further directions to advance the state of the art in this area.
+
+\subsection{Communication Topologies}
+
+Section~\ref{sec:env:many-core} of this dissertation has outlined different communication topologies that are employed in multi- and many-core systems. Even though discussed on a theoretical level in \cref{sec:compo:distributed}, the prototype built for this work does not yet support advanced inter processor communication facilities. Consequently, the next step of research would be to extend the prototype and employ \cobas{} in a mesh based many-core system, potentially with distributed or non-cache coherent memory and evaluate its scalability in such a scenario. In that context, the extension of the single broker system as it is today towards a multi broker system might become indispensable and another interesting research object.
+
+\subsection{Topology Management}
+
+Another field of study regarding the \cobas{} architecture can be identified as the management of Topologies. Even though the management was defined and described in detail, certain aspects, for example regarding the combination of existing Topologies, remain to be investigated. This includes the question on how to automatically merge two existing partial topologies, \eg{}, for different classes of \acp{PE} to a holistic scheduling Topology. Furthermore, the definition of scheduler Topologies themselves can be considered an object of research. In the current prototype, Topologies are defined programmatically in C. The definition process might be simplified through a \ac{DSL} tailored to that problem or even a \ac{GUI} based approach that would improve the comprehensibility, especially for complex scheduler layouts.
+
+\subsection{Scheduler Analysis}
+
+The experiments of \cref{sec:studies:scale} have shown that the scheduler can easily be congested in a many-core system if not designed in a scalable way. However, the experiment has also shown that not every \ac{PE} needs its own code path. In order to design a scheduler that is both scalable and does not use an unnecessary separation of code paths, tools for analysis are necessary. The evaluation of this dissertation already made initial steps towards a contention analysis in the scheduler code path through the call-graphs. Those could be visualized in a Topology editor and make it easier to spot potential bottlenecks in a many-core environment.
+
+\subsection{Multi-Scheduler Environments}
+
+This dissertation has discussed the issue of scheduling in the context of virtual machines. As the guest most of the time employs system software with its own process scheduling, it is interesting to study the interaction between the host and the guest scheduler. Through the communication infrastructure of the \cobas{} framework, it might be possible for both schedulers to interact with each other and, thus, create better overall scheduling results. As the generic information distribution system of the \cobas{} framework is, as of today, unique to scheduler architectures, new opportunities for optimization might emerge.
+
+\subsection{Security Aspects}
+
+This dissertation has also shown that the execution of certain workloads can be optimized by a custom scheduling policy. However, as this policy is provided by the application level and executed in the kernel context, several security related issues arise. The analysis of these attack vectors and how to improve the \cobas{} Component interface would be worth investigating in future work. Different scenarios with different degrees of freedom exist. From the security perspective the simplest solution could be an interface that only allows the application to chooses from a certain set of policies that are put into action through the super-user or the operating system itself. A more critical solution from a security point of view would be that the user can freely provide his or her scheduler implementation. As the code is brought into execution inside the kernel, this opens many security related issues. However, researching the attack vectors might yield a solution between these two extremes.

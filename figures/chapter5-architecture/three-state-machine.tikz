@@ -1,0 +1,16 @@
+\begin{scaletikzpicturetowidth}{0.7\textwidth}
+\begin{tikzpicture}[scale=\tikzscale, every node/.style={transform shape},
+					pstate/.style={ellipse, draw=black, minimum height=3em, text centered}]
+	\node[pstate, thick, text width=1.75cm] (ready)   at (0,0)   {\Large \sffamily ready};
+	\node[pstate, thick, text width=1.75cm] (running) at (6,0)   {\Large \sffamily running};
+	\node[pstate, thick, text width=1.75cm] (blocked) at (3,2.5) {\Large \sffamily blocked};
+	
+	\draw[->, thick] (ready)   edge[statea, bend left =20]  node[anchor=south] {dispatch}  (running);
+	\draw[<-, thick] (ready)   edge[statea, bend right=20] node[anchor=north] {relinquish}(running);
+	\draw[<-, thick] (ready)   edge[statea, bend left =30]  node[anchor=east, xshift=-3mm]  {unblock}(blocked);
+	\draw[->, thick] (running) edge[statea, bend right=30] node[anchor=west, xshift=3mm] {block}(blocked);
+
+	\draw[thick] (ready.west)   edge[statea, <-] node[anchor=south] {enter} ++(-2,0);
+	\draw[thick] (running.east) edge[statea, ->] node[anchor=south] {exit}  ++(2,0);
+\end{tikzpicture}
+\end{scaletikzpicturetowidth}

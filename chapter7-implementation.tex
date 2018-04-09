@@ -1,0 +1,155 @@
+\chapter{CoBaS Implementation}%
+\label{chap:proto}
+
+\Cref{chap:arch} described and discussed the design and architecture of the \cobas{} framework. Even though the approach is reasonable from an architectural point of view, it remains questionable whether it can be built that way and is suited for real-world scenarios. To analyze the properties of the \cobas{} architecture, a prototype was implemented that is described in detail in this chapter.
+
+Before the implementation of the \cobas{} prototype could begin, a programming language had to be selected to implement it. Because the application domain of \cobas{} extends widely to operating systems, the considered languages had to have solid support for bare metal programming. This requirement narrowed down the number of possible languages significantly and especially ruled out a significant number of the currently most popular languages like Java, \Csh{}, Python, or Go. For the implementation, the languages Ada, C, \Cpp{}, and Rust were considered as they are most common languages under the remaining suitable languages.
+
+The programming of the \cobas{} prototype started in late 2012. At that point, the Rust programming language was still very young, and the definition of the language itself was still in a flow. It only became stable in mid-2015~\cite{Rust-2015-Stable}. Therefore, Rust was ruled out as the main programming language for the prototype even though a reevaluation today might come to a different assessment. The remaining programming languages were considered equally suitable to implement the prototype. However, as \cobas{} is intended not only for the domain of operating systems, the integrability of other systems had the next highest priority when choosing the programming language. Regarding that, C and \Cpp{} are a better choice compared to Ada as most other programming languages have extensive support to incorporate legacy C code and with that also \Cpp{} code (\eg{} \cite[Annex B.2]{Ada2012}\cite[Sec.~5.9]{Rust}). This left the choice between C and \Cpp{} only. As most operating system kernels today are implemented in C, the selection for \cobas{} was also C over \Cpp{} as it promised to make it easier to integrate early stages of the prototype into the existing systems without the additional obstacles of differences in programming languages. Also, C promised to be a good starting point if a more mature framework should be migrated to a more modern language like Rust later on.
+
+Based on this consideration regarding the programming language, the \cobas{} prototype was implemented using C. The implementation can roughly be divided into the following parts that are discussed in the subsequent sections:
+
+\vspace{-0.33cm}
+\begin{enumerate*}
+	\item The framework itself that is independent of the underlying runtime system.
+	\item The runtime adapters that integrate the framework into the runtime system.
+	\item Topologies that describe a scheduling policy based on \cobas{} components.
+	\item The management of Components in the \cobas{} framework.
+\end{enumerate*}
+
+Moreover, a list of implemented Components for the prototype and their functionality is described in detail in \cref{appendix:cobas}.
+
+\section{Framework Implementation}
+
+The framework implementation itself is the heart of the \cobas{} prototype. However, discussing every detail of the framework implementation thoroughly would go far beyond the scope of this dissertation. Therefore, this section will focus on the two most important elements of \cobas{}: The message broker and the pipe system.
+
+\subsection{Message Broker}%
+\label{sec:impl:fw:broker}
+
+The \cobas{} Message Broker manages all topics and subscriptions as described in \cref{sec:arch:notifications}. As \cobas{} is a dynamic system, topics can be defined not only at compile time, but also during runtime. To make \cobas{} aware of a new topic, each topic has to be registered with the framework before it can be used. To manage the topics, the framework stores several properties of each topic including:
+
+\begin{itemize*}
+	\item A unique identifier to avoid collisions and, if needed, distinguish between versions.
+	\item A simple identifier that serves as a name for the topic.
+	\item Descriptive information about the topic in a human readable form.
+	\item A registration counter that ensures that the topic is not removed from the system while it is still needed.
+	\item The Component instance for the topic that response to it.
+	\item The callback that is invoked for the topic.
+\end{itemize*}
+
+Apart from this information, each topic has a concrete structure for the notification payload. However, this structure is opaque to the \cobas{} framework and therefore neither announced to the framework nor managed by it.
+
+Every topic is assigned both a simple and a unique identifier. For performance reasons, the topics are stored rather in an array than in a list. The simple identifier is used as the index for that list. As the array has a limited size that will in most use-cases be below 1000~entries, the simple identifier has the same limited value space. This makes the simple identifier unfeasible for a unique identification of the topic. Furthermore, it makes it also impossible to differentiate between different versions of notification payload structures that belong to this topic. The unique identifier allows the framework to run additional checks, whether the published event fits the currently registered topic or not and it prevents the use of the simple identifier for two different topics.
+
+Once a topic is registered, Components can subscribe to that topic or register as a unique identifier (\cf{} \cref{sec:arch:notifications}). The framework creates a list of subscriptions for every registered topic. Each subscription includes a reference to the subscribing component instance and a reference to the callback function the instance used for notification of events of that topic. When a notification arrives for a particular topic, the framework iterates over the subscription list and invokes every callback that is assigned to that specific subscription. The responder functionality works the same way. However, only one component instance can register as a responder for each topic.
+
+Again, because \cobas{} is a dynamic system, topics cannot only be introduced to the framework, but also removed again at runtime. To assure that the system does not become inconsistent by deleting a topic that is still in use, the implementation tracks the components that need the topic and only removes it when no component is left that might use the topic.
+
+\begin{listing}[t!]\centering
+	\begin{minipage}{.85\textwidth}
+		\captionsetup{margin=20pt}
+		\caption{Example for a Topic definition in \cobas{}.}
+		\label{lst:cobas:affinity}\vspace{-2mm}
+		\inputminted[fontsize=\footnotesize]{C}{listings/affinity.h}
+	\end{minipage}
+\end{listing}
+
+An example for a topic definition is given in \cref{lst:cobas:affinity}. The topic is used to notify the framework about the affinity of a task or to retrieve it through the responder infrastructure. The simple identifier is given in Line~6 and the unique identifier in Line~7. Line~8 defines a human readable string representation of the topic and Line~9 gives a short description of the Topic. The Topic specific argument is defined in Lines~13 to~16. As explained above, this definition is only used by the Components that are related to the Topic and is opaque to the \cobas{} framework. In this specific example, the Topic message contains a reference to a task (Line~14) and a CPU mask (Line~15). The shown message is used for both notifications and requests. In the case of a notification, the task field contains the task of which the CPU affinity of which is changed and the affinity field the new affinity. In the case of a request, the requesting instance will set the task reference to the task it wants to retrieve the affinity from. The request responder will set the affinity and send the message back to the requesting instance.
+
+\subsection{The Pipe System}%
+\label{sec:impl:pipes}
+
+\begin{figure}[t!]\centering
+	\includetikz{figures/chapter7-implementation/pipe}
+	\caption[Example for referencing tasks in \cobas{} pipes.]{Example for referencing tasks in \cobas{} pipes. Component instances are depicted as boxes and tasks as colored balls. Each pipe has a dedicated list hook in every task's TCB that is used when the task is referenced. For comprehensibility, only the hooks for the task list are shown. An excerpt of the red tasks' TCB, which is referenced by four pipes, is depicted as an example.}%
+	\label{fig:impl:pipe}
+\end{figure}
+
+The pipe concept was introduced in \cref{sec:arch:pipes}. The first issue that had to be solved is that every task can be referenced by multiple pipes. This matter arises mostly from the limited capabilities of the C language. To avoid the definition of a new list type and the corresponding list operations for every data type that might be stored in a list, \cobas{} uses the same generic list approach as it is used, \eg{}, in the Linux kernel~\cite[\cf{}][87--89]{Bovet-2005-LinuxKernel}. However, the genericness of the approach comes with the drawback that the linked data structure needs to have a hook for being linked into a list. This is not an issue if an element can only be part of one list at a time, but if it can be part of several lists at a time, it needs as many hooks as there are lists it might be linked into at the same time. For the pipe system, this means every task needs three hooks for every pipe in the system as it might be referenced by every Pipe. For that purpose, the \cobas{} \ac{TCB} has list hooks for every possible pipe. It could be argued that this leads to a big memory consumption as every pipe causes an additional memory consumption of, \eg{}, 24~Byte in a 64-Bit system for the three list hooks. However, as the number of pipes scales with the size of the system regarding the number of cores, the system will also scale in memory to serve the cores. Therefore, memory consumption will be no issue at that point. \Cref{fig:impl:pipe} shows how a task is referenced by several pipes using the hooks in its \ac{TCB}. For simplification, only the hooks for the task lists are shown.
+
+Apart from the task sets that are relevant to the connected component instances, every pipe consists of further elements to ensure the functionality of the \cobas{} framework. They hold references to the components they are connected to. This allows an easier management of the system, especially when component instances are dynamically added or removed.
+
+\section{Runtime System Adapters Implementation}
+
+The \cobas{} framework itself is independent of the runtime system. However, to be usable in an actual runtime system, a \emph{Runtime System Adapter}, as discussed in \cref{sec:arch:adapter}, is needed. This section discusses the technical details and challenges that occurred when implementing these Runtime System Adapters. The implementation details presented in this section were previously published in parts in \textcite{Busse-2015-CoBaS}.
+
+\subsection{Adapting \cobas{} to the Runtime System}%
+\label{sec:impl:adapt:cobas}
+
+\begin{figure}[t!]\centering
+	\includetikz{figures/chapter7-implementation/func_mapping}
+	\caption[General function wrapping in \cobas{}]{General function wrapping in \cobas{} on the example of memory allocation. Function parameters and return values are neglected for better readability. This figure only illustrates the idea, the actual wrapper functions are more comprehensive.}%
+	\label{fig:impl:wrapping}
+\end{figure}
+
+To adapt \cobas{} to the runtime system, the concepts of wrapper functions and libraries are used, which are similar to the \emph{adapter} and \emph{façade} pattern in object-oriented programming -- hence the name Runtime System Adapter. The idea of the pattern is outlined with an example for \cobas{} in \cref{fig:impl:wrapping}. All runtime independent functions of the \cobas{} prototype are decorated with \code{fw_}, where all runtime dependent functions are decorated with \code{os_}. The decorators were also introduced to avoid the pollution of the namespaces as C does not support automatic function name mangling. The latter functions are not intended to be used by the \cobas{} user, but only by the framework itself. The example shows how the develper accesses the \code{fw_malloc} function, which, in this example, is part of the framework library set. The \code{fw_malloc} then relies on the \code{os_malloc} function. The \code{os_malloc} function can and will most likely be different for every operating system. In the example, in, \eg{}, Linux, it would call the \code{kmalloc} function and in FreeBSD the \code{malloc} function respectively. It is not unlikely that certain functionality that is required by \cobas{} is not given in the target runtime system. In those cases, the functionality has to be programmed for the target system. For example, in a runtime system that does not have a memory management feature, the functionality might be implemented in the \code{os_malloc} function itself. During compilation, only the source file fitting to the target runtime system is considered by the build flow, ensuring that only the suitable code paths are incorporated into the binary. The set of all runtime dependent functions represents the interface that needs to be satisfied to use \cobas{}.
+
+\begin{listing}[t!]\centering
+	\begin{minipage}{.925\textwidth}
+		\captionsetup{margin=20pt}
+		\caption[Example of a function definition for runtime system dependent calls.]{Example of a function definition for runtime system dependent calls. The definition is only used when not superseded by a preprocessor macro defined for the target system. In addition, it serves as documentation for the function and its type signature.
+			\label{lst:cobas:wrapping}}\vspace{-6mm} \inputminted[linenos=false,fontsize=\footnotesize]{c}{listings/wrapping.c}
+	\end{minipage}\vspace{-3mm}
+\end{listing}
+
+Some functions do not necessarily need an explicit wrapper. Take for example the printing of kernel messages. This function often has an identical signature as the standard C \code{printf} function~\cite[\cf{}][Sec.~7.21.6.3]{ISO-C12}. As a result, it is possible to simply link the runtime system dependent function symbol against the function of the runtime system. This linking can be achieved through preprocessor macros. Still, this approach is only feasible for some runtime systems and functions. For that reason, preprocessor constructs such as the one shown as an example in \cref{lst:cobas:wrapping} are used. It checks if the runtime system dependent function is already defined as preprocessor symbol and, therefore, another existing function to link against. If so, the native function will be linked as described. If not, it will define a function prototype, and a dependent function has to be available at the latest during the final linking. If this function was not implemented for the target system, the linking will fail by intention as the functions are vital for \cobas{}. The construct also serves as documentation. An ordinary preprocessor macro does not include types for the function signature, which would make it difficult to implement the Runtime System Adapter. The checking construct shows the type signature for every interface function and its purpose. This information is indispensable when adapting \cobas{} to a new runtime environment.
+
+A similar approach is used for some specific types. A few types have to be mapped to the native types, for example the type that describes the size of memory spaces. In some systems, this is not only specific to the runtime system, but even to the target architecture. Take for example the \code{size_t} type in Linux. On most 32~Bit architectures, it is defined as an \code{unsigned int}, while on most 64~Bit architectures it is defined as an \code{unsigned long}\footnote{\cf{} \code[style=bw,fontsize=\footnotesize]{include/uapi/asm-generic/posix_types.h} in \cite{Linux44}}. An exception to that is the SuperH architecture, where the \code{size_t} is defined as a \code{long unsigned int}\footnote{\cf{} \code[style=bw,fontsize=\footnotesize]{arch/sh/include/uapi/asm/posix_types_64.h} in \cite{Linux44}}. To keep \cobas{} both platform and architecture independent, the \cobas{} \code{size_t} equivalent \code{fw_size_t} is wrapped to the runtime systems type. With Linux, the preprocessor first replaces every \code{fw_size_t} declaration with \code{size_t} and then subsequently with the target architecture specific type, \eg{}, \code{unsigned int}.
+
+\subsection{Adapting the Runtime System for \cobas{}}
+
+Incorporating \cobas{} into a runtime system has two facets: Either it is intended to be used for a whole new system or it is to be integrated into an existing system. Even though the general approach for integration does not differ much, the latter scenario potentially requires more implementation effort as the legacy system needs to be adapted. The reason is that an existing system might have several dependencies regarding the scheduler. For example, in the FreeBSD kernel, the locking of, \eg{}, drivers is partially realized through the run queue lock, which is not available when using \cobas{}. Another example are task dependencies during the bootstrapping of the system. Further problems might occur when the functionality of \cobas{} is, especially in an early phase of adaption, not as wide as the original scheduler. In this study, this has been particularly true for the Linux kernel, which has a very sophisticated scheduler.
+
+Also in both scenarios, the task-related information that is typically held in the \ac{TCB} might not all fall into the responsibility of \cobas{}. Examples are information regarding the virtual memory mapping, file system handlers, or debug information unrelated to process scheduling. For that reason, the \cobas{} prototype realizes the coexistence of the runtime system's \ac{TCB} with the \cobas{} internal \ac{TCB}. In order to do that, the \cobas{} \ac{TCB} is linked into the runtime system \ac{TCB} and vice versa as depicted in \cref{fig:impl:pcb}. The link to the runtime system's \ac{TCB} is another example of a type that is mapped to the target runtime system's type as described in the previous section. Besides these issues, the only access interface of the runtime system to \cobas{} is the publish–subscribe interface and a call to request a new task for a specific \ac{PE}.
+
+\begin{figure}[t!]\centering
+	\includetikz{figures/chapter7-implementation/pcb}
+	\caption[Coexistence of the \cobas{} and runtime system TCB]{Implementation for the coexistence of the \cobas{} and runtime system \ac{TCB}. The \cobas{} \ac{TCB} holds a link to the runtime system \ac{TCB} and vice versa. The \ac{TCB} contains links to the Component instance specific \acp{TCB}. All grey parts of a data structure are opaque to the \cobas{} prototype.}%
+	\label{fig:impl:pcb}
+\end{figure}
+
+\section{Topology Implementation}
+
+Section~\ref{sec:arch:topologies} described why topologies in \cobas{} are necessary to obtain a working scheduling policy. Topologies can be divided into three categories: Static topologies, dynamic topologies, and adaptive topologies. This section will describe how the three kinds of topologies are realized in the \cobas{} prototype.
+
+\subsection{Static Topologies}
+
+Static topologies are the initial topologies for every system using \cobas{}. When a system is started, an initial topology is needed to bootstrap the system. Static topologies can be widely considered as equivalent to the state of the art of implementing scheduling policies. Several static topologies were implemented to test and evaluate the prototype. In the current version of the \cobas{} prototype, static topologies are described by explicit programming. However, the definition process of the prototype is designed in a way that a \ac{DSL} or GUI based definition can be easily developed.
+
+\subsection{Dynamic Topologies}
+
+With a dynamic Topology, the system can react to events in the system as, \eg{}, the arrival of a new \ac{PE} as described in the example in \cref{sec:arch:topologies:dynamic} on Page~\pageref{sec:arch:topologies:dynamic}. The implementation for that scenario can rely on the notification system of the \cobas{} framework. The same way Components can subscribe to a Topic, a Topology can subscribe to it. For instance, the example from \cref{sec:arch:topologies:dynamic} can be implemented in a way that the Topology subscribes to an event that announces a new \ac{PE}. When it receives the notification, it can reconfigure the Topology the way it is depicted in \cref{fig:arch:topo:dynamic} on Page~\pageref{fig:arch:topo:dynamic}.
+
+\subsection{Adaptive Topologies}%
+\label{sec:impl:topology:adaptive}
+
+The current \cobas{} prototype supports runtime system controlled adaptive Topologies in a way that it allows the replacement of Component instances through the user space. Two steps are necessary to achieve this. First, the old Component instance has to be removed and, second, the new instance has to be created. To do that in a consistent way, it has to be assured that no Pipe update or notification gets lost. The approach to achieve that for the Pipes is straight forward as every Pipe has a separate lock. Therefore, the Pipes that are concerned with the reconfiguration are locked and a Pipe update is triggered on each to ensure that no Pipe updates are pending. For the notification system, the approach is slightly more complicated. To ensure consistency, a readers–writer lock was employed in the notification system, where the normal operations act as readers and the reconfiguration process acts as a writer. This ensures that an arbitrary number of tasks can use the \cobas{} Broker during normal operations, but only one reconfiguration is possible and the reconfiguration does not interfere with normal operations. It has to be noted that with this implementation, during the reconfiguration of the Topology, the whole notification system is stalled. However, this is not an issue as long as the reconfiguration happens not very frequently.
+
+Once the system is in that safe state, the replacement process starts. Besides creating the new instance and removing the old instance, the Component specific parts of the \ac{TCB} have to be considered. As the framework does not know what the \ac{TCB} looks, the Component instances have to be involved. Before the old Component instance is removed from the system, the destructor for the Component specific \ac{TCB} that may be defined by each Component is invoked for each task in the system. For the new Component instance, the same is done for its constructor of its Component specific \ac{TCB}, if defined by by the new Component. Once these steps are completed, the replacement process is finalized by adding all tasks that are in the ingoing Pipes of the new instance as new tasks, so they are initially processed by the new Component instance and all locks are freed so that normal operations can continue.
+
+\section{Component Management}%
+\label{sec:impl:comp_management}
+
+The three most interesting aspects of the component system of the prototype are the loading of a component during runtime, the initialization of Components, and the instantiation of component instances. The actual components that were implemented for the prototype are summarized in \cref{appendix:components}.
+
+\subsection{Component Loading}
+
+The loading of components has two general scenarios: Either the component is already statically built into the system, or the component is loaded during runtime. This problem is similar to \emph{loadable kernel modules}. Therefore, some techniques from that area were reused and adapted for \cobas{}. The loading of components in the former scenario is trivial, as the components can simply be linked into the final binary. However, the latter scenario requires more effort.
+
+To load a Component, it is first needed in compiled binary format. For the prototype, the \ac{ELF}~\cite{SystemV,ELFSpec} was chosen as it is a format that is widely used. A framework function was implemented that takes such an \ac{ELF} binary as an argument together with some meta information like, \eg{}, the size of the binary blob. To load the Component, memory is allocated in an executable memory region and the executable code is copied from the \ac{ELF} file into that memory region. However, the code is not executable yet, as the symbols in the code have to be resolved. In order to do so, the addresses of the symbols have to be known to the \cobas{} framework. As the framework offers only a limited set of functions to components, the mapping is built into the framework itself. Once the symbols are resolved in the binary code, the component can be initialized and is available to be used in a Topology.
+
+\subsection{Component Initialization}
+
+The initialization of components is necessary so that the framework knows about the existence of and ways to handle the respective components. Contrary to the loading, the initialization of components is trivial for components loaded at runtime as it is evident that the loaded component also has to be initialized. The more challenging part is the initialization of built-in components. As the built-in components are only linked into the final binary, the rest of the \cobas{} functions does not necessarily have knowledge of their existence. To avoid changes to the \cobas{} framework itself every time a component is added or removed from the linking phase, another technique from the area of \emph{loadable kernel modules} was adapted.
+
+The \cobas{} prototype offers a preprocessor macro that takes a function pointer as an argument. The components can specify their distinct initialization function through this macro. The preprocessor macro then creates a variable that holds the address of the initialization function and assigns a special linker attribute to it. During the linking phase of the runtime binary, all those variables are subsequently placed in the data section of the kernel binary, and the begin and end address of this array are assigned to a variable. During the initialization of \cobas{} itself, it can iterate over this area using the supplied variables and call every initialization function of every component compiled into the kernel. The whole procedure is summarized in \cref{fig:impl:init}.
+
+\begin{figure}[t!]\centering
+	\includetikz{figures/chapter7-implementation/init}
+	\caption[Assembly of the array of built-in component's initialization functions.]{Pointers to the initialization functions of built-in components are assembled in an array by the linker during the final linking of the operating system's kernel. The initialization functions are marked by the developer as such.}%
+	\label{fig:impl:init}
+\end{figure}
+
+\subsection{Component Instantiation}
+
+During its initialization, every component announces a constructor function to the \cobas{} framework, which can be used to create new instances. These functions take two arguments. An ID that is unique and will identify the instance in the future and a pointer to a data structure. As the framework itself does not necessarily need to know how the component works, the type of the pointer is opaque and can even be empty. However, ordinarily, the pointer will point to a structure that, \eg{}, includes the pipes that are connected to this component. The constructor of the component checks whether the supplied structure is valid and will initialize and return a pointer to a new instance of that component.

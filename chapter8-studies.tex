@@ -1,0 +1,524 @@
+\chapter{Quantitative Evaluation}%
+\label{chap:study}
+
+After the qualitative evaluation of the \cobas{} approach in \cref{chap:prop}, the \cobas{} prototype presented in the previous section also allows a quantitative evaluation that is presented in this chapter. The goal of the quantitative evaluation is to further substantiate the claims of this dissertation stated in the introduction and refined by the requirements discussed in \cref{chap:requirements}. For that purpose, several case studies and experiments have been performed. This chapter presents them and substantiates, namely, the following claims in the subsequent sections:
+
+\begin{itemize*}
+	\item It is possible to build a process scheduling framework that is suitable for multiple runtime systems. (\cref{sec:studies:independence})
+	\item The maintainability of the \cobas{} framework itself is feasible for multiple runtime systems and versions. (\cref{sec:studies:maintainability})
+	\item Different execution models can be handled by the \cobas{} approach. (\cref{sec:studies:hetero})
+	\item The \cobas{} framework scales for many-core systems. (\cref{sec:studies:scale})
+	\item The overhead introduced by the \cobas{} approach is not prohibitive. (\cref{sec:studies:overhead})
+	\item The \cobas{} approach can be used in real world scenarios. (\cref{sec:studies:nas})
+	\item An adaptable scheduler can improve the system performance. (\cref{sec:studies:performance})
+	\item The component approach allows different programming schemes for the scheduling policy implementation. (\cref{sec:studies:language})
+\end{itemize*}
+
+Aside from the \cobas{} related studies and experiments, \cref{sec:studies:tracing} introduces a new tracing technique that was developed in order to be able to perform the detailed tracing necessary for the evaluation in Sections~\ref{sec:studies:scale} through~\ref{sec:studies:language}.
+
+\section{Runtime System Independence}%
+\label{sec:studies:independence}
+
+To demonstrate and measure the degree of runtime system independence, \cobas{} was integrated as the main process scheduling facility into the Linux and FreeBSD kernel. Several considerations are the foundation for this decision. First, only free and publicly available operating systems were considered. This ensures that the findings of this study can be widely published and reproduced. Second, the operating systems should be relevant to productive use, which shows that \cobas{} is feasible for real world systems. Third, if possible, the operating systems should cover different application domains. Finally, the selected operating systems should differ with regard to the complexity of their scheduler subsystem.
+
+The Linux kernel is by far the most prominent and widely used open source kernel. Its applicability reaches from small embedded systems, over desktops, to large supercomputing environments. Its code base is freely available, and it has over \num{3500} active developers (\cf{} \cref{table:devs} on \cpageref{table:devs}).
+
+Even though the FreeBSD kernel is used in far fewer systems and has a much smaller base of active developers, it is still one of the most important open source kernels apart from Linux. This stems mostly from the fact that the licensing of the FreeBSD~\cite[\cf{}][]{FreeBSD-License} kernel is not as restrictive as the licensing of the Linux kernel~\cite[\cf{}][]{GPL}. Because of this, the FreeBSD kernel is a popular choice for closed systems like the Playstation~4~\cite{PlayStation4}. Apart from closed systems, FreeBSD is a favorable choice for storage solutions because it has the best support for ZFS\footnote{ZFS is a filesystem designed for high performance, reliability, and capacity~\cite[24\psqq]{ZFS}.} after the proprietary implementation of the Solaris operating system.
+
+\subsection{Using \cobas{} as Process Scheduler for an Operating System}
+
+Integrating \cobas{} into an existing operating system can in most cases be considered more challenging than using \cobas{} for a new operating system\footnote{Exceptions are operating systems like, \eg{}, eCos that are designed to support a custom scheduler.}. The reason is that the scheduler is often highly integrated into the rest of the system. This is even true for microkernel operating systems, as even there the scheduler is part of the kernel and not placed in the user space as a separate entity.
+
+The approach for integrating \cobas{} into an existing operating system can be generalized and was applied to both the Linux and FreeBSD kernels: First, the current scheduler subsystem was thoroughly analyzed regarding its structure and integration into the kernel. This is necessary as the runtime system might have several assumptions concerning the properties of the scheduler implementation that are neither documented nor explicitly stated. Then, the existing scheduler logic was completely removed, leaving only empty function bodies as stubs for functions that are called from outside the scheduler. The same applies to global variables and structures that are used outside the scheduler subsystem.
+
+In an operating system, particular attention has to be paid to the locking. Unlike in user space, the \emph{Coffman conditions}~\cite{Coffman-1971-Deadlock} can hold regarding the CPU and, \eg{}, a lock in kernel space. In user space, only the conditions mutual exclusion, hold and wait, and circular wait hold regarding the CPU as the operating system can preempt every user process through a hardware interrupt, \ie{}, by a timer. In kernel space, the condition \emph{no preemption} can also hold since the operating system cannot preempt itself in certain circumstances. For example, assume that the operating system executes code in a system call triggered from the userland; then, the execution jumps to another part of the code to handle an interrupt. If both contexts try to use the same resource, \eg{}, a lock, a deadlock situation occurs. The interrupt handler will never give up the CPU as it attempts to acquire the lock, whereas the other kernel code cannot release the lock as it does not assigned the CPU to progress further. The issue is discussed in more detail by~\textcite{Russell-2003-KernelLocking}.
+
+\subsection{Integrating \cobas{} into the FreeBSD Kernel}
+
+FreeBSD uses the ULE scheduler~\cite{Roberson-2003-ULE} as its main process scheduler even tough the traditional BSD scheduler~\cite[\cf{}][16\psq]{Mauro-2001-SolarisBSDSched} is also still available. The scheduler can be selected during compile time of the kernel. The ULE scheduler implementation consists of approximately \num{2900}~lines of code. The implementation of the ULE scheduler was stripped down to use the \cobas{} scheduler framework as main process scheduling facility. The size of the resulting Runtime System Adapter is summarized in \cref{tbl:adapter:freebsd}. Besides the Runtime System Adapter, some minor changes had to be included in the kernel tree, namely seven lines of code in the linker script and another \num{50}~lines of code in the kernel Makefile to include the \cobas{} sources during the build process.
+
+It has to be noted that the support for dynamic Component loading and replacement as described in \cref{sec:impl:comp_management} is ongoing work for the Runtime System Adapter of the FreeBSD kernel, hence not yet completed and considered in \cref{tbl:adapter:freebsd}.
+
+\begin{table}[!t]
+	\caption[Size of the Runtime System Adapter for the FreeBSD kernel.]{Size of the Runtime System Adapter for the FreeBSD kernel in lines of code.}%
+	\label{tbl:adapter:freebsd}
+	\begin{tabular}{lrrrr}\toprule
+		Language & Files   & Blank     & Comment   & Code      \\ \midrule
+		C        & \num{3} & \num{192} & \num{592} & \num{670} \\
+		C Header & \num{2} & \num{50}  & \num{86}  & \num{169} \\ \midrule
+		\(\sum\) & \num{5} & \num{242} & \num{678} & \num{839} \\ \bottomrule
+	\end{tabular}
+\end{table}
+
+\subsection{Integrating \cobas{} into the Linux Kernel}%
+\label{sec:studies:linux}
+
+Contrary to FreeBSD, the default Linux process scheduler supports several scheduling policies as already described in \cref{sec:rw:linux_classes}. Furthermore, it offers much more features than the FreeBSD scheduler, including, \ie{}, control groups\footnote{Control groups is a functionality that allows the assignment of resources and the limitation of the use of resources, \eg{}, the CPU for particular groups of processes~\cite[\cf{}][]{Menage-2016-cgroups}.} or NUMA aware process scheduling. Because of this, the code base of the Linux scheduler is much bigger than the FreeBSD scheduler. The implementation of the Linux scheduler is split into several files roughly consisting of the \file{kernel/sched/core.c} file, which contains the basic infrastructure for process scheduling and several files implementing the actual scheduling policies. To replace the vanilla scheduler with \cobas{}, the \file{kernel/sched/core.c} with approximately \num{8600}~lines of code was stripped down and used as a basis for the wrapper logic. The source files that are implementing the actual scheduling policies were dropped and completely ignored for the \cobas{} integration. The size of the resulting Runtime System Adapter is summarized in \cref{tbl:adapter:linux}. In addition to theses files, some minor changes were applied to the kernel tree to be able to select either the vanilla scheduler or the \cobas{} framework as main scheduling facility.
+
+\begin{table}[!t]
+	\caption[Size of the Runtime System Adapter for the Linux kernel.]{Size of the Runtime System Adapter for the Linux kernel in lines of code.}%
+	\label{tbl:adapter:linux}
+	\begin{tabular}{lrrrr}\toprule
+		Language & Files    & Blank     & Comment    & Code       \\ \midrule
+		C        & \num{5}  & \num{448} & \num{1123} & \num{1547} \\
+		C Header & \num{3}  & \num{155} & \num{324}  & \num{323}  \\
+		make     & \num{1}  & \num{31}  & \num{12}   & \num{92}   \\
+		Assembly & \num{1}  & \num{0}   & \num{4}    & \num{8}    \\ \midrule
+		\(\sum\) & \num{10} & \num{634} & \num{1463} & \num{1970} \\ \bottomrule
+	\end{tabular}
+\end{table}
+
+\subsection{Discussion}
+
+The case study presented in this section shows that it is possible to create a scheduler framework suitable for multiple runtime systems. Furthermore, it gave insights on the necessary steps and the complexity of creating a Runtime System Adapter for a specific runtime system and integrating \cobas{} into that runtime system. It can also be assessed that the effort for creating a new Runtime System Adapter strongly depends on the complexity of the runtime system or, to be more precise, on its scheduler subsystem. The Runtime System Adapter for the FreeBSD kernel is much smaller and less complex compared to the one for the Linux kernel. This resembles the complexity of the individual schedulers available for both systems.
+
+\section{Maintainability}%
+\label{sec:studies:maintainability}
+
+Creating a new feature for an operating system automatically raises the question of maintainability. In general, internal kernel \acp{API} are not necessarily stable between individual revisions, making it often necessary to adapt features to new kernel versions. Even though \cobas{} was designed to improve the maintainability of policy implementations, the framework itself has to be maintained to be compatible with new versions of the intended target operating system. For this dissertation, the maintainability of \cobas{} was researched using the exemplary implementations for Linux and FreeBSD.
+
+\begin{table}[!t]
+	\caption[Number of changes in the Linux kernel's Runtime System Adapter.]{Number of changes in the Linux kernel's Runtime System Adapter due to new kernel versions.\footref{foot:migration_delta}}%
+	\label{tbl:migration_delta_linux}\vspace{-2mm}
+	\begin{tabular}{l@{\(\,\,\rightarrow\,\,\)}lccc}\toprule
+		\multicolumn{2}{c}{\multirow{2}{*}{\raisebox{-9pt}{\breakC{Linux Kernel\\Version Delta}}}}    & \multicolumn{3}{c}{Changes}   \\ \cmidrule(lr){3-5}
+		\multicolumn{2}{c}{}& Files   & Insertions & Deletions \\ \midrule
+		v3.9  & v3.10 & \num{1} & \num{52}  & \num{1}   \\
+		v3.10 & v3.11 & \num{0} & \num{0}   & \num{0}   \\
+		v3.11 & v3.12 & \num{0} & \num{0}   & \num{0}   \\
+		v3.12 & v3.13 & \num{2} & \num{21}  & \num{263} \\
+		v3.13 & v3.14 & \num{2} & \num{30}  & \num{4}   \\
+		v3.14 & v3.15 & \num{1} & \num{0}   & \num{10}  \\
+		v3.15 & v3.16 & \num{2} & \num{6}   & \num{2}   \\
+		v3.16 & v3.17 & \num{1} & \num{6}   & \num{0}   \\
+		v3.17 & v3.18 & \num{2} & \num{33}  & \num{0}   \\
+		v3.18 & v3.19 & \num{2} & \num{5}   & \num{4}   \\
+		v3.19 & v4.0  & \num{1} & \num{54}  & \num{24}  \\
+		v4.0  & v4.1  & \num{1} & \num{1}   & \num{1}   \\
+		v4.1  & v4.2  & \num{2} & \num{57}  & \num{10}  \\
+		v4.2  & v4.3  & \num{1} & \num{1}   & \num{1}   \\
+		v4.3  & v4.4  & \num{3} & \num{245} & \num{49}  \\ \bottomrule
+	\end{tabular}
+\end{table}
+\begin{table}[!t]
+	\caption[Number of changes in the FreeBSD kernel's Runtime System Adapter.]{Number of changes in the FreeBSD kernel's Runtime System Adapter due to new kernel versions.\footref{foot:migration_delta}}%
+	\label{tbl:migration_delta_freebsd}\vspace{-2mm}
+	\begin{tabular}{l@{\(\,\,\rightarrow\,\,\)}lccc}\toprule
+		\multicolumn{2}{c}{\multirow{2}{*}{\raisebox{-9pt}{\breakC{FreeBSD Kernel\\Version Delta}}}}    & \multicolumn{3}{c}{Changes} \\ \cmidrule(lr){3-5}
+		\multicolumn{2}{c}{} & Files   & Insertions & Deletions \\ \midrule
+		v9.2  & v9.3  & \num{2} & \num{24} & \num{24} \\
+		v9.3  & v10.0 & \num{1} & \num{9}  & \num{9}  \\
+		v10.0 & v10.1 & \num{1} & \num{9}  & \num{9}  \\
+		v10.1 & v10.2 & \num{0} & \num{0}  & \num{0}  \\
+		v10.2 & v10.3 & \num{1} & \num{1}  & \num{0}  \\ \bottomrule
+	\end{tabular}
+\end{table}
+\footnotetext{\label{foot:migration_delta}The statistics were obtained from the \cobas{} source code repository using \emph{git} with the \code[style=bw,fontsize=\footnotesize]{'git diff --stat [old] [new]'} command.}
+
+The development of the \cobas{} framework started in 2013 when the Linux kernel v3.9 and FreeBSD kernel v9.2 were the most recent versions. As the study of \cobas{} stretched over three years, new and improved kernel versions became available. At the time of writing, this meant v4.4 for Linux as the latest long term support version released on January~\nth{10}~2016 and for FreeBSD v10.2 published on March~\nth{28}~2016. This made it possible to research the maintainability of \cobas{} for \num{15}~kernel revisions for Linux and four kernel revisions for FreeBSD. The summarized code statistics for both adaptations are presented in \cref{tbl:migration_delta_linux,tbl:migration_delta_freebsd} respectively. The Linux example shows that the changes are limited to a few lines of code. Only the moves from v3.12 to v3.13 and from v4.3 to 4.4 are standing out with more than \num{100}~changes. Looking closer at those changes shows that the adaptation for v3.13 made it possible to remove several lines of code from the framework as they were also moved to a different part of the vanilla kernel, making them not necessary anymore in the frameworks code base. The move from v4.3 to v4.4 was more challenging, though, as some scheduler logic was restructured. This is also reflected in the amount of time it took to adapt to the new versions. The stepwise adaptation from v3.9 to v4.3 took approximately \num{10}~working hours in total, whereas the further adaptation for the kernel v4.4 alone took another \num{30}~woking hours.
+
+For FreeBSD, the changes on the Runtime System Adapter are even more marginal. Looking into detail shows that they are almost not existing. Contrary to the Linux kernel, the FreeBSD kernel source of v10.0 is not a direct ascendent of v9.3 as they were developed in parallel. Because of that, v9.3 already included changes not present in v10.0, which made it necessary to revert changes to the Runtime System Adapter. This reversion accounts exclusively for the nine insertions and deletions reflected in \cref{tbl:migration_delta_freebsd}. As the changes from v9.3 were later on applied to v10.1, the modification of the Runtime System Adapter had to be introduced yet another time, resulting, again, in the nine insertions and deletions. Migrating the \cobas{} framework from FreeBSD v9.2 to v10.3 including the intermediate versions took less than two working hours.
+
+It has to be noted that the dynamic Component loading and replacement as described in \cref{sec:impl:comp_management} was not yet implemented during the adaptation for newer kernel releases. Still, even with additional work possibly stemming from these code paths, it is safe to say that maintaining \cobas{} over several kernel releases is both feasible and possible.
+
+\section{System Heterogeneity}%
+\label{sec:studies:hetero}
+
+As previously discussed, current and future systems most likely have to rely on heterogeneity to reach the desired processing performance. To enable the operating system to manage all \acp{PE}, no matter how diverse they are, the scheduler subsystem has to be as generic as possible. The case study presented in this section demonstrates how the \cobas{} framework handles this heterogeneity. For the remainder of this section, the notion native or native \ac{PE} will refer to the part of the system that boots it and is the main processing facility. The notion foreign or foreign \ac{PE} will refer to every processing not conducted by the native part. Such a foreign \ac{PE} could be, for example, a processing accelerator like a \ac{GPU}.
+
+\begin{figure}[!b] \centering
+	\includetikz{figures/chapter8-studies/topo-external-pe}
+	\caption[Topology supporting a foreign PE.]{Topology supporting a foreign PE besides the native ones. The Topology supports an arbitrary number of native PEs.}%
+	\label{fig:eval:external}
+\end{figure}
+
+In order to demonstrate that and how the \cobas{} framework can handle tasks that are not native to the main system architecture, the Topology as depicted in \cref{fig:eval:external} was created similar to the example discussed in \cref{sec:arch:topologies:adative} on Page~\pageref{fig:arch:topo_adaptive} (\cref{fig:arch:topo_adaptive}). The Topology can be subdivided into two parts: one for the native part of the system and one to support the foreign part. The elements of the Topology for the native part employ a simple decentral multi-core scheduling. It consists of an instance of the \emph{Load Balancing} Component  and several \emph{Head Queue} Component instances, one for each native \ac{PE}. Furthermore, the Topology has an instance of the \emph{Affinity} Component that stores the affinity of every task for each \ac{PE}. It is used by the \emph{Load Balancing} Component to determine which outgoing Pipes are suitable for each task. All of the used components are described in more detail in \cref{appendix:components}.
+
+Concerning the foreign part of the system, the Topology includes an \emph{ISA Demux} Component. The \emph{ISA Demux} Component examines the \ac{ISA} requirements of every ingoing task and assigns it to an outgoing Pipe fitting this requirement. The \ac{ISA} requirement itself is stored by an instance of the \emph{ISA Tagging} Component. The tasks for the foreign \ac{PE} are scheduled in a first come first served manner by an instance of the \emph{FCFS} Component. As illustrated by \cref{fig:eval:external}, the Topology also includes an instance of a \emph{TCB Entry} Component (\cf{} \cref{appendix:components}). For this case study, it held the thread context for the foreign \ac{PE}. Note that it would have also been possible to implement this data structure in the Runtime System Adapter; however, to show examples of the capabilities of the component approach, the realization through a \cobas{} Component was chosen.
+
+\begin{listing}[t!]
+	\begin{minipage}{.7\textwidth}
+		\rule{\textwidth}{0.5pt}
+		\caption{Algorithm for the external PE emulation.\label{alg:study:pe}}\vspace{-5mm}
+		\begin{algorithmic}[1]
+			\Statex
+			\While{keep processing data}
+				\Let{task}{\Call{Schedule}{Foreign PE}}
+				\If{task \(\neq \emptyset\)}
+					\State \Call{Notify}{\texttt{DISPATCH}, \(\langle\)task$\rangle$}
+					\Let{context}{\Call{Request}{\texttt{TCB}, \(\langle\)task$\rangle$}}
+					\State \Call{Process}{context}
+					\If{context not finished}
+						\State \Call{Notify}{\texttt{RELINQUISH}, \(\langle\)task$\rangle$}
+					\ElsIf{task is standalone}
+						\State \Call{Notify}{\texttt{EXIT}, \(\langle\)task$\rangle$}
+					\Else
+						\State \Call{Notify}{\texttt{ISA}, \(\langle\)task, native$\rangle$}
+						\State \Call{Notify}{\texttt{RELINQUISH}, \(\langle\)task$\rangle$}
+					\EndIf
+				\Else
+					\State \Call{Sleep}{1000~ms}
+				\EndIf
+			\EndWhile
+		\end{algorithmic}
+		\vspace{-3mm}\rule{\textwidth}{0.5pt}
+	\end{minipage}
+\end{listing}
+
+The foreign \ac{PE} element was emulated through a Linux kernel module executing the algorithm in \cref{alg:study:pe}. The kernel module requests a task from the \cobas{} framework for the foreign \ac{PE} (Line~2). If a task is available, the framework will return it, the module informs the framework about the dispatching (Line~4), acquires the task context from the \emph{TCB Entry} Component (Line~5), and starts processing it (Line~6). If no task is available, the module sleeps for one second before retrying (Line~16). After finishing a process run, the module checks if the task is finished. If not, it is resubmitted to the framework (Line~8). If the task is finished, the module checks if it was a standalone task. If this is the case, the task gets completely removed from the system (Line~10), if it is not the case, the \ac{ISA} requirement is reset (Line~12) and the task is resubmitted to the framework (Line~13). To emulate the processing in a processing accelerator, the kernel module simply uses a busy wait loop. Therefore, the task context is also unpretentious. It simply consists of the number of processing iterations, a relative value for the length of the busy wait loop, and the information whether the task is a standalone task or not; therefore, whether it has to be scheduled again on the real \ac{PE} after finishing or not.
+
+The functionality of this scheduling Topology was validated with two experiments. In the first experiment, several standalone tasks were created by the userland and submitted to the scheduler. The execution of those tasks was verified through the kernel log. In the second experiment, a task was created that assumed the need for the external \ac{PE} at some point of the execution. Therefore, it changes its \ac{ISA} requirement at a certain point of execution, yields from the current native \ac{PE}, and gets processed by the external processing emulation. After that, the task was resubmitted to the native scheduling path and finished its execution.
+
+This case study has shown an example that the \cobas{} architecture can handle arbitrary tasks for non-native tasks. The emulated processing can, from a high-level point of view, easily be replaced by an actual processing accelerator. This case study forewent to explore an actual implementation as it is mainly an implementation challenge and promises no new insights from the architectural or scientific points of view.
+
+In combination with the dynamicity aspects of the \cobas{} architecture, the capabilities demonstrated in this section would also allow to deliver processing accelerators together with a scheduling implementation. Even though this is already happening today, those schedulers are either realized in user space or as a dedicated subsystem in the kernel. \cobas{} would allow to integrate the specific scheduling policy into the main process scheduler subsystem. As a result, the operating system has, again, full control of all \acp{PE} and optimizations regarding the scheduling of multiple processing accelerators and \acp{PE} might be possible.
+
+\section{High Precision Kernel Tracing}%
+\label{sec:studies:tracing}
+
+\afterpage{%
+	\clearpage% flush all other floats
+	\ifodd\value{page}
+	%\else% uncomment this else to get odd/even instead of even/odd
+		\expandafter\afterpage% put it on the next page if this one is odd
+	\fi
+	{%
+	\begin{figure}[p]
+		\includetikz{figures/chapter8-studies/tracing/tracing}
+		\caption[Process of the simulation-based kernel tracing.]{Process of the simulation-based kernel tracing. The tracing data is collected by the gem5 simulator per core. The simulation 	trace is transformed to a call-graph (right page) that can be simplified to reliably identify critical code paths.}\label{fig:eval:tracing}
+	\end{figure}
+	\clearpage
+	\begin{figure} \centering
+		\begin{sideways}
+			\includetikz{figures/chapter8-studies/tracing/trace_raw}
+		\end{sideways}\vspace{1cm}
+		\caption*{\Cref{fig:eval:tracing} continued.}
+	\end{figure}
+	\clearpage
+	}%
+}
+
+The remaining case studies presented in this chapter require a detailed analysis of the runtime behavior of the \cobas{} prototype. Such an analysis can be performed either in a simulated environment or a real runtime system like \eg{} Linux. The former approach has the benefit that it allows a very detailed analysis and every aspect of the execution can be controlled. However, it has the drawback that the results are strongly depending on the model used to create the simulator. In particular, the runtime system simulation approach might fall short to analyze or show certain aspects as the model is not a complete representation of the real system. Furthermore, the results might have a bias also caused by an inaccurate modeling of a real runtime system. To avoid these issues, the experiments presented in the remainder of the chapter use the Linux kernel as runtime system.
+
+Using a real runtime system instead of a simulated poses several other difficulties. The most noteworthy is the acquiring of the tracing data itself. The operating system is usually involved with tracing and profiling of executed code. A common approach when tracing the execution of the operating system is in-system tracing that uses different kinds of hooks in the operating system kernel. The most generic of these approaches is \emph{ftrace}, which is embedded in the upstream kernel. It allows the tracing of arbitrary functions through the same technique used for live patching with \emph{kpatch} and \emph{kGraft} (see \cref{sec:related:patching}). When the tracing is active, at the beginning of traced functions, the execution flow is redirected to the \emph{ftrace} infrastructure to log the execution and possibly perform further tracing steps. Other, more sophisticated, tracing frameworks like \emph{perf}~\cite{perf}, \emph{extended Berkeley Packet Filter (eBPF)}~\cite{Corbet:2014:eBPF}, \emph{SystemTap}~\cite{Eigler:2006:Systemtap,systemtap}, or \emph{LTTng}~\cite{Desnoyers:2006:LTTng,lttng} exist that allow an even more specific tracing and more extensive analysis. However, all in-system tracing facilities have an intrinsic drawback. They introduce an additional bias as they change the execution timing through their overhead (\cf{} \citeauthor{Weaver:2013:Overhead}~\cite{Weaver:2013:Overhead,Weaver:2015:Overhead} and \cref{sec:studies:scale:results}). This overhead becomes an issue especially with short functions. The tracing overhead becomes the dominant factor in the execution time, making the results useless for the analysis. Furthermore, the changes in execution time also become an issue for real-time sensitive executions. For example, the scheduler might rely on a periodic timer interrupt to determine the end of a time slice. When the execution of certain functions is prolonged by the tracing, the scheduling behavior might become completely different as the timing relations change. Another issue regarding in-system tracing arises from the amount of tracing data. When tracing the kernel in a stress situation, the trace can become huge in the order of several hundred megabytes per traced core and second. This data has to be stored. As the secondary storage, today, rarely exceeds a throughput of gigabytes per second, the data has to be stored in main memory or some tracing samples have to be dropped to not exceed the throughput of the secondary storage. Relying on main memory for the storage of the data limits the time span that can be traced. Finally, the main issue of in-system tracing, namely needing support by the operating system, cannot be entirely avoided. Therefore, for example, certain functions in the Linux kernel are not traceable by \emph{ftrace}.
+
+As theses issues would hinder a thorough evaluation of the \cobas{} prototype, another approach was developed for this dissertation that combines the benefits of both in-system tracing and a runtime system simulation. This method uses a simulation of an entire system including the CPU, caches, memory, timers, and all other hardware features. The simulator executes the Linux kernel with the \cobas{} prototype as main scheduling facility. With the support of the simulator, the execution of the operating system can be traced on an instruction level without interference. The resulting execution trace was then processed to recreate the call-graph. This step is necessary as the simulator has no knowledge about the call relation in the simulated machine since it lacks information about the location of the stack inside the simulated machine. It has to be emphasized that this approach needs a simulated machine and not a virtualized machine. Even though it is possible to track the execution flow in the virtual machine from the outside with, \eg{}, a debugging facility, this debugging would also influence the timing behavior as the virtualized timers for the virtual machine would still progress.
+
+To implement this tracing and profiling, the \emph{gem5} simulator~\cite{Binkert:2011:gem5} was used. Two main considerations lead to the use of \emph{gem5}: First, \emph{gem5} is a well-established tool in the research community regarding the low-level simulation of an entire system with extensive tracing and profiling support and, second, \emph{gem5} is free and open-source allowing uncomplicated extension and reuse for further research and researchers. The \emph{gem5} simulator permits the simulation of a full system, therefore, it cannot only provide a simulation environment for an operating system, but also arbitrary bare metal applications. This allows the approach, presented in this section, also to be applied to such applications. The \emph{gem5} simulator allows, furthermore, the simulation of a significant number of cores. The number of cores is conceptually only limited by the simulated hardware. For example, the x86 simulation is limited to \num{254}~cores as the simulated \ac{APIC} provides only \num{254}~interrupt lines for CPUs. Moreover, it is possible to integrate a SystemC based hardware model into the \emph{gem5} simulator as presented by, \eg{}, \textcite{Jung-2015-Gem5SystemC}. This may allow the analysis of the scheduler behavior for possibly emerging new hardware architectures.
+
+The \emph{gem5} simulator has the capability to trace the execution of code using debug symbols supplied at simulation start. When tracing is enabled, every time a new instruction is fetched, the simulator checks if the new instruction resides in the same function of the previous function. If this is not the case, it creates a new entry in the trace log. An example of the output is given in \cref{fig:eval:tracing}. Based on this call trace, the call-stack is reconstructed, deducing information about the call relation of the different functions. Once this information together with the timing simulation is collected, a call-graph can be generated as depicted in \cref{fig:eval:tracing}. The nodes of the graph represent the kernel functions and the edges function calls. Besides the number of calls for each function, the total time in simulation ticks to finish each function is shown. The total time incorporates both the time needed to execute the function itself and all functions called by it. Furthermore, the average time in simulation ticks to execute every function is given. Every edge shows the time the outgoing function spent in the target subgraph; therefore, the difference between the time of all outgoing edges and the time given for each function call is the time only spent in that function itself. The colors of the function nodes indicate the amount of time spent in the function in relation to the total execution time of the functions in the top row of the graph. This makes it easier to identify critical code paths that are worth investigating for further optimization. Some functions in the kernel, especially helper functions, are called very frequently from various functions. As this can influence the comprehensibility of the graph, they are filtered. In the filtered example graph in \cref{fig:eval:tracing}, the functions starting with \code{fw_pipe_} and \code{_raw_} were filtered. The runtime of the filtered function is still part of the total runtime of the calling functions. Therefore, the critical code path stays recognizable.
+
+The most significant drawback of the presented approach is the required simulation time. Depending on the number of cores and activity in the simulated system on a current simulation host, the simulation of one real time second can reach from minutes up to days. The situation is aggravated by the fact that the \emph{gem5} simulator in its current implementation only allows a sequential simulation and, therefore, cannot profit from a multi-core system.
+
+\section{Scalability and Contention}%
+\label{sec:studies:scale}
+
+The requirement of scalability was introduced in \cref{sec:requirements:scale} and further elaborated in \cref{sec:prop:computation}. The goal of the experiment presented in this section is to show that it is possible to build a scheduler with the \cobas{} framework that can handle up to hundreds of cores and does not suffer from contention. This claim is proven by quantifying the impact of scalability and contention issues and that it is possible to eliminate them. The measurements are acquired with a topology that is configurable regarding its input pipes and the computation time of the scheduling algorithm. Configuring the topology with a single input Pipe would resemble a system that is completely centralized and, therefore, greatly suffers from contention. Configuring the topology with the same number of input Pipes as \acp{PE} resembles a system with minimal potential for contention. It has to be expected that, with a many-core system, the execution of several code paths of the scheduler framework will be slowed down due to the higher degree of contention, whereas this contention should significantly decrease with the fully scalable configuration.
+
+\subsection{Experimental Setup}
+
+\begin{figure}[!b] \centering
+	\includetikz{figures/chapter8-studies/scalability/topo}
+	\caption[The Topology used for the scalability evaluation.]{The Topology used for the scalability evaluation of the \cobas{} framework. It can be adapted to use between 1 and \(p\) ingoing Pipes, where \(p\) has to be equal or smaller the number of \acp{PE}.}%
+	\label{fig:eval:scale-topo}
+\end{figure}
+
+The experiment described in this section uses the Topology depicted in \cref{fig:eval:scale-topo}. It consists of one \emph{Load-Balancing} Component that has \(p\) ingoing Pipes, where \(p\) is the number of the \acp{PE} of the benchmarking machine. Furthermore, one instance of a \emph{Burn} Component is connected to every ingoing Pipe of the Load-Balancing Component instance. The \emph{Burn} Component instances are used to emulate the computational overhead of a real scheduling algorithm. They use the function presented in \cref{lst:eval:speed} to burn CPU cycles through busy waiting that would, in a real, more sophisticated scheduling algorithm, be used to compute the task order. The number of waiting cycles for the Burn Components is adjustable through a notification. The Topology furthermore includes an \emph{Affinity} component that tracks the affinities of every task and is used by the load-balancing component to determine feasible \acp{PE}. Finally, the Topology also includes a \emph{Marker} Component that has no functional purpose, but allows to place a mark in the function call-graph of the kernel. All of the used components are described in more detail in \cref{appendix:components}.
+
+The Topology used in this experiment is adaptive in a way that it allows to adjust the number of active ingoing Pipes. The adaptation is triggered by a notification that can set the number of utilized ingoing Pipes to an arbitrary number between 1~and~\(n\). That means if the number of ingoing Pipes is set to~1 in the one extreme, all \acp{PE} have to share the same Pipe for submitting tasks to the \cobas{} framework, whereas, when in the other extreme the number of ingoing Pipes is set to \(n\), every \ac{PE} has a dedicated Pipe for task submission.
+
+\begin{center}
+	\begin{listing}[!t]
+		\begin{minipage}{.66\textwidth}
+			\captionsetup{margin=0pt}
+			\caption{The loop used to emulate a workload.}
+			\label{lst:eval:speed}
+\begin{minted}[linenos=false, fontsize=\small]{C}
+for(int c=0 ; c<work_cycles ; c++) {
+    __asm__ __volatile__("");
+}
+\end{minted}
+		\end{minipage}
+	\end{listing}
+\end{center}
+
+The experiments were conducted in two different environments: a simulated one and a real system. The simulation scenario used the \emph{gem5}~simulator with the tracing technique presented in \cref{sec:studies:tracing}. The experiments with the real system were conducted on the system summarized in \cref{tbl:experiments:scale}. All experiments of this sections used the \cobas{} implementation for the Linux kernel v4.4. The real system used a Gentoo userland. The simulated system used a fully automated, \emph{Busybox} based userland that received the experimental parameters through the kernel command line.
+
+\begin{table}[!t]
+	\caption{System configuration used in the scalability experiments.}%
+	\label{tbl:experiments:scale}
+	\begin{tabular}{ll}\toprule
+		Architecture      & x86\_64             \\
+		Microarchitecture & AMD Abu Dhabi       \\
+		Model             & AMD Opteron 6386 SE \\
+		Clock Rate        & 2800~MHz            \\
+		Sockets           & 4                   \\
+		NUMA-Nodes        & 8                   \\
+		\acp{PE}          & 64                  \\
+		Memory            & 128~GB              \\ \bottomrule
+	\end{tabular}
+\end{table}
+
+\subsection{Experiment Execution}
+
+\begin{sidewaysfigure} \centering
+	\includetikz{figures/chapter8-studies/scalability/trace}
+	\caption[Exemplary call-graph of the scalability experiment.]{Exemplary call-graph of the scalability experiment. The call-graph was generated from the experiment with 16~\acp{PE} and the same number of scheduling Pipes.}%
+	\label{fig:eval:scale-trace}
+\end{sidewaysfigure}
+
+\Cref{fig:eval:scale-trace} depicts an exemplary call-graph generated from one of the experiments using the technique described in \cref{sec:studies:tracing} as an orientation for further analysis. The functions \code{__schedule} and \code{activate_task} are part of the Runtime System Adapter for the Linux kernel. They are the main scheduling functions that are called by the kernel. The \code{activate_task} function is called when a task gets either unblocked or is woken up for the first time. The \code{__schedule} function is called by the Linux kernel when a new task has to be selected for a specific \ac{PE}. This can be the case when either a task is blocked or a scheduler tick occurs and a task has to be relinquished. The other functions depicted in \cref{fig:eval:scale-trace} are all part of the framework. Most of the functions are self-explaining by their name. The \code{fw_notify} function is the main interface of the \cobas{} Broker as all notifications are submitted via this function. As the call-graph indicated, the notification system is also used by the \cobas{} framework internally to trigger task state transitions. Internal functions are prefixed with \code{__fw}, while functions also available to Components are prefixed with \code{fw}. Functions that have another prefix are part of a Component, \ie{}, \code{burn_pipe_update} is the Pipe update function of the \emph{Burn} Component and \code{lb_pipe_update} is the Pipe update function of the \emph{Load-Balancing} Component.
+
+For the real system, the function tracer \emph{ftrace} of the Linux kernel was used to acquire the call-trace needed to create the call-graph. Even though \emph{ftrace} is capable of collecting more information about the function calls as it has access to the call stack, it has other downsides compared to the \emph{gem5} traces. The first and most noteworthy difference is that it cannot trace all functions in the Linux kernel as it is part of the kernel itself. This applies especially to the central Linux scheduler function that is excluded from \emph{ftrace}. Therefore, it was not possible to track the whole scheduling code path, but still the relevant parts for this experiment that lie inside the framework. Second, as the measurements generate much information in a very short time, either the measurements have to fit into main memory or certain function call events have to be dropped. As the latter is not acceptable for the purpose of this experiment, the simulation time was very limited. The third disadvantage of \emph{ftrace} is that, caused by the mechanism used for the tracing, every function call takes an additional amount of time as it needs to be recorded. This is particularly the case when looking at relatively short functions. This impact can be significant as the recording of the function call can take several times longer than the function execution itself.
+
+With the \emph{gem5}~simulator, five different configurations were simulated: a 16~core, a 32~core, a 64~core, a 128~core, and a 254~core x86-64 machine. 254~Cores represent the current limit of the \emph{gem5}~simulator as the used \ac{APIC} only supports 256~interrupt lines, two of which are already reserved. With each simulated machine size, the performance was evaluated for 0, 500, 1000, and 2000 loop iterations in the \emph{Burn} components. Each loop iteration accounts for 2500~simulator ticks, five clock cycles of the simulated CPUs, or \SI{2.5}{\nano\second} real time. Therefore, the real time delay is 0, \SI{1.25}{\micro\second}, \SI{2.5}{\micro\second}, and \SI{5}{\micro\second} respectively. The same four experiments were conducted with the real machine and traced with \emph{ftrace}.
+
+To determine the scalability of the \cobas{} framework, the scheduler subsystem needed to be stressed during the measurement. To stress the scheduler subsystem, the \emph{hackbench} benchmark was used. Note that \emph{hackbench} was only used to generate a high load on the scheduler subsystem and not for using it as benchmark measure. In both environments, the benchmark was run with \num{100}~groups each with \num{20}~senders and \num{20}~receivers communicating via pipes \num{100}~times with each other resulting in \num{4000}~tasks in total. The call trace was marked via the \emph{Marker} Component to indicate when the benchmark started. That allows only to consider the function trace of the time the benchmark ran and allows the analysis of the system in the high-stress situation without being biased by the low load situation during the system boot.
+
+\subsection{Experimental Results}%
+\label{sec:studies:scale:results}
+
+\begin{figure} \centering
+	\includetikz{figures/chapter8-studies/scalability/pipe-scale-64c}
+	\caption[Results of the scalability experiments with 64~PEs and the gem5 Simulator.]{Results of the scalability experiments with 64~\acp{PE} using the \emph{gem5} Simulator and four different workload emulations. The average runtime of each function is given in simulation ticks (left y-axis) and real time (right y-axis) as a subject to the number of scheduling Pipes.}%
+	\label{fig:eval:scale-gem5-64c}
+\end{figure}
+
+\begin{figure} \centering
+	\includetikz{figures/chapter8-studies/scalability/pipe-scale-ftrace-64c}
+	\caption[Results of the scalability experiments with 64~PEs and a real system.]{Results of the scalability experiments with 64~\acp{PE} using the real system as summarized in \cref{tbl:experiments:scale}.}%
+	\label{fig:eval:scale-ftrace-64c}
+\end{figure}
+
+The results of the experiments for 64~\acp{PE} are presented in \cref{fig:eval:scale-gem5-64c} for the \emph{gem5} experiments and in \cref{fig:eval:scale-ftrace-64c} for the real machine summarized in \cref{tbl:experiments:scale}. The diagrams present the runtime both in terms of simulation ticks (left y-scale of each diagram) and the resulting real time (right y-scale of each diagram). For an improved readability, the results for \num{16}, \num{32}, \num{128}, and \num{254}\,\acp{PE} are moved to \cref{appendix:data:scale} depicted in \crefrange{fig:eval:scale-gem5-16c}{fig:eval:scale-gem5-128c} on \cpagerefrange{fig:eval:scale-gem5-16c}{fig:eval:scale-gem5-128c}. Because of the high computational complexity of the simulation for the \num{254}\,\acp{PE} experiment, it was not possible to collect results for \num{2000}\,loop iterations. The diagrams show the average number of cycles required to process the respective functions. For each measurement, the average values are shown, as well as the confidence interval for a confidence level of \SI{95}{\percent} in a Student's t-distribution. As most of the confidence intervals are very small and therefore hard to illustrate, the data collected during the experiments and used to generate the diagrams is summarized in \cref{appendix:data:scale} as well in the \crefrange{tbl:scale:16c0p}{tbl:scale:128c2000p} on \cpagerefrange{tbl:scale:16c0p}{tbl:scale:128c2000p}.
+
+The results show that, as expected, when several cores try to access the same Pipe, the system congests. In fact, the congestion is even so severe that once more than 32~\acp{PE} access one Pipe, it was not possible to gather meaningful measurements as most of the time was spent in the scheduler, resulting in almost no progress of the workload. Moreover, the results show that, in all functions depending on Pipe processing (\code{fw_dispatch}, \code{fw_relinquish}, and \code{fw_unblock}), the overhead drops significantly because of the lock contention on the Pipes as soon as the number of Pipes increases. In consequence, the same applies to the Runtime System Adapter functions (\code{activate_task} and \code{__schedule}) that depend on those framework functions. The degree of contention also depends on the time that is required for each Pipe update. For example, with zero burn cycles, the contention already reaches a low level when less than \num{16}\,\acp{PE} have to share one Pipe, whereas with \num{2000}\,burn cycles this process starts below \num{8}\,\acp{PE} per Pipe.
+
+At first sight, the results of the \code{fw_admit} function do not seem to fit the remaining results. Even though it also depends on the processing inside the Pipeline, it only shows indication of contention when 16 or more \acp{PE} are accessing the same Pipe in the \emph{gem5} simulation, while in the real x86 system, the behavior seems to be promiscuous. In the \emph{gem5} case, the results are explained by the inner workings of the \emph{hackbench} benchmark. It forks all children in the very beginning. That means that at that point all other cores of the simulated machine are idle; there is no contention on the scheduler system. Therefore, the task admittance does not compete with other \acp{PE} that want to use the scheduler subsystem. The competition and therefore possible congestion starts only after some time, when the benchmark has already spawned most of its children. Besides the tasks spawned by \emph{hackbench}, no significant number of other tasks is spawned that might influence the results. That this reasoning is sound is backed by the fact that not substantially more than \num{4000} task admittances are recorded in the task trace (\cf{}~\crefrange{tbl:scale:16c0p}{tbl:scale:128c2000p} in \cref{appendix:data:scale}).
+
+The situation with the results gathered by the \emph{ftrace} tool is different and a result of the biggest drawback of the measurements collected by \emph{ftrace}. Through the way it works, \emph{ftrace} introduces an additional noise into the measurements as it takes extra time for every function to execute and finish. That can be observed when comparing the relative distance of the curves in the diagrams in \cref{fig:eval:scale-gem5-64c,fig:eval:scale-ftrace-64c} with each other. The distances for the \emph{ftrace} results are much smaller than for the \emph{gem5} results. This is caused by the \emph{ftrace} overhead that makes the overhead posed by the Pipe functions less significant. Because of that, the results for the \code{fw_admit} function in \cref{fig:eval:scale-ftrace-64c} show more differences in the processing of the \emph{ftrace} tracking than the differences caused by the \cobas{} framework.
+
+The graphs in all but the \code{fw_admit} functions are not completely monotonic. This can be explained by the fact that the runtime changes are based on lock contention and, furthermore, the lock contention is not completely deterministic. It depends on two or more \acp{PE} accessing the same mutual exclusive data or code path, which is a random process. As a result with a small but none zero probability, it is possible that the observed experiment is not close to the average and causes the spikes. However, as the simulator itself is completely deterministic, it will create the same conditions that lead to the results, therefore, repeating the experiment will not result in a different measurement. This reasoning is backed by the results gathered on the real system that does not suffer from that necessitarianism and does not show these severe spikes.\label{sec:studies:scale:results!end}
+
+\subsection{Discussion of the Results}
+
+The experiments of this section have shown that a scheduler that suffers from contention cannot be used in a system with dozens or hundreds of cores. With such a scheduler, the system is completely occupied by the scheduling routine and cannot perform any productive work. The situation greatly improves once it is possible for several \acp{PE} to execute the scheduling code concurrently. The results indicate that it is possible to build such a scheduler based on the \cobas{} framework as the time spent in the scheduler drops more than linear once a scalable topology is used. The experiments of this section have shown that the \cobas{} framework is capable of scaling for systems up to \num{254}~cores and they give no indication that a scaling beyond that number of cores is not possible. Therefore, it can be concluded that \cobas{} is suited for many-core systems and it is possible to implement scalable schedulers regarding the number of cores with it.
+
+\section{Composition Overhead}%
+\label{sec:studies:overhead}
+
+The \cobas{} framework allows the construction of a sophisticated scheduling policy from several Components. However, having a processing of a complex algorithm distributed among several Components introduces an overhead as information or, to be more precise, the task orders have to be moved from one component to another. The goal of the experiment presented in this section is to quantify this overhead. The quantification is done by dividing an artificial computation that emulates a schedule computation among several Component instances. The resulting processing time is then compared to the processing time needed to perform the computation in a single Component instance.
+
+\subsection{Experiment Description and Setup}
+
+\begin{figure}[!b] \centering
+	\includetikz{figures/chapter8-studies/overhead/topo}
+	\caption{Topology used for the evaluation of the composition overhead.}%
+	\label{fig:eval:overhead-topo}
+\end{figure}
+
+\afterpage{%
+	\clearpage% flush all other floats
+	\begin{figure} \centering
+		\includetikz{figures/chapter8-studies/overhead/trace}
+		\caption[Exemplary call-graph of the overhead experiment with four stages.]{Exemplary call-graph of the overhead experiment with four stages.}%
+		\label{fig:eval:overhead-trace}
+	\end{figure}
+}
+
+To determine the overhead of dividing a workload that emulates a scheduling algorithm between several Component instances, a Topology as depicted in \cref{fig:eval:overhead-topo} was created. To simulate the workload, an approach similar to the \emph{Burn} Component from the previous section was used. However, to be able to distinguish the different stages of the Pipeline from one another, the \emph{Burn} Component was extended in a way that it can be configured during instantiation according to the supposed name of the update function. This Component will be denoted as \emph{Depth} Component. The experiment was conducted with the \emph{gem5} simulator and \emph{hackbench} as stress for the scheduler subsystem also similar to the previous section. Pipeline depths reaching from one to six Component instances were evaluated with various computation workloads for the emulated scheduling algorithm. The processing times of the \code{depth_pipe_update_stage_0} function were collected for all experiments as they do not only include the processing time of the \code{depth_pipe_update_stage_0} function itself, but also all subsequent component instances. The \emph{Marker} Component was also used in this experiment to narrow the trace down to the time during the high-stress situation of the scheduler subsystem similar to the previous section.
+
+As the differences in processing time were expected to be very small, the experiments were only conducted with the \emph{gem5} simulator as it allows a very precise quantification of how much time was spent in which function. That would not have been the case with in-system tracing approaches with the introduction of a bias. The simulated system consisted of only one core as it is sufficient to determine the overhead. The experiments used the same \emph{Busybox} based userland as in the previous section as well as the \emph{hackbench} benchmark to stress the scheduler subsystem. However, only \num{25}~groups were used, reducing the number of threads to \num{1000}. This was sufficient to stress the scheduler of a single-core machine.
+
+\begin{figure}[!t] \centering
+	\includetikz{figures/chapter8-studies/overhead/pipe-overhead}
+	\caption[Overhead in Pipe processing by dividing the scheduler computation among several Component instances.]{Overhead in Pipe processing by dividing the scheduler computation among several Component instances. The processing time of each Pipeline is put into relation to the Pipeline with only one Component instance.}%
+	\label{fig:eval:pipe-overhead}
+\end{figure}
+
+Again, similar to the previous section, an exemplary call-graph is given as an orientation in \cref{fig:eval:overhead-trace} generated from an experiment with four stages. The upper part of the call-graph represents the framework function as explain in the previous section. The lower part of the call-graph illustrates the chain of Pipe updates of the \emph{Depth} Component instances with their update functions \code{depth_pipe_update_stage_0} through \code{depth_pipe_update_stage_4}. Each task is handed through the different Depth Component instances.
+
+\subsection{Experimental Results}%
+\label{sec:studies:overhead:results}
+
+The experimental results are summarized in \cref{fig:eval:pipe-overhead}. It shows the ratio between the processing time of the various Pipeline lengths and the processing time with only one Component instance in the Pipeline. The exact measurements are in the appendix in \cref{tbl:overhead:data} on \cpageref{tbl:overhead:data}. The results in the appendix also show the overhead for no workload, which poses the worst case scenario, as it cannot be illustrated in \cref{fig:eval:pipe-overhead} with a logarithmic scale. Looking only at the Pipeline itself, without workload, the Pipeline with six instances would also take six times the amount of time to complete. However, as the Pipeline is not the only part involved in scheduling, this is not the case for the measurements; therefore, in the worst case scenario with zero work, the ratio is smaller. The experimental results also show that the additional processing time with more instances becomes more and more insignificant the more work has to be completed.
+
+However, even in the worst case, the scheduler overhead is rather small putting it into relation with the total runtime of the experiments. For example, the total runtime of the experiment with zero work and six Pipeline stages was approximate \num{1.222e12} simulation ticks. Taking the difference of the values from two processing stages in \cref{fig:eval:pipe-overhead}, the composition overhead is the following (all times in simulation ticks):
+
+\begin{center}
+	\(\text{total overhead} \approx \displaystyle\frac{20.62 \cdot 10^9 - 16.80 \cdot 10^9}{1.222 \cdot 10^{12} - (20.62 \cdot 10^9 - 16.80 \cdot 10^9)} \approx 1.66 \cdot 10^{-3} = 1.66 \mbox{\,\textperthousand}\)
+\end{center}
+
+Measuring this small overhead was mainly possible through the simulation of the system. In a real system, the overhead would most likely be smaller than the measurement uncertainty.
+
+\subsection{Discussion of the Results}
+
+Looking at the overhead of dividing the task ordering among several Component instances shows two different pictures. On the one side, for the relative processing time in the scheduler itself, the partition can create a significant overhead. This is especially true when having a scheduling algorithm with a low computational complexity distributed over several components. However, subdividing the algorithm between several components also opens the opportunity of parallel execution that can lead to a reduced contention in multi- and many-core systems as shown in the previous section. Moreover, looking at the overall system, the overhead rather small as the scheduler contributes only in a small fraction to the overall system load. Finally, it should be noted that the used scenario poses a very high-stress situation for the scheduler that is probably very rare in real world scenarios. Therefore, the results of this evaluation can be treated as a worst-case approximation.
+
+\section{Performance Evaluation}%
+\label{sec:studies:nas}
+
+While the previous experiments focused on the properties of the \cobas{} framework itself, this section evaluates the impact of \cobas{} on real world scenarios. As most benchmarks are sensitive to the actual employed scheduling policy, this section can only give an idea how the \cobas{} approach will perform in actual productive systems. Still, it is possible to assess, whether it is feasible to use \cobas{} in real world systems.
+
+\subsection{Experimental Setup}
+
+\begin{table}[!b]
+	\caption{System configuration used in the performance evaluation.}%
+	\label{tbl:experiments:performance}
+	\begin{tabular}{ll}\toprule
+		Architecture:      & x86\_64              \\
+		Microarchitecture: & Intel Sandy Bridge   \\
+		Model:             & Intel Core i7-2600   \\
+		Clock Rate:        & 3400~MHz             \\
+		Sockets:           & 1                    \\
+		NUMA-Nodes:        & 1                    \\
+		\acp{PE}:          & 8 (4~cores with SMT) \\
+		Memory:            & 8~GB                 \\ \bottomrule
+	\end{tabular}
+\end{table}
+
+\begin{table}[!b]
+	\caption{Overview of the used NAS benchmarks.}%
+	\label{tab:nas}
+	\renewcommand{\arraystretch}{1.1}
+	\centering
+	\begin{tabular}{m{0.9cm}m{3.75cm}m{5cm}}
+		\toprule
+		Name & Description                               & Computational Challenge     \\
+		\midrule
+		BT   & Block Tridiagonal                         & Floating point performance  \\
+		CG   & Conjugate Gradient                        & Irregular communication     \\
+		EP   & Embarrassingly Parallel                   & Floating point performance  \\
+		FT   & Fast Fourier Transform                    & Long-distance communication \\
+		IS   & Integer Sort                              & Integer performance         \\
+		LU   & Lower-Upper symmetric \mbox{Gauss-Seidel} & Regular communication       \\
+		MG   & Multi Grid                                & Regular communication       \\
+		SP   & Scalar Pentadiagonal                      & Floating point performance  \\
+		UA   & Unstructured Adaptive                     & Irregular communication     \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+To evaluate the real world performance of \cobas{}, a smaller machine compared to \cref{sec:studies:scale} was used. The machine used in \cref{sec:studies:scale} is a module based CPU design\footnote{Refer to \cref{sec:intro:challenges:innovation} for issues regarding the scheduling on this particular design.} with eight NUMA domains. Having only basic scheduling algorithms available for \cobas{} today, it can be expected to result in a poor performance that does not reflect shortcomings in the \cobas{} architecture but in the used scheduling policy. In order to reduce the impact of the scheduling policy, the machine summarized in \cref{tbl:experiments:performance} was used. Even though it has \ac{SMT}, it seems feasible that a simple scheduling policy can manage the machine.
+
+To benchmark the \cobas{} framework, the \emph{\ac{NAS} parallel benchmarks suite}~\cite{Bailey-1991-NPB,BaileyEtAl-1994-Npb,NAS} and \emph{hackbench} benchmark were used. The \ac{NAS} benchmark suite consists of several micro-benchmarks resembling typical computational problems appearing in science (\cref{tab:nas}). The benchmarks are available in increasing problem sizes: \emph{S}, \emph{W},
+and \emph{A} through \emph{E}. However, not every benchmark is available in the bigger sizes. As they are only intended for test purposes, the small \emph{S} and \emph{W} input sizes were not evaluated. Furthermore, because of the memory requirements of the larger problem sizes, only problem sizes up to \emph{B} for FT and MG, and problem sizes up to \emph{C} for the other benchmarks were measured. For the evaluation, an OpenMP implementation of the benchmark suite was used (\cf{} \textcite{JiFrYa-1999-OpenMpNpb}). The benchmarks were executed with eight concurrent threads, matching the number of \acp{PE} of the machine.
+
+The hackbench benchmark was already used in the previously presented experiments; however, it was only used to create stress on the scheduler subsystem. In this evaluation, it is used to benchmark the scheduler performance. As the benchmark outputs its runtime with an accuracy of only \SI{10}{\milli\second}, the number of loops was raised to \num{10000} from the default of \num{100} to increase the benchmark's runtime. The number of communication groups varied between \num{1} and \num{256} with the number of groups being a power of two. This results in \num{40} up to \num{10240} concurrent threads.
+
+\begin{figure}[!b] \centering
+	\includetikz{figures/chapter8-studies/performance/topo}
+	\caption{Topology used for the \cobas{} performance evaluation.}%
+	\label{fig:eval:performance-topo}
+\end{figure}
+
+The \cobas{} scheduler used the Topology depicted in \cref{fig:eval:performance-topo}. As comparison, the \ac{CFS} was benchmarked. A Gentoo userland was used with a vanilla Linux kernel v4.4 for the \ac{CFS} benchmarks and the modified Linux kernel v4.4 with the \cobas{} prototype implementation for the \cobas{} measurements. The execution of each benchmark was repeated \num{50} times.
+
+\subsection{Experimental Results}%
+\label{sec:studies:nas:results}
+
+The results for the \ac{NAS} benchmarks are summarized in \cref{fig:eval:performance-nas} and the results for the hackbench benchmark in \cref{fig:eval:performance-hackbench}. The mean of the absolute runtimes for the benchmarks is summarized in \cref{tbl:performance:nas,tbl:performance:hackbench} in the appendix on \cpageref{tbl:performance:nas} together with a \SI{95}{\percent} confidence interval in a Student's t-distribution.
+
+\afterpage{%
+	\clearpage% flush all other floats
+	\begin{figure} \centering
+		\includetikz{figures/chapter8-studies/performance/nas-plot}
+		\caption[Speedup of the \cobas{} scheduler in relation to the CFS scheduler for the NAS benchmark suite.]{Speedup of the \cobas{} scheduler in relation to the CFS scheduler for the \emph{NAS benchmark suite}.}%
+		\label{fig:eval:performance-nas}
+	\end{figure}%
+	\begin{figure}\centering
+		\includetikz{figures/chapter8-studies/performance/hackbench-plot}
+		\caption[Speedup of the \cobas{} scheduler in relation to the CFS scheduler for the hackbench benchmark.]{Speedup of the \cobas{} scheduler in relation to the CFS scheduler for the \emph{hackbench} benchmark. The lower x-axis is labeled by the number of groups, while the labeling of the upper x-axis shows the corresponding number of threads.}%
+		\label{fig:eval:performance-hackbench}
+	\end{figure}
+	\clearpage
+}
+
+The results show a slight speedup of the \cobas{} based scheduler compared to the \ac{CFS} for the LU benchmarks with input size B. For all other evaluated benchmarks in the \ac{NAS} benchmark suite, a slowdown of up to \SI{8}{\percent} can be observed. However, with exception of the BT, CG, and UA benchmarks with input size~A, the slowdown is close to or even below \SI{1}{\percent}. Looking even closer, the confidence intervals suggest that the difference might not even be statistically relevant for most of the benchmarks.  The situation is different for the hackbench benchmark. There, the \cobas{} scheduler experiences a slowdown of approximately \SI{15}{\percent} only for the smallest group size. For the other group sizes, the \cobas{} scheduler has a speedup factor of up to \num{1.8} compared to \ac{CFS}.
+
+\subsection{Discussion of the Results}
+
+There is a mixed picture for the results. For the \ac{NAS} benchmark, the \cobas{} based scheduler causes a slight performance degradation, while in the hackbench benchmark it is superior. Based on the results, it can be concluded that it is possible to construct a performant scheduler with the \cobas{} architecture. However, the results also show that the performance strongly depends on the actual scheduling policy. For example, the performance degradations in the \ac{NAS} benchmarks are most likely caused by the inferior consideration of cache affinity of the \cobas{} implementation compared to the \ac{CFS}. In order for a task to have the chance to have remaining data in the cache after re-scheduling, the load-balancer implemented for \cobas{} only tries to schedule an arriving task once at the \ac{PE} it was executed last. The the \ac{CFS} has a more sophisticated strategy for that purpose that increases the chances to still find data in the cache. The hackbench benchmark, contrary to the \ac{NAS} benchmarks, has almost no cache dependencies and, based on its simple communication pattern, profits most likely from the round-robin scheduling policy. Furthermore, does the \cobas{} scheduler implementation not consider the special requirements for scheduling in an \ac{SMT} system, where tasks scheduled on a single \ac{SMT} sibling can influence each other.
+
+\section{Scheduler Adaptation}%
+\label{sec:studies:performance}
+
+The necessity for the scheduler to be adaptive to the system was specified in \cref{sec:requirements:adaptability}. The argument primarily focused on the adaptability towards the system architecture. This aspect was already partially discussed earlier in this chapter in \cref{sec:studies:hetero}. However, the adaptability and reconfiguration of the scheduler also allow it to be adapted to the workload. The goal of the experiment presented in this section is to show how an adaptive scheduler can improve the system performance. The benefits are shown by a workload that reconfigures the scheduling policy according to its needs.
+
+\subsection{Experiment Description and Setup}
+
+\begin{figure}[!b] \centering
+	\includetikz{figures/chapter8-studies/adaptation/topo}
+	\caption[Adaptation of the scheduler topology for the Benchmark.]{Adaptation of the scheduler topology for the Benchmark. The benchmark is exclusively executed on the PE~3 and subject to the scheduling policy of the lower Component instance (green). The scheduling policy is changed from \emph{Head Queue} to \emph{FCFS} to \emph{LCFS} and back to \emph{Head Queue}}%
+	\label{fig:eval:speed-topo}
+\end{figure}
+
+The experiment assumes a simple workload that works in two phases through a processing pipeline, where each stage is an individual thread. First, it works through the pipeline forward; the second thread waiting for the first one, the third for the second and so on. In the second phase, the same pipeline is processed backward; the last thread is waiting for the second last, the second last for the third last and so on. The threads synchronize through a spinlock. The runtime of this workload is evaluated with three different scheduling strategies. First, with the vanilla Linux scheduler that implements the \ac{CFS} strategy. Second, with a simple round-robin scheduling, using the \cobas{} framework. Moreover, third, with an adaptive scheduling in \cobas{} that first employs a \ac{FCFS} scheduling strategy and is reconfigured to a \ac{LCFS} strategy before the second phase begins (\cf{} \cref{fig:eval:speed-topo}). The workload is executed on a single core; therefore, the threads of the application are scheduled to the same \ac{PE}. The experiment was conducted with 1~to~128 threads and the resulting runtime was measured for 100~runs. The experiments were carried out on the machine as the previous experiment (\cf{}~\cref{tbl:experiments:performance} on \cpageref{tbl:experiments:performance}). However, \ac{SMT} and dynamic frequency scaling were deactivated to minimize the variances between measurements. A Gentoo userland was used with a vanilla Linux kernel v4.4 for the \ac{CFS} benchmarks and the modified Linux kernel v4.4 with the \cobas{} prototype implementation. The threads used the same loop as presented in \cref{lst:eval:speed} in \cref{sec:studies:scale} on \cpageref{lst:eval:speed} to emulate a workload. Three workload scenarios were evaluated: a small workload with \(100\)~loop cycles, a medium workload with \(10^6\)~loop cycles, and a high workload with \(10^9\)~loop cycles.
+
+\subsection{Experimental Results}%
+\label{sec:studies:performance:results}
+
+\begin{sidewaysfigure} \centering
+	\includetikz{figures/chapter8-studies/adaptation/adaptation}
+	\caption[Results of the performance evaluation.]{Results of the performance evaluation. The upper row shows the absolute runtimes of the experiments, while the lower row illustrates the ratio between the optimized \cobas{} strategy and the two other scheduling policies. Note that for the high workload experiment the results of the vanilla Linux CFS scheduling and \cobas{} Round-Robin scheduling highly overlap.}%
+	\label{fig:eval:speed}
+\end{sidewaysfigure}
+
+The experimental results are summarized in \cref{fig:eval:speed}. The data acquired during the experiment and used to generate the diagrams is summarized in the appendix in \cref{tbl:performance:data} on Page~\pageref{tbl:performance:data}. The upper row of the Figure depicts the absolute runtimes of the experiments for the three scheduling strategies and workloads per thread. The lower row illustrates the ratio between the optimized scheduling policy and the two other scheduling policies. Note that for the high workload experiment the results of the vanilla Linux \ac{CFS} scheduling and \cobas{} Round-Robin scheduling are highly overlapping.
+
+For the high-workload scenario, the optimized approach is strictly superior to the other two scheduling approaches. In the two other scenarios, the situation is more diverse. The first thing that is unusual are the results of the \ac{CFS} policy for one processing thread. For both the low and medium workload scenario, the runtime is several orders of magnitudes lower than the other scheduling policies. Two reasons explain this behavior: First, \ac{CFS} is optimized for responsibility; therefore, the newly created task is instantly scheduled to the CPU, whereas no such optimization exists in the \cobas{} policies. Second, the task creation process is faster in the vanilla Linux scheduler. As explained in \cref{sec:studies:linux}, a significant amount of code from the original scheduler, especially regarding task creation, was reused for the \cobas{} prototype, therefore adding only additional creation overhead. However, the advantage of \ac{CFS} vanishes already when considering two pipeline stages. From that point on, \ac{CFS} is at best equal to the other strategies.
+
+Even though the optimized \cobas{} scheduler shares the same task creation overhead with the \cobas{} round-robin scheduler, it performs worse for the lowest number of threads both in the low and medium workload scenarios. This behavior can be explained by the additional overhead required to reconfigure the scheduler Topology. In fact, for the low workload scenario, this overhead is prevailing over the processing time up to 32~threads for the low workload scenario as the total program runtime is constant until that point. However, the optimized strategy is better than the two other strategies even with this additional overhead.
+
+\subsection{Discussion of the Results}
+
+This experiment has given an example that shows that \cobas{} can vastly improve the processing time of specific workload scenarios. The optimized scheduling strategy makes use of the property of \cobas{} to be able to modify the scheduler at runtime. It has to be emphasized that the used modification goes beyond a reconfiguration of the system as the used scheduling strategies would not necessarily have to be already present in the system. They could also have been loaded during the runtime of the system. With this property, it would be possible to create and implement scheduling strategies specifically tailored to concrete problems. It can be expected that this approach can be used in more relevant and complex real-world scenarios that benefit from an optimized scheduling.
+
+\section{Foreign Language Components}%
+\label{sec:studies:language}
+
+Contrary to most other scheduler systems, \cobas{} has a well-defined set of interfaces that should make it easy to adapt it to specific runtime systems. However, the interface set should also make it easier to implement Components in arbitrary languages. In \cref{sec:prop:fpga}, it was already discussed how hardware-based Components might be integrated into \cobas{} with \ac{FPGA} technology. The main goal of this section is to show the feasibility to implement \cobas{} Components with programming concepts different from its main language. This section studies the integration of a Component written in a language other than C or its relatives, namely Rust.
+
+The Rust programming language was already discussed in the decision for the main programming languages of the \cobas{} prototype at the beginning of \cref{chap:proto}. Even though it was discarded as main programming language there, it is still interesting as a study object for system programming. The purpose of this section is to research the challenges when implementing a Component in Rust and evaluating the possible overhead during execution. Therefore, \cref{sec:study:rust:impl} starts with an explanation of the main steps to implement and obstacles that occurred when implementing a \cobas{} Component in Rust. \Cref{sec:study:rust:setup} describes an experiment conducted to evaluate the overhead of a Rust based component. Finally, the last subsection discusses the result of the experiment in detail.
+
+\subsection{Implementation Details}%
+\label{sec:study:rust:impl}
+
+Even though Rust was designed as system programming language and requires no special runtime system, bare-metal support is limited, though it is steadily increasing. Also, documentation regarding bare-metal implementations are still limited; yet, a simple operating system -- Redox~\cite{Redox} -- that was implemented in Rust and an example for Linux kernel module written in Rust~\cite{rust_ko} exist. Both examples were helpful to solve technical problems creating a \cobas{} Component in Rust like, \eg{}, how to compile and link the code or how to handle the mapping of primitive variables or a \code{void} pointer.
+
+The first challenge to implement a Component is the way it can access the functions offered by the framework. As the interface of \cobas{} for Components is limited and well defined in the form of header files, it was possible to almost entirely automatically generate the interface with \emph{rust-bindgen}~\cite{rust-bindgen}. One challenge using \emph{rust-bindgen} was that it parses all include files. The way the \cobas{} prototype is built would also include the source files of the runtime system. As the Component is supposed to be independent of the runtime system, including an arbitrary one was not an option. Therefore, a new \texttt{zero} runtime system target was introduced that maps functions and types to a default value. With the \texttt{zero} target, it was possible to generate a binding that needed only minimal manual adaption regarding the module that contains the primitive types.
+
+Another challenge was the dependence of the \cobas{} prototype on the C preprocessor. The issue shall be explained on the example of a list. The \cobas{} prototype uses an implementation for generic lists in C that is also employed in the Linux kernel as explained in \cref{sec:impl:pipes}. A structure is linked into a list by adding a \emph{list head} structure that contains the usual pointers one expects from a list element. The list is then constructed by linking those \emph{list heads}. To retrieve the actual data of a list element, a preprocessor macro is used that calculates the address of the list element based on the address of the \emph{list head} and its position in the list element~\cite[\cf{}][87--89]{Bovet-2005-LinuxKernel}. The offset is computed by the preprocessor at compile time. This implementation of a list is both efficient in performance and code reuse; however, it is not straightforward to be ported to other programming languages. This became an issue in the Rust implementation of a \cobas{} Component as this facility is used, \eg{}, to retrieve the private part of the \ac{TCB}. There are two general ways to cope with the issue. The first one would be to call a C function when a \ac{TCB} has to be retrieved; the other one is to hand the offset over during the instantiation of the Rust Component. As the position of the private \ac{TCB} is not supposed to change, the latter approach was chosen for locks.
+
+\subsection{Experiment Description and Setup}%
+\label{sec:study:rust:setup}
+
+\begin{figure}[!b] \centering
+	\includetikz{figures/chapter8-studies/rust/topo}
+	\caption{Topology used for the evaluation of the Rust based Component.}%
+	\label{fig:eval:rust-topo}
+\end{figure}
+
+To evaluate the overhead of a Rust based Component, two Components that perform the minimal functionality of a \cobas{} Component, namely moving tasks from an ingoing Pipe to an outgoing Pipe, were implemented both in C and Rust. The C-based component is called \emph{Head Queue} and the Rust based component is called \emph{Rusty}. With those two Components, a simple Topology as depicted in \cref{fig:eval:rust-topo} was created that uses a \emph{Head Queue} instance for \acp{PE} with an even ID and a \emph{Rusty} instance for \acp{PE} with an odd ID. Furthermore, a \emph{Load-Balancing} Component was used in conjunction with an \emph{Affinity} Component to distribute tasks among the \acp{PE}. A \emph{Marker} Component was used to mark the begin of the experiment in the call-trace. All of the used components are described in more detail in \cref{appendix:components}.
+
+As the differences in processing time are expected to be very low, similar to \cref{sec:studies:scale,sec:studies:overhead}, the \emph{gem5} simulator was used to measure the execution time of the system functions. A system with two cores was simulated resulting in a setup in which the scheduling of the processes for the first core has to run through the \emph{Head Queue} Component and the one for the second core through the \emph{Rusty} Component. To acquire the call-graph, the scheduler subsystem was stressed in the same way as described in \cref{sec:studies:overhead}.
+
+\subsection{Experimental Results}%
+\label{sec:study:rust:results}
+
+\begin{sidewaysfigure} \centering
+	\includetikz{figures/chapter8-studies/rust/trace}
+	\caption[Excerpt of the system call-graph with a Rust based Component.]{Excerpt of the system call-graph, running an instance of a Rust based and a C based \cobas{} Component.}%
+	\label{fig:eval:rust}
+\end{sidewaysfigure}
+
+The experimental results are depicted as a call-graph in \cref{fig:eval:rust}. The notation of the graph is the same as described in \cref{sec:studies:scale}. The function \code{hq_pipe_update} is the Pipe update function of the \emph{Head Queue} Component instance and the \code{rust_pipe_update} function of the \emph{Rusty} Component instance respectively. The results show that the average execution of the Pipe update takes \SI{24.64}{\percent} longer in the Rust based Component than in the C based Component even though both Components perform the same task. Even though this overhead seems very high at first glance, looking at the total times relativizes that. As the total time that is covered by the call-graph is approximately \num{1.198e12} simulation ticks, the total overhead regarding the entire system with kernel and user space execution of the \code{rust_pipe_update} function is rather small and can be quantified as following (all times in simulation ticks):
+\begin{center}
+	\(\text{total overhead} \approx \displaystyle\frac{(367.53 \cdot 10^3 - 294.87 \cdot 10^3) \cdot 7897}{1.198 \cdot 10^{12}} \approx 4.78 \cdot 10^{-4} = 0.478 \text{\,\textperthousand}\)
+\end{center}
+
+Looking closer at the call-graph, the overhead can be split into several aspects. The first one is the use of the \code{Option} type~\cite{rust_doc} that is frequently utilized in the Rust language as return type if the return value is possibly undefined like, \eg{}, a \code{NULL} pointer. Accessing the wrapped value requires an explicit \code{unwrap} function call that accounts for \SI{5.44}{\percent} to the execution time of the update function of the \emph{Rusty} Component. The next cause for the additional overhead can be identified by pointer arithmetic. In Rust, a call to the \code{offset} function is necessary, which accounts, according to the call-graph, for another \SI{2.31}{\percent} of the execution time of the update function. Even though in C this would also require an addition or subtraction, it would not take 17~clock cycles compared to the function call in Rust. Finally, the last visible overhead is introduced by an additional function wrapping of a \cobas{} call. As discussed above, Rust cannot make use of the preprocessor. Therefore, some functions might have to be wrapped. For this experiment, the lock and unlock functions were wrapped to assess the overhead. The call-graph shows that it takes an additional \num{8000} simulation ticks or 16~clock cycles to acquire the lock. The overhead for unlocking the spin lock cannot be precisely determined as the unlocking logic was inlined into the wrapper function. However, the execution time of the unlock wrapper takes less time than the call of the locking wrapper. This can be explained by the fact that, through the inlining, the construction of a complete call stack is avoided. The discussed functions only cover approximately half of the observed overhead of the Rust based component. The remaining overhead can be explained by the overhead introduced by building the call stack for the just discussed functions and other Rust internals like a different switch case handling.
+
+\subsection{Discussion of the Results}
+
+The case study has shown how \cobas{} allows the use of other programming functions to easily implement partial scheduling decisions. Because of the limited framework interface, it is easier to create a bridge between the framework written in C and a foreign programming language. This separation makes it also plausible that a \cobas{} Component might be implemented in a \ac{FPGA}. Even though the bridging introduces some overhead, it might be worth accepting it as a more modern or domain specific programming language might make the development less error prone, easier to test, and easier to maintain.

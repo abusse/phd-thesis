@@ -1,0 +1,29 @@
+\begin{scaletikzpicturetowidth}{0.9\textwidth}
+	\begin{tikzpicture}[scale=\tikzscale, every node/.style={transform shape}]
+		\draw (0,0) rectangle ++(3,3);
+		\node[anchor=north, inner sep=1em] at (1.5,3) {Linux Kernel};
+		\draw (0.25,0.25) rectangle ++(2.5,0.75) node[pos=0.5] {Timers};
+		\draw (0.25,1.25) rectangle ++(2.5,0.75) node[pos=0.5] {Scheduler};
+
+		\draw[fill=gray!30] (6,3) rectangle ++(2.5,-1) node[pos=0.5] {\breakC{ExSched\\Module}};
+		\draw[fill=gray!30] (8.5,2.8) -- ++(0.5,0) ++(0.2,0) circle (0.2);
+		\draw[fill=gray!30] (8.5,2.2) -- ++(0.5,0) ++(0.2,0) circle (0.2);
+		\node[anchor=west] at (9.25,2.5) {\breakC{ExSched\\Plugins}};
+		
+		\draw[->, thick] (6,2.5) -- ++(-3,0);
+		\node[anchor=north west] at (3.25,2.4) {\breakL{\code{schedule()} \\
+														\code{wake_up_process()} \\
+														\code{sched_setscheduler()} \\
+														\code{set_cpus_allowed_ptr()} \\
+														etc.}};
+
+		\draw[very thick, dot diameter=1.5pt, dot spacing=4pt, dots] (-3.5,4) -- ++(15,0);
+		\node[anchor=south west] at (-3.25,4) {\Large User Space};
+		\node[anchor=north west] at (-3.25,3.9) {\Large Kernel Space};
+		
+		\draw (0,5) rectangle ++(3,1) node[pos=0.5] {Application};
+		\draw[fill=gray!30] (6,5) rectangle ++(2.5,1) node[pos=0.5] {\breakC{ExSched\\Library}};
+		\draw[->, thick] (3,5.5) -- node[anchor=south] {ExSched APIs} ++(3,0);
+		\draw[->, thick] (7.25,5) -- node[anchor=west, pos=0.25] {\code{ioctl()}} ++(0,-2);
+	\end{tikzpicture}
+\end{scaletikzpicturetowidth}

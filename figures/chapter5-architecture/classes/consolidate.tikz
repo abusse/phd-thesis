@@ -1,0 +1,10 @@
+\begin{tikzpicture}[scale=0.7, every node/.style={transform shape}]
+	
+	\node[rectangle, draw, fill=Component, anchor=west, minimum height=1.8cm, minimum width=1.8cm, inner sep=0] at (2,0) (load) {\breakC{Consolidating\\Component}};
+
+	\path [->, draw] (load.0) -- node[anchor=south, align=center] {$\tau_0,\tau_2,\tau_3,\tau_1,\tau_4$} ++(3,0);
+	\path [<-, draw] (load.155) -- node[anchor=south, align=center] {$\tau_0,\tau_1$} ++(-3,0);
+	\path [<-, draw] (load.180) -- node[anchor=south, align=center] {$\tau_2$} ++(-3,0);
+	\path [<-, draw] (load.205) -- node[anchor=south, align=center]{$\tau_3,\tau_4,$} ++(-3,0);
+
+\end{tikzpicture}

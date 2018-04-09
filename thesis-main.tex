@@ -1,0 +1,832 @@
+% use pdf version 1.4
+\pdfoptionpdfminorversion=4
+
+\documentclass[twoside, 10pt, a4paper, final]{book}
+
+% Included packages %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{morewrites}					% we will need more than 16 write handles
+\usepackage[utf8]{inputenc}				% use UTF-8 input encoding
+\usepackage{lmodern}
+\usepackage[T1]{fontenc}				% western font encoding, improve hyphenation
+\usepackage{textcomp}
+\usepackage{tipa}						% Text-mode Accents (e.g. \textpolhook{a})
+\usepackage[main=english, ngerman]{babel}				% set main language
+\usepackage{ifdraft}					% enable check for draft option
+\usepackage{mathtools}					% display equations
+\usepackage{amssymb}					% math symbols
+\usepackage{wasysym}					% additional symbols
+\usepackage{amsfonts}
+\usepackage{xspace}						% control whitspaces after macros
+\usepackage[hang,bottom]{footmisc}		% footnote modifications
+\usepackage{geometry}					% general page layout
+%\usepackage[cam,a4,center,odd,noinfo]{crop}		% create crop marks for the document
+\usepackage{fancyhdr}
+\usepackage{sectsty}
+\usepackage{graphicx}
+\usepackage{scrextend}					% reference footnotes
+\usepackage[hang,bf,					% hang caption, bf
+			tableposition=top,			% table caption is always above table
+			margin=20pt]{caption}		% indent caption
+\usepackage[listformat=simple,			% subfigure caption
+			list=true]{subcaption}		% list subfigures in table of figures
+\usepackage[titles,subfigure]{tocloft}	% define new 'List of...' and TOC layout
+\usepackage{floatrow}					% enables caption above listing, load before minted
+\usepackage{framed}
+\usepackage[draft=false,chapter]{minted}% source code formating
+\usepackage[english=american]{csquotes}	% use the right quotation marks
+\usepackage{savesym}
+\savesymbol{checkmark}
+\usepackage{dingbat}					% load dingbat font (e.g. \carriagereturn for minted)
+\usepackage{mdwlist}
+\usepackage[normalem]{ulem}				% underlinging (e.g. \sout and \uwave)
+\usepackage{makeidx}					% support for an index
+\usepackage{extramarks}
+\usepackage{enumitem}					% change the itemize front character
+\usepackage{float}
+\usepackage[]{acronym}					% handle acronyms
+\usepackage{array}						% improved tabular environment
+\usepackage{pgfplots, pgfplotstable}
+\usepackage{xcolor}				        % enable eg color names (load before tikz!!!)
+\usepackage{tikz}			            % lets draw some stuff like a boss
+\usepackage{chngcntr}					% custom counteres used for e.g. time and date calculation
+\usepackage{xspace}						% enable conditional withespace for e.g. a.s.o.
+\usepackage[super]{nth}					% superscript st, nd, rd, th
+\usepackage{wrapfig}					% wrap text around figures
+\usepackage{rotating}					% rotate figures
+\usepackage{textgreek}					% greek letter in text mode \textalpha etc.
+\usepackage{relsize}
+\usepackage[chapter]{algorithm}
+\usepackage[]{algpseudocode}
+\usepackage{multicol}					% introduce multicolumn environment
+\usepackage{multirow}
+\usepackage{tabularx}
+\usepackage{colortbl}
+\usepackage{tcolorbox}					% colored table boxes
+\usepackage{dirtree}					% directory listings
+\usepackage{booktabs}
+\usepackage{xtab}						% tables spanning multiple pages
+\usepackage{threeparttable}				% table with footnotes
+\usepackage{environ}
+\usepackage{setspace}					% allow to set line spacing
+\usepackage{afterpage}					% put text/figure after a certain page
+\usepackage{siunitx}					% numbers and units
+\usepackage{xpatch}						% allow some bib patching
+\usepackage{fnpct}						% improve footnote reference placing
+
+\makeindex
+
+% Improve overall appearance with microtype package %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% read http://www.khirevich.com/latex/microtype/ for further information %%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage[activate={true,nocompatibility},	% activate protrusion and expansion
+			final,
+			tracking=true,
+			kerning=true,
+			spacing=true,
+			factor=1100,						% add 10% to the protrusion amount (default is 1000)
+			stretch=10,
+			shrink=10]{microtype}
+
+% PDF setup with links %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\usepackage[a-1b]{pdfx}
+\hypersetup{final,						%links are only inserted in final mode
+			%pdfpagemode={UseOutlines},
+			bookmarks=true,bookmarksopen=false,bookmarksopenlevel=0,
+			bookmarksnumbered=true,
+			hypertexnames=false,
+			pdfstartview={FitV},
+			colorlinks=false,linkcolor={black},citecolor={black},urlcolor={black},
+			linktoc=all,
+			breaklinks=true,
+			%pagebackref=true,
+			plainpages=false,
+			pageanchor=true,
+			%backref=page,
+			}
+\usepackage[capitalise]{cleveref}		% more sophisticated references 
+										%(load after hyperref!)
+
+
+% Packages specific for draft and debugging %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{showlabels}					% prints LaTex lables in draft mode
+
+% Reduce label size of showlabels package
+\renewcommand{\showlabelfont}{\scriptsize}
+
+
+% Bibliography setup %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage[backend=biber,
+			datamodel=thesis-main,
+			bibencoding = utf8,
+			defernumbers=true,
+			natbib = true,
+			style = numeric-comp,
+			giveninits=true,
+			maxnames = 12,
+			minnames = 1,
+			maxcitenames=2,
+			backref = false,
+			backrefstyle = two,
+			defernumbers = true,
+			isbn=true,
+			doi=true,
+			%backref=true,			% enable to show refering pages in entry
+			]{biblatex}
+
+% Bibliography files
+\addbibresource{thesis-main.bib}
+\addbibresource{publications.bib}
+
+\defbibenvironment{publications}
+ {\list
+     {}
+     {\setlength{\leftmargin}{\bibhang}%
+      \setlength{\itemindent}{-\leftmargin}%
+      \setlength{\itemsep}{\bibitemsep}%
+      \setlength{\parsep}{\bibparsep}}}
+  {\endlist}
+  {\item}
+
+% make ordinals (st, nd, rd, th) superspript in bibliography
+\DeclareLanguageMapping{english}{lib/english-ordinal-sscript}
+\DeclareFieldFormat{edition}{\ifinteger{#1}%
+							 {\mkbibordedition{#1}\addthinspace{}ed.}%
+							 {#1\isdot}
+							}
+
+% redefine strings in Bibliography
+\DefineBibliographyStrings{english}{%
+	urlseen = {Retrieved},  
+	sequens = {f\adddot},			% use f. instead of sq.
+	sequentes = {ff\adddot},		% use ff. instead of sqq.
+}
+
+\renewcommand*{\sqspace}{}			% no space at \psq and \psqq
+
+\assignrefcontextkeyws[labelprefix=S]{software}
+
+% only print isbn or issn if doi is not present
+\DeclareSourcemap{
+	\maps[datatype=bibtex]{
+		\map{
+			\step[fieldsource=doi,final]
+			\step[fieldset=isbn,null]
+		}
+		\map{
+			\step[fieldsource=doi,final]
+			\step[fieldset=issn,null]
+		}
+	}
+}
+
+\DeclareSortingScheme{ymdnt}{
+	\sort{
+		\field{presort}
+	}
+	\sort[final]{
+		\field{sortkey}
+	}
+	\sort[direction=descending]{
+		\field[strside=left,strwidth=4]{sortyear}
+		\field[strside=left,strwidth=4]{year}
+		\literal{9999}
+	}
+	\sort[direction=descending]{
+		\field{month}
+		\literal{9999}
+	}
+	\sort{
+		\field{sortname}
+		\field{author}
+		\field{editor}
+		\field{translator}
+		\field{sorttitle}
+		\field{title}
+	}
+	\sort{
+		\field{sorttitle}
+		\field{title}
+	}
+}
+
+\DeclareBibliographyDriver{standard}{%
+	\usebibmacro{bibindex}%
+	\usebibmacro{begentry}%
+	\usebibmacro{author}%
+	\setunit{\labelnamepunct}\newblock
+	\usebibmacro{title}%
+	\newunit\newblock
+	\printfield{number}%
+	\setunit{\addspace}\newblock
+	\printfield[parens]{type}%
+ 	\newunit\newblock
+	\usebibmacro{location+date}%
+	\newunit\newblock
+	\iftoggle{bbx:url}
+    	{\usebibmacro{url+urldate}}
+    {}%
+  	\newunit\newblock
+	\usebibmacro{addendum+pubstate}%
+	\setunit{\bibpagerefpunct}\newblock
+	\usebibmacro{pageref}%
+	\newunit\newblock
+	\usebibmacro{related}%
+	\usebibmacro{finentry}
+}
+
+\renewcommand\namelabeldelim{\addnbspace}
+%\renewcommand\multicitedelim{\addcomma\addnbspace}
+\defcounter{abbrvpenalty}{10000}
+
+% Make sure that not overful hboxes are created through URLs
+\setcounter{biburllcpenalty}{7000}
+\setcounter{biburlucpenalty}{8000}
+
+% Page setup via geometry package %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\geometry{
+	verbose,
+	twoside,
+	centering,
+	papersize={170mm,235mm},
+	textwidth=132mm,
+	textheight=191mm,
+	heightrounded, % <- I recommend this
+	hratio=1:1,
+	vratio=1:1,
+}
+
+% Helpful macros and definitions %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Calculation of current time based on counter \time (minutes since midnight)
+% Usage: \now
+\newcount\myhours
+\newcount\myminutes
+\myhours   = \time \divide \myhours by 60
+\myminutes = \time \multiply \myhours by 60 \advance \myminutes by -\myhours
+             \divide \myhours by 60
+\def\now{\ifnum\myhours<10{}0\fi\number\myhours:\ifnum\myminutes<10{}0\fi\number\myminutes}
+
+% Adds a <line> to the Table of Contents (TOC)
+% Usage: \addtotoc{<line>}
+\newcommand{\addtotoc}[1]{
+  \ifnum0=\csname c@section\endcsname
+    \def\myLevel{section}
+    \def\myEntry{#1}
+  \else
+    \ifnum0=\csname c@subsection\endcsname
+      \def\myLevel{section}
+      \def\myEntry{\protect\numberline{}{#1}}
+    \else
+      \def\myLevel{subsection}
+      \def\myEntry{\protect\numberline{}{#1}}
+    \fi
+  \fi
+  \addcontentsline{toc}{\myLevel}{\myEntry}
+}
+
+% Prints source code identifiers such as method and class names using a
+% different font and escapes LaTex control caracters like \ and _
+% Usage: \code[style]{<method>}
+\newcommand{\code}[2][style=bw,fontsize=\normalsize]{\mintinline[#1]{text}{#2}}
+
+% Prints file names different font and escapes LaTex control caracters
+% like \ and _
+% Usage: \filename[style]{<method>}
+\newcommand{\file}[2][bw]{\mintinline[style=#1,fontsize=\normalsize]{text}{#2}}
+
+
+\newcommand{\refline}[2]{\ref{#1}(#2)}
+
+\newcommand*\Let[2]{\State #1 $\gets$ #2}
+%\algrenewcommand\alglinenumber[1]{
+%    {\sf\footnotesize\addfontfeatures{Colour=888888,Numbers=Monospaced}#1}}
+
+\algrenewcommand\algorithmicrequire{\textbf{Precondition:}}
+\algrenewcommand\algorithmicensure{\textbf{Postcondition:}}
+
+\makeatletter
+\algrenewcommand\ALG@beginalgorithmic{\footnotesize}
+\makeatother
+
+% Defines a TODO <aspect> that is only visible in draft mode
+% Usage: \TODO{<aspect>} simply adds a blue todo to the text
+%        \TODO[<description>]{<aspect>} also adds <description> to the TOC
+\ifdraft{
+	\newcommand{\TODO}[2][@]{
+		{\textcolor{blue}{[TODO: #2]}}
+		\ifx#1@
+		\else
+      		\addtotoc{\textcolor{blue}{TODO: #1}}
+    	\fi
+  	}
+	\newcommand{\QUEST}[2][@]{
+		{\textcolor{red}{[Question: #2]}}
+		\ifx#1@
+		\else
+      		\addtotoc{\textcolor{red}{Question: #1}}
+    	\fi
+  	}
+}{
+	\newcommand{\TODO}[2][@]{}
+	\newcommand{\QUEST}[2][@]{}
+}
+
+\newcommand{\TR}{\ref{TODO}\TODO{Missing Reference}\@\xspace\PackageWarning{TODO}{Missing Reference}}
+\newcommand{\TC}{\cite{TODO}\TODO{Missing Citation}\@\xspace\PackageWarning{TODO}{Missing Citation}}
+
+% Underlines <passage>s that should be checked later (visible in draft mode)
+% Usage \CHECK{<passage>}
+\ifdraft{
+  \newcommand{\CHECK}[1]{\uwave{#1}}
+}{
+  \newcommand{\CHECK}[1]{#1}
+}
+
+% Alternative to commenting out <paragraphs>
+% Usage: \FORGET{<paragraphs>}
+\ifdraft{
+  \newcommand{\FORGET}[1]{\sout{#1}}
+}{
+  \newcommand{\FORGET}[1]{}
+}
+
+\newcommand*{\eg}{e.g.\@\xspace}
+\newcommand*{\ie}{i.e.\@\xspace}
+\newcommand*{\cf}{cf.\xspace}
+\newcommand*{\etal}{et\ al.\@\xspace}
+
+\newcommand{\rpm}{\sbox0{$1$}\sbox2{$\scriptstyle\pm$}
+  \raise\dimexpr(\ht0-\ht2)/2\relax\box2 }
+
+\renewcommand{\l}[1]{l\adddot~#1}
+\renewcommand{\ll}[1]{ll\adddot~#1}
+
+\newcommand{\cobas}{CoBaS\texorpdfstring{\@\xspace}{}}
+\newcommand{\uitron}{\textmugreek{}ITRON\@\xspace}
+
+\newcommand*{\elide}{\textup{[\,\dots]}\@\xspace}
+
+\newcommand\Cpp{C\nolinebreak\hspace{-.05em}\raisebox{.4ex}{\relsize{-2.5}{\textbf{+}}}\nolinebreak\raisebox{.4ex}{\relsize{-2.5}{\textbf{+}}}}
+
+\newlength{\Cheight}
+\settoheight{\Cheight}{C}
+\newcommand{\Csh}{C\includegraphics[height=\Cheight]{figures/sharp}}
+
+\def\signed #1{{\leavevmode\unskip\nobreak\hfil\penalty50\hskip2em
+  \hbox{}\nobreak\hfil(#1)%
+  \parfillskip=0pt \finalhyphendemerits=0 \endgraf}}
+
+
+\renewcommand{\mkcitation}[1]{~#1}
+\newsavebox\mybox
+\newenvironment{aquote}[1]
+  {\savebox\mybox{#1}\begin{quote}}
+  {\signed{\usebox\mybox}\end{quote}}
+
+\newcommand{\breakL}[1]{\begin{tabular}{l}#1\end{tabular}}
+\newcommand{\breakC}[1]{\begin{tabular}{c}#1\end{tabular}}
+\newcommand{\breakR}[1]{\begin{tabular}{r}#1\end{tabular}}
+
+% Fonts %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Set fonts for headlines, tables, and listings
+\allsectionsfont{\bfseries}
+\sisetup{math-micro=\text{\textmugreek},
+		 text-micro=\textmugreek,
+		 exponent-product=\cdot,
+		 output-product=\cdot}
+
+% Page Layout %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Paragraphs and footnotes
+\setlength\parskip{\medskipamount}
+\setlength\parindent{0pt}
+\setlength\footnotemargin{0.8em}
+
+% Standard header and footer
+\setlength{\headheight}{14pt}
+\renewcommand{\headrulewidth}{0pt}
+
+\fancypagestyle{frontmatter}{
+	\fancyhf{}
+	\fancyheadoffset[OR,EL]{2cm}
+	\fancyhead[OR]{\textsc{\nouppercase{\leftmark}}\quad\smash{\rule[-.2ex]{1pt}{4cm}}\quad\makebox[\widthof{0000000}][l]{\thepage}}
+	\fancyhead[EL]{\makebox[\widthof{0000000}][r]{\thepage}\quad\smash{\rule[-.2ex]{1pt}{4cm}}\quad\textsc{\nouppercase{\leftmark}}}
+}
+
+
+\fancypagestyle{mainmatter}{
+	\fancyhf{}
+	\fancyheadoffset[OR,EL]{2cm}
+	\fancyhead[OR]{\textsc{\nouppercase{\rightmark}}\quad\smash{\rule[-.2ex]{1pt}{4cm}}\quad\makebox[\widthof{0000000}][l]{\thepage}}
+	\fancyhead[EL]{\makebox[\widthof{0000000}][r]{\thepage}\quad\smash{\rule[-.2ex]{1pt}{4cm}}\quad\textsc{\nouppercase{\leftmark}}}
+}
+
+\fancypagestyle{backmatter}{
+	\fancyhf{}
+	\fancyheadoffset[OR,EL]{2cm}
+	\fancyhead[OR]{\textsc{\nouppercase{\rightmark}}\quad\smash{\rule[-.2ex]{1pt}{4cm}}\quad\makebox[\widthof{0000000}][l]{\thepage}}
+	\fancyhead[EL]{\makebox[\widthof{0000000}][r]{\thepage}\quad\smash{\rule[-.2ex]{1pt}{4cm}}\quad\textsc{\nouppercase{\leftmark}}}
+}
+
+% header and footer on other pages
+\fancypagestyle{plain}{
+	\fancyhead{}
+	\fancyfoot[CE,CO]{\sffamily\thepage}
+	\ifdraft{
+		\fancyfoot[C]{\today, \now}
+		\fancyfoot[R]{\sffamily\thepage}
+	}{
+		\fancyfoot[C]{}
+		\fancyfoot[R]{\thepage}
+	}
+}
+
+% Chapter layout
+
+\usepackage{titlesec}
+\titleformat{\chapter}[display]
+	{\normalfont\Large\raggedleft}% format
+	{\raggedleft\MakeUppercase{\chaptertitlename}\,\resizebox{!}{1.25cm}{\thechapter}\rlap{\hspace{0.5cm}\rule{5cm}{1.25cm}}}  % label
+	{1ex} % sep
+	{\Huge\bfseries} % before-code
+	[\vspace{-2ex}%
+	 \rule{\textwidth}{0.3pt}
+	] % after-code
+\titleformat{name=\chapter,numberless}[display]
+	{\normalfont\Large\raggedleft}% format
+	{}  % label
+	{-7ex} % sep
+	{\Huge\bfseries} % before-code
+	[\vspace{-2ex}%
+	 \rule{\textwidth}{0.3pt}
+	] % after-code
+\titlespacing*{\chapter}{0pt}{20pt}{15pt}
+
+\titleformat*{\section}{\LARGE\bfseries}
+\titleformat*{\subsection}{\Large\bfseries}
+\titleformat*{\subsubsection}{\large\bfseries}
+\titleformat*{\paragraph}{\large\bfseries}
+\titleformat*{\subparagraph}{\large\bfseries}
+
+% The subfigure option of the tocloft package needs the 'lofdepth' & 'lotdepth'
+% counter. Normally its define by the subfigure or subfig package, but as we use
+% subcaption we have to define it on our own
+\newcounter{lofdepth}
+\setcounter{lofdepth}{2}
+\newcounter{lotdepth}
+\setcounter{lotdepth}{2}
+
+\setlength\cftbeforesecskip{-4pt}
+\setlength\cftbeforesubsecskip{-4pt}
+\setlength\cftbeforefigskip{-4pt}
+\setlength\cftbeforesubfigskip{-4pt}
+\setlength\cftbeforetabskip{-4pt}
+\setlength\cftbeforesubtabskip{-4pt}
+
+\let\Chapter\chapter
+\def\chapter{\addtocontents{lol}{\protect\addvspace{10\p@ }}\Chapter}
+
+% Document specific commands and abbreviations %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\floatsetup[listing]{style=plaintop}
+\floatstyle{plaintop}
+\restylefloat{table}
+
+\makeatletter 
+\def\mod@estimate@lineht{% 
+  \ST@lineht=\arraystretch \baslineskp 
+  %\global\advance\ST@lineht by 1\p@ 
+  \ST@stretchht\ST@lineht\advance\ST@stretchht-\baslineskp 
+  \ifdim\ST@stretchht<\z@\ST@stretchht\z@\fi 
+  \ST@trace\tw@{Average line height: \the\ST@lineht}% 
+  \ST@trace\tw@{Stretched line height: \the\ST@stretchht}% 
+} 
+\newenvironment{strictsupertabular} 
+  {\let\estimate@lineht\mod@estimate@lineht\supertabular} 
+  {\endsupertabular} 
+\makeatother
+
+% Default Settings for source code printing
+
+\newlength{\mintednumbersep}
+\AtBeginDocument{%
+  \sbox0{\tiny00}%
+  \setlength\mintednumbersep{\parindent}%
+  \addtolength\mintednumbersep{-\wd0}%
+}
+
+\setminted[]{style=xcode,
+			 linenos=true,
+			 numbersep=5pt,
+			 tabsize=4, 
+%			 showtabs,
+			 frame=lines,
+			 fontsize=\footnotesize,
+			 fontfamily=lmtt,
+			 mathescape,
+			 escapeinside=||,
+			 breaklines, breakautoindent=false,
+			 breaksymbolleft=\raisebox{0.8ex}{ \small\reflectbox{\carriagereturn}},
+			 breaksymbolindentleft=0pt,
+			 breaksymbolsepleft=0pt,
+			 breaksymbolright=\small\carriagereturn,
+			 breaksymbolindentright=0pt,
+			 breaksymbolsepright=0pt,
+}
+
+% Change the itemize symbol
+
+\def\labelitemi{\normalfont \bfseries \textendash}
+
+% don't footnote numbers with 1 every chapter %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\counterwithout{footnote}{chapter}
+
+% TikZ setup %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{tikz-uml}
+\usetikzlibrary{arrows,arrows.meta,bending,positioning,shapes,calc,backgrounds,intersections,shadows,shapes.misc}
+\usetikzlibrary{colorbrewer}
+\usetikzlibrary{matrix}
+\usetikzlibrary{spy}
+\usetikzlibrary{patterns}
+\usetikzlibrary{decorations.pathreplacing,calligraphy}
+
+\definecolor{myRed}{RGB}{230,178,130}
+\definecolor{myGreen}{RGB}{178,195,134}
+\definecolor{myGray}{RGB}{242,242,242}
+\definecolor{myBlue}{RGB}{118,148,189}
+\definecolor{myYellow}{RGB}{237,188,75}
+\definecolor{myOtherYellow}{RGB}{249,249,165}
+\definecolor{myOrange}{RGB}{236,195,154} 
+
+\definecolor{Component}{RGB}{253,249,192}	%\colorlet{Component}{yellow!30}
+\definecolor{Broker}{RGB}{143,188,252}		%\colorlet{Broker}{blue!20}
+\definecolor{CPU}{RGB}{203,255,181}			%\colorlet{CPU}{green!30}
+\definecolor{Memory}{RGB}{186,219,235}		%\colorlet{Memory}{cyan!30}
+\definecolor{IO}{RGB}{253,249,192}			%\colorlet{IO}{yellow!30}
+
+\colorlet{BlueBackground}{Memory!75}
+\colorlet{RedBackground}{myRed!75}
+
+\definecolor{hot} {rgb}{1.00,0.15,0.15}
+\definecolor{warm}{rgb}{0.15,1.00,0.15}
+\definecolor{cold}{rgb}{0.15,0.65,1.00}
+
+
+\makeatletter
+\newsavebox{\measure@tikzpicturew}
+\NewEnviron{scaletikzpicturetowidth}[1]{%
+  \def\tikz@width{#1}%
+  \def\tikzscale{1}\begin{lrbox}{\measure@tikzpicturew}%
+  \BODY
+  \end{lrbox}%
+  \pgfmathparse{#1/\wd\measure@tikzpicturew}%
+  \edef\tikzscale{\pgfmathresult}%
+  \BODY
+}
+\makeatother
+
+\makeatletter
+\newsavebox{\measure@tikzpictureh}
+\NewEnviron{scaletikzpicturetoheight}[1]{%
+  \def\tikz@height{#1}%
+  \def\tikzscale{1}\begin{lrbox}{\measure@tikzpictureh}%
+  \BODY
+  \end{lrbox}%
+  \pgfmathparse{#1/\ht\measure@tikzpictureh}%
+  \edef\tikzscale{\pgfmathresult}%
+  \BODY
+}
+\makeatother
+
+\newcommand*\circled[1]{\tikz[baseline=(char.base)]{
+            \node[shape=circle,draw,inner sep=0pt, minimum size=11pt] (char) {\footnotesize #1};}}
+\newcommand*\taskball[2]{\tikz[baseline=(char.base)]{
+            \shade[ball color=#1!80!white] (char) circle (#2) ;}}
+\newcommand*\arraytaskball[2]{\tikz[]{
+            \shade[ball color=#1!80!white] circle (#2) ;}}
+\newcommand*\arraytaskballcrossed[3]{\tikz[]{
+            \shade[ball color=#1!80!white] circle (#2) node[cross=#3, line width=0.8pt] {};}}
+
+\newcommand*\fixedtaskball[1]{\tikz[baseline=(char.base)]{
+            \shade[ball color=#1!80!white] (char) circle (4pt) ;}}
+
+\newcommand*\thread[1]{
+\begin{tikzpicture}[scale=#1, every node/.style={transform shape}]
+	\draw[line width=1pt] (0,0) .. controls (0.2,0.25) and (-0.2,0.25) .. (0,0.5) .. controls (0.2,0.75) and (-0.2,0.75) .. (0,1) ++(0,0.2);
+\end{tikzpicture}}
+
+
+% Do not draw tikz figures in draft mode
+%\ifdraft{
+%	\usetikzlibrary{external}\tikzexternalize
+%	\newcommand{\includetikz}[2][1]{\textbf{\sffamily{}\breakC{TikZ figures not available in draft mode\\\code{#1.tikz}}}}
+%}{
+	\newcommand{\includetikz}[2][1]{\scalebox{#1}{\input{#2.tikz}}}
+%}
+
+\makeatletter
+\tikzset{
+	% Define standard arrow tip
+    >=stealth',
+    % Arrow style for state transitions
+    statea/.style={
+			shorten <=2pt,
+			shorten >=2pt,},
+    dot diameter/.store in=\dot@diameter,
+    dot diameter=3pt,
+    dot spacing/.store in=\dot@spacing,
+    dot spacing=10pt,
+    dots/.style={
+        line width=\dot@diameter,
+        line cap=round,
+        dash pattern=on 0pt off \dot@spacing
+    },
+    precise pin/.style args={#1:#2}{
+        pin={[
+            inner sep=0pt,
+            label={[
+             append after command={
+                    node [
+                        inner sep=0pt,
+                        at=(\tikzlastnode.#1),
+                        anchor=#1+180
+                    ] {#2}
+                }
+            ]center:{}}
+        ]#1:{}}
+    }
+}
+\makeatother
+
+\newcommand\irregularlineh[2]{%
+  let \n1 = {rand*(#1)} in
+  +(0,0)
+  \foreach \a in {0.2,0.3,...,#2}{
+    let \n1 = {rand*(#1)} in
+    -- +(\a-0.1,\n1)
+  } -- +(#2,0)
+}  % #1=seed, #2=length of horizontal line
+
+\newcommand\irregularlinev[2]{%
+  let \n1 = {rand*(#1)} in
+  +(0,0)
+  \foreach \a in {0.1,0.15,...,#2}{
+    let \n1 = {rand*(#1)} in
+    -- +(\n1,\a-0.1)
+  } -- +(0,#2)
+}  % #1=seed, #2=length of horizontal line
+
+\input{lib/shape-document}
+
+% Use a recent version for tikz and pgf plotting
+\pgfplotsset{compat=1.14}
+\usepgfplotslibrary{colorbrewer}
+\usepgfplotslibrary{groupplots}
+
+% further imports %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\input{lib/shadequote}
+
+% Title page %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+\renewcommand{\thepage}{\roman{page}}
+\pagestyle{frontmatter}
+\renewcommand{\chaptermark}[1]{\markboth{\thechapter\ #1}{}}
+\renewcommand{\sectionmark}[1]{\markright{\thesection\ #1}}
+
+\phantomsection
+\include{preface1-titlepage}
+\cleardoublepage
+
+% Table of contents, list of figures, etc. %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\microtypesetup{protrusion=true}
+
+\phantomsection
+\include{preface2-abstract}
+\cleardoublepage
+
+\phantomsection
+\include{preface3-zusammenfassung}
+\cleardoublepage
+
+\pagestyle{plain}
+\phantomsection
+\include{preface4-acknowledgment}
+\cleardoublepage
+\pagestyle{frontmatter}
+\renewcommand{\chaptermark}[1]{\markboth{\thechapter\ #1}{}}
+\renewcommand{\sectionmark}[1]{\markright{\thesection\ #1}}
+
+
+\pdfbookmark{Contents}{Contents}
+\microtypesetup{protrusion=false}
+\tableofcontents
+\cleardoublepage
+
+\phantomsection
+\setcounter{lofdepth}{2}
+\listoffigures
+\addcontentsline{toc}{chapter}{\listfigurename}
+\cleardoublepage
+
+\phantomsection
+\setcounter{lofdepth}{2}
+\listoftables
+\addcontentsline{toc}{chapter}{\listtablename}
+\cleardoublepage
+
+\phantomsection
+\listoflistings
+\addcontentsline{toc}{chapter}{\listoflistingscaption}
+\cleardoublepage
+
+\phantomsection
+\addcontentsline{toc}{chapter}{List of Abbreviations}
+\include{preface5-loa}
+\cleardoublepage
+
+% Content %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\setcounter{page}{1}
+\renewcommand{\thepage}{\arabic{page}}
+\pagestyle{mainmatter}
+\renewcommand{\chaptermark}[1]{\markboth{\thechapter\ #1}{}}
+\renewcommand{\sectionmark}[1]{\markright{\thesection\ #1}}
+
+\microtypesetup{protrusion=true}
+
+\include{chapter1-introduction}   \cleardoublepage
+\include{chapter2-analysis}       \cleardoublepage
+\include{chapter3-requirements}   \cleardoublepage
+\include{chapter4-related_work}   \cleardoublepage
+\include{chapter5-architecture}   \cleardoublepage
+\include{chapter6-composition}    \cleardoublepage
+\include{chapter7-implementation} \cleardoublepage
+\include{chapter8-studies}        \cleardoublepage
+\include{chapter9-conclusion}     \cleardoublepage
+
+\appendix
+\renewcommand{\chaptername}{Appendix}
+
+\include{appendix1-components}    \cleardoublepage
+\include{appendix2-data}		  \cleardoublepage
+
+% References %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\cleardoublepage
+\pagestyle{backmatter}
+\renewcommand{\chaptermark}[1]{\markboth{\thechapter\ #1}{}}
+\renewcommand{\sectionmark}[1]{\markright{\thesection\ #1}}
+
+% avoid page breaks inside entries
+%\patchcmd{\bibsetup}{\interlinepenalty=5000}{\interlinepenalty=10000}{}{}
+
+\begin{refsection}[publications.bib]
+	\chapter*{List of Publications\markboth{List of Publications}{}}
+	\addcontentsline{toc}{chapter}{List of Publications}
+\nocite{*}
+\printbibliography[env=publications,heading=none, keyword=mine]
+\vspace{0.75cm}
+\printbibliography[env=publications,heading=none, notkeyword=mine]
+\end{refsection}
+
+\chapter*{Bibliography\markboth{Bibliography}{}}
+\addcontentsline{toc}{chapter}{Bibliography}
+
+\printbibliography[heading=subbibintoc,
+				   notkeyword=software,
+				   title={Literature}
+				  ]
+
+\newrefcontext[labelprefix=S]
+\printbibliography[heading=subbibintoc,
+				   resetnumbers=true,
+				   keyword=software,
+				   title={Software References}
+				  ]
+\cleardoublepage
+\newpage\null\thispagestyle{empty}\newpage
+
+\end{document}

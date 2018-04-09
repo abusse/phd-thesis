@@ -1,0 +1,54 @@
+\begin{scaletikzpicturetowidth}{0.8\textwidth}
+	\begin{tikzpicture}[scale=\tikzscale, every node/.style={transform shape}]
+		\draw[fill=gray!30] (0,0) -- ++(10,0) -- ++(0,7.5) -- ++(-10,0) -- cycle;
+		\draw[fill=white]   (0.5,0.5) -- ++(1.5,0) -- ++(0,0.5) -- ++(1,0) -- ++(0,-0.5)
+							-- ++(2.5,0) -- ++(0,0.5) -- ++(1,0) -- ++(0,-0.5)
+							-- ++(1,0) -- ++(0,0.5) -- ++(1,0) -- ++(0,-0.5)
+							-- ++(1,0) -- ++(0,6) 
+							-- ++(-4,0) -- ++(0,-0.5) -- ++(-1,0) -- ++(0,0.5) -- ++(-4,0) -- cycle;
+		
+		\draw (3.5,4.2) rectangle ++(3,0.8)   node[pos=0.5] {\Large Fixed Priority};
+		\draw (1.25,2)  rectangle ++(2.5,0.8) node[pos=0.5] {\Large Real-Time};
+		\draw (5.5,2)   rectangle ++(3,0.8)   node[pos=0.5] {\Large Time-Sharing};
+		
+		\node[align=center] at ($(2,0.5)!0.5!(3,1)$) {bot.};
+		\node[align=center] at ($(5.5,0.5)!0.5!(6.5,1)$) {bot.};
+		\node[align=center] at ($(7.5,0.5)!0.5!(8.5,1)$) {bot.};
+		
+		\node[align=center] at ($(4.5,6)!0.5!(5.5,6.5)$) {top};
+		
+		\draw[<->, semithick] (2.5,1) -- ++(0,1);
+		\draw[<->, semithick] (2.5,2.8) -- ++(1.8,1.4);
+		
+		\draw[<->, semithick] (6,1) -- ++(0,1);
+		\draw[<->, semithick] (8,1) -- ++(0,1);
+		\draw[<->, semithick] (7,2.8) -- ++(-1.3,1.4);
+		
+		\draw[<->, semithick] (5,5) -- ++(0,1);
+		
+		\node[align=center, anchor=south] at (5,6.75) {\Large Hierarchical Scheduler Infrastructure};
+		
+		\draw[very thick, dot diameter=1.5pt, dot spacing=4pt, dots] (-4,8.5) -- ++(14.5,0);
+		\node[anchor=south west] at (-3.75,8.5) {\Large User Space};
+		\node[anchor=north west] at (-3.75,8.4) {\Large Kernel Space};
+		
+		\draw[->, semithick, densely dashed] (-3,5) -- ++(3,0);
+		\node[anchor=north west] at (-3,5) {\breakL{timer\\expirations}};
+		
+		\draw[<-, semithick, densely dashed] (-3,2) -- ++(3,0);
+		\node[anchor=north west] at (-3,2) {\breakL{thread\\dispatches}};
+		
+		\draw[->, semithick, densely dashed] (2.5,-2) -- ++(0,2);
+		\node[anchor=north] at (2.5,-2) {Thread~1};
+		\draw[->, semithick, densely dashed] (6,-2) -- ++(0,2);
+		\node[anchor=north] at (6,-2) {Thread~2};
+		\draw[->, semithick, densely dashed] (8,-2) -- ++(0,2);
+		\node[anchor=north] at (8,-2) {Thread~3};
+		
+		\node[fill=white] at (5,-1) {\Large Notifications: block, unblock, create, delete};
+		
+		\draw[->, semithick, densely dashed] (3,9.5) -- ++(0,-2);
+		\node[anchor=south] at (3,9.5) {\Large Applications};
+		\node[anchor=west, xshift=0.5em] at (3,8) {\code{HLSCtl()}};
+	\end{tikzpicture}
+\end{scaletikzpicturetowidth}

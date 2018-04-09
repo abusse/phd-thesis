@@ -1,0 +1,68 @@
+\begin{table}[h!]
+	\setlength{\tabcolsep}{4pt}
+	\setlength{\aboverulesep}{1pt}
+	\setlength{\belowrulesep}{1pt}
+	
+	\pgfplotstableset{
+		create on use/time/.style={create col/expr={\thisrow{burn}/2}},
+	}
+	
+	\centering
+	\caption[Overhead experiment results.]{Overhead experiment results. The mean runtimes and confidence intervals are given in microseconds (\cf~\cref{sec:studies:overhead:results}).}
+	\label{tbl:overhead:data}
+	{\tiny
+	\pgfplotstabletypeset[
+		col sep=comma,
+	    columns={burn,1Stage,E1Stage,C1Stage,2Stage,E2Stage,C2Stage,3Stage,E3Stage,C3Stage},
+		columns/burn/.style		= {column type=c,  column name=},
+		columns/1Stage/.style	= {preproc/expr={##1/1000000}, fixed zerofill, precision=3, column name={Runtime}},
+		columns/E1Stage/.style	= {preproc/expr={##1/1000000}, sci, sci zerofill, precision=2, column name={95\% CI}, postproc cell content/.append style={/pgfplots/table/@cell content/.add={\rpm}{}}},
+		columns/C1Stage/.style	= {column name={Samples}},
+		columns/2Stage/.style	= {preproc/expr={##1/1000000}, fixed zerofill, precision=3, column name={Runtime}},
+		columns/E2Stage/.style	= {preproc/expr={##1/1000000}, sci, sci zerofill, precision=2, column name={95\% CI}, postproc cell content/.append style={/pgfplots/table/@cell content/.add={\rpm}{}}},
+		columns/C2Stage/.style	= {column name={Samples}},
+		columns/3Stage/.style	= {preproc/expr={##1/1000000}, fixed zerofill, precision=3, column name={Runtime}},
+		columns/E3Stage/.style	= {preproc/expr={##1/1000000}, sci, sci zerofill, precision=2, column name={95\% CI}, postproc cell content/.append style={/pgfplots/table/@cell content/.add={\rpm}{}}},
+		columns/C3Stage/.style	= {column name={Samples}},
+		every odd row/.style={before row={\rowcolor[gray]{.85}}},
+		every head row/.style={
+		    before row={
+		        \toprule
+		        \multirow{2}{*}{\raisebox{-2pt}{Cycles}}
+		        & \multicolumn{3}{c}{1~Stage}
+		        & \multicolumn{3}{c}{2~Stages}
+		        & \multicolumn{3}{c}{3~Stages} \\ \cmidrule(lr){2-4} \cmidrule(lr){5-7} \cmidrule(lr){8-10}
+		    },
+		    after row=\midrule
+		},
+		every last row/.style={after row=\bottomrule},
+	]{figures/chapter8-studies/overhead/pipe-overhead.dat}}\vspace{0.33cm}
+	{\tiny
+	\pgfplotstabletypeset[
+		col sep=comma,
+    	columns={burn,4Stage,E4Stage,C4Stage,5Stage,E5Stage,C5Stage,6Stage,E6Stage,C6Stage},
+		columns/burn/.style		= {column type=c,  column name=},
+		columns/4Stage/.style	= {preproc/expr={##1/1000000}, fixed zerofill, precision=3, column name={Runtime}},
+		columns/E4Stage/.style	= {preproc/expr={##1/1000000}, sci, sci zerofill, precision=2, column name={95\% CI}, postproc cell content/.append style={/pgfplots/table/@cell content/.add={\rpm}{}}},
+		columns/C4Stage/.style	= {column name={Samples}},
+		columns/5Stage/.style	= {preproc/expr={##1/1000000}, fixed zerofill, precision=3, column name={Runtime}},
+		columns/E5Stage/.style	= {preproc/expr={##1/1000000}, sci, sci zerofill, precision=2, column name={95\% CI}, postproc cell content/.append style={/pgfplots/table/@cell content/.add={\rpm}{}}},
+		columns/C5Stage/.style	= {column name={Samples}},
+		columns/6Stage/.style	= {preproc/expr={##1/1000000}, fixed zerofill, precision=3, column name={Runtime}},
+		columns/E6Stage/.style	= {preproc/expr={##1/1000000}, sci, sci zerofill, precision=2, column name={95\% CI}, postproc cell content/.append style={/pgfplots/table/@cell content/.add={\rpm}{}}},
+		columns/C6Stage/.style	= {column name={Samples}},
+		every odd row/.style={before row={\rowcolor[gray]{.85}}},
+		every head row/.style={
+		    before row={
+		        \toprule
+		        \multirow{2}{*}{\raisebox{-2pt}{Cycles}}
+		        & \multicolumn{3}{c}{4~Stage}
+		        & \multicolumn{3}{c}{5~Stages}
+		        & \multicolumn{3}{c}{6~Stages} \\ \cmidrule(lr){2-4} \cmidrule(lr){5-7} \cmidrule(lr){8-10}
+		    },
+		    after row=\midrule
+		},
+		every last row/.style={after row=\bottomrule},
+]{figures/chapter8-studies/overhead/pipe-overhead.dat}}
+
+\end{table}

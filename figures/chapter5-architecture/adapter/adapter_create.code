@@ -1,0 +1,22 @@
+sys_task_create(...) {
+		|\hspace{0.5cm}\thread{0.7}|
+	cobas_task_create(...);
+		|\hspace{0.5cm}\thread{0.7}|
+	cobas_task_aff(...);
+	cobas_task_prio(...);
+}
+
+cobas_task_aff(...) {
+		|\hspace{0.5cm}\thread{0.7}|
+	cobas_notify(TOPIC_AFF,...);
+}
+
+cobas_task_prio(...) {
+		|\hspace{0.5cm}\thread{0.7}|
+	cobas_notify(TOPIC_PRIO,...);
+}
+
+cobas_task_isa(...) {
+		|\hspace{0.5cm}\thread{0.7}|
+	cobas_notify(TOPIC_ISA,...);
+}

@@ -1,0 +1,34 @@
+\begin{table}[h!]
+	\setlength{\tabcolsep}{4pt}
+	\setlength{\aboverulesep}{1pt}
+	\setlength{\belowrulesep}{1pt}
+	
+	\centering
+	\caption[Performance evaluation results for the hackbench benchmark.]{Performance evaluation results for the hackbench benchmark. The mean runtimes and confidence intervals are given in seconds. Each benchmark was repeated \num{50} times (\cf~\cref{sec:studies:nas:results}).}
+	\label{tbl:performance:hackbench}\vspace{-2.5mm}
+
+	{\small
+	\pgfplotstabletypeset[
+		col sep=comma,
+	    columns={groups,cobas, Ecobas, cfs, Ecfs, ratio},
+		columns/groups/.style		= {column type=c,  column name=, string type},
+		columns/cobas/.style		= {column type=c, fixed zerofill,precision=2, column type/.add={}{}		   , column name={Runtime}},
+		columns/Ecobas/.style		= {sci, sci zerofill, precision=2, sci sep align={c}, column type/.add={>{\rpm}}{} , column name={\SI{95}{\percent} CI}},
+		columns/cfs/.style			= {column type=c, fixed zerofill,precision=2, column type/.add={}{}		   , column name={Runtime}},
+		columns/Ecfs/.style			= {sci, sci zerofill, precision=2, sci sep align={c}, column type/.add={>{\rpm}}{} , column name={\SI{95}{\percent} CI}},
+		columns/ratio/.style		= {column type=c, fixed zerofill,precision=5, column type/.add={}{}		   , column name=},
+		every odd row/.style={before row={\rowcolor[gray]{.85}}},
+		every head row/.style={
+		    before row={
+		        \toprule
+		        \multicolumn{1}{c}{\multirow{2}{*}{\raisebox{-7.5pt}{\breakC{Number\\of Groups}}}}
+		        & \multicolumn{3}{c}{\cobas}
+		        & \multicolumn{3}{c}{CFS}
+		        & \multirow{2}{*}{\raisebox{-2pt}{Ratio}} \\ \cmidrule(lr){2-4} \cmidrule(lr){5-7}
+		    },
+		    after row=\midrule
+		},
+		every last row/.style={after row=\bottomrule},
+	]{figures/evaluation/performance/hackbench.dat}
+	}
+\end{table}

@@ -1,0 +1,63 @@
+\begin{table}
+	\setlength{\tabcolsep}{4pt}
+	\setlength{\aboverulesep}{1pt}
+	\setlength{\belowrulesep}{1pt}
+	
+	\centering
+	\caption[Scalability experiment results with 16~PEs and \SI{0}{\micro\second} Workload.]{Scalability experiment results with 16~PEs and \SI{0}{\micro\second} Workload. The mean runtimes and confidence intervals are given in microseconds (\cf~\cref{sec:studies:scale:results}).}
+	\label{tbl:scale:16c0p}
+	{\tiny
+	\pgfplotstabletypeset[
+		col sep=comma,
+	    columns={pipes,activate_task,Eactivate_task,Cactivate_task,__schedule,E__schedule,C__schedule,__fw_admit,E__fw_admit,C__fw_admit},
+		columns/pipes/.style			= {column type=c,  column name=},
+		columns/activate_task/.style	= {preproc/expr={##1/1000000}, fixed zerofill, precision=3, column name={Runtime}},
+		columns/Eactivate_task/.style	= {preproc/expr={##1/1000000}, sci, sci zerofill, precision=2, column name={95\% CI}, postproc cell content/.append style={/pgfplots/table/@cell content/.add={\rpm}{}}},
+		columns/Cactivate_task/.style	= {fixed, column name={Samples}},
+		columns/__schedule/.style		= {preproc/expr={##1/1000000}, fixed zerofill, precision=3, column name={Runtime}},
+		columns/E__schedule/.style		= {preproc/expr={##1/1000000}, sci, sci zerofill, precision=2, column name={95\% CI}, postproc cell content/.append style={/pgfplots/table/@cell content/.add={\rpm}{}}},
+		columns/C__schedule/.style		= {fixed, column name={Samples}},
+		columns/__fw_admit/.style		= {preproc/expr={##1/1000000}, fixed zerofill, precision=3, column name={Runtime}},
+		columns/E__fw_admit/.style		= {preproc/expr={##1/1000000}, sci, sci zerofill, precision=2, column name={95\% CI}, postproc cell content/.append style={/pgfplots/table/@cell content/.add={\rpm}{}}},
+		columns/C__fw_admit/.style		= {fixed, column name={Samples}},
+		every odd row/.style={before row={\rowcolor[gray]{.85}}},
+		every head row/.style={
+		    before row={
+		        \toprule
+		        \multirow{2}{*}{\raisebox{-2pt}{Pipes}}
+		        & \multicolumn{3}{c}{\code[style=bw,fontsize=\tiny]{activate_task}}
+		        & \multicolumn{3}{c}{\code[style=bw,fontsize=\tiny]{__schedule}}
+		        & \multicolumn{3}{c}{\code[style=bw,fontsize=\tiny]{__fw_admit}}\\ \cmidrule(lr){2-4} \cmidrule(lr){5-7} \cmidrule(lr){8-10}
+		    },
+		    after row=\midrule
+		},
+		every last row/.style={after row=\bottomrule},
+	]{figures/chapter8-studies/scalability/data/m5out-16c-0b.dat}}\vspace{0.33cm}
+	{\tiny
+	\pgfplotstabletypeset[
+		col sep=comma,
+	    columns={pipes,__fw_dispatch,E__fw_dispatch,C__fw_dispatch,__fw_relinquish,E__fw_relinquish,C__fw_relinquish,__fw_unblock,E__fw_unblock,C__fw_unblock},
+		columns/pipes/.style			= {column type=c,  column name=},
+		columns/__fw_dispatch/.style	= {preproc/expr={##1/1000000}, fixed zerofill, precision=3, column name={Runtime}},
+		columns/E__fw_dispatch/.style	= {preproc/expr={##1/1000000}, sci, sci zerofill, precision=2, column name={95\% CI}, postproc cell content/.append style={/pgfplots/table/@cell content/.add={\rpm}{}}},
+		columns/C__fw_dispatch/.style	= {fixed, column name={Samples}},
+		columns/__fw_relinquish/.style	= {preproc/expr={##1/1000000}, fixed zerofill, precision=3, column name={Runtime}},
+		columns/E__fw_relinquish/.style	= {preproc/expr={##1/1000000}, sci, sci zerofill, precision=2, column name={95\% CI}, postproc cell content/.append style={/pgfplots/table/@cell content/.add={\rpm}{}}},
+		columns/C__fw_relinquish/.style	= {fixed, column name={Samples}},
+		columns/__fw_unblock/.style		= {preproc/expr={##1/1000000}, fixed zerofill, precision=3, column name={Runtime}},
+		columns/E__fw_unblock/.style	= {preproc/expr={##1/1000000}, sci, sci zerofill, precision=2, column name={95\% CI}, postproc cell content/.append style={/pgfplots/table/@cell content/.add={\rpm}{}}},
+		columns/C__fw_unblock/.style	= {fixed, column name={Samples}},
+		every odd row/.style={before row={\rowcolor[gray]{.85}}},
+		every head row/.style={
+		    before row={
+		        \toprule
+		        \multirow{2}{*}{\raisebox{-2pt}{Pipes}}
+		        & \multicolumn{3}{c}{\code[style=bw,fontsize=\tiny]{__fw_dispatch}}
+		        & \multicolumn{3}{c}{\code[style=bw,fontsize=\tiny]{__fw_relinquish}}
+		        & \multicolumn{3}{c}{\code[style=bw,fontsize=\tiny]{__fw_unblock}}\\  \cmidrule(lr){2-4} \cmidrule(lr){5-7} \cmidrule(lr){8-10}
+		    },
+		    after row=\midrule
+		},
+		every last row/.style={after row=\bottomrule},
+	]{figures/chapter8-studies/scalability/data/m5out-16c-0b.dat}}
+\end{table}

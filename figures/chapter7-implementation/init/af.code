@@ -1,0 +1,15 @@
+/***************************
+* Component Implmentation
+***************************/
+
+
+int af_init() {
+	/*************************
+	* Inititalization code
+	* for the component
+	*************************/
+	
+	fw_component_register(...);
+}
+
+fw_component_init(af_init);

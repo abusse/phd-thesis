@@ -1,0 +1,30 @@
+\begin{tikzpicture}[scale=0.75, every node/.style={transform shape}]	
+	\path [draw, fill=green!20, style=dashed, line width=0.5pt] (-2.5,3.2) -- ++(11.2,0) -- ++(0,-8.2) -- ++(-11.2,0) -- cycle;
+	\path [draw, fill=gray!20,  style=dashed, line width=0.5pt]   (1.5,3) -- ++(7,0) -- ++(0,-6) -- ++(-7,0) -- cycle;
+	\node [align=left, anchor=north west] at (1.7,2.8) {\textsf{Initial Topology}}; 
+	\node [align=left, anchor=north west] at (-2.3,3) {\textsf{Adapted Topology}};
+
+	\node[rectangle, fill=Component, draw, anchor=west, minimum height=1.8cm, minimum width=1.8cm, inner sep=0] at (-2,0) (isa) {\breakC{ISA\\Seperation}};
+	\node[rectangle, fill=Component, draw, anchor=west, minimum height=1cm, minimum width=1.8cm, inner sep=0] at (4,-4) (acc) {FCFS};
+	
+	\node[rectangle, fill=Component, draw, anchor=west, minimum height=1.8cm, minimum width=1.8cm, inner sep=0] at (2,0) (load) {\breakC{Load-\\Balancing}};
+	\node[rectangle, fill=Component, draw, anchor=west, minimum height=1cm, minimum width=1.8cm, inner sep=0] at (6,2) (rr1) {\breakC{Round-\\Robin}};
+	\node[rectangle, fill=Component, draw, anchor=west, minimum height=1cm, minimum width=1.8cm, inner sep=0] at (6,0.66) (rr2) {\breakC{Round-\\Robin}};
+	\node[rectangle, fill=Component, draw, anchor=west, minimum height=1cm, minimum width=1.8cm, inner sep=0] at (6,-0.66) (rr3) {\breakC{Round-\\Robin}};
+	\node[rectangle, fill=Component, draw, anchor=west, minimum height=1cm, minimum width=1.8cm, inner sep=0] at (6,-2) (rr4) {\breakC{Round-\\Robin}};
+	
+	\path [->, draw, line width=0.75pt] (isa.0)      -- node[anchor=south, align=center]{} (load);
+	\path [->, draw, line width=0.75pt] (load.30)  -- node[anchor=south, align=center]{} (rr1.180);
+	\path [->, draw, line width=0.75pt] (load.10)  -- node[anchor=south, align=center]{} (rr2.180);
+	\path [->, draw, line width=0.75pt] (load.350) -- node[anchor=south, align=center]{} (rr3.180);
+	\path [->, draw, line width=0.75pt] (load.330) -- node[anchor=south, align=center]{} (rr4.180);
+
+	\path [->, draw, line width=0.75pt] (rr1.0) -- node[anchor=south, align=center]{} ++(2,0);
+	\path [->, draw, line width=0.75pt] (rr2.0) -- node[anchor=south, align=center]{} ++(2,0);
+	\path [->, draw, line width=0.75pt] (rr3.0) -- node[anchor=south, align=center]{} ++(2,0);
+	\path [->, draw, line width=0.75pt] (rr4.0) -- node[anchor=south, align=center]{} ++(2,0);
+
+	\path [->, draw, line width=0.75pt] (-4,0)      -- node[anchor=south, align=center]{} (isa);
+	\path [->, draw, line width=0.75pt] (isa.335) -- ++(0.5,0) |- (acc.180);
+	\path [->, draw, line width=0.75pt] let \p1=(rr3.0) in (acc.0) -- (\x1,-4) -- ++(2,0);
+\end{tikzpicture}

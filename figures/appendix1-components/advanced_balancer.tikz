@@ -1,0 +1,29 @@
+\begin{scaletikzpicturetowidth}{0.6\textwidth}
+\begin{tikzpicture}[scale=\tikzscale, every node/.style={transform shape}]
+	\draw[fill=Component, thick] (0,0) rectangle (3,3) node[pos=0.5] {\LARGE \breakC{Advanced\\Balancer}};
+	
+	\path[<-, draw, thick] (0,0.6) -- ++(-1.5,0);
+	\path[<-, draw, thick] (0,1.2) -- ++(-1.5,0);
+	\path[<-, draw, thick] (0,1.8) -- ++(-1.5,0);
+	\path[<-, draw, thick] (0,2.4) -- ++(-1.5,0);
+	
+	\path[->, draw, thick] (3,2.2) -- node[above, yshift=-0.5mm] {Pipe\,0} ++(2,0) node[anchor=west] {PE\,0};
+	\path[->, draw, thick] (3,1.5) -- node[above, yshift=-0.5mm] {Pipe\,1} ++(2,0) node[anchor=west] {PE\,1, PE\,2};
+	\path[->, draw, thick] (3,0.8) -- node[above, yshift=-0.5mm] {Pipe\,2} ++(2,0) node[anchor=west] {PE\,3};
+	
+	\node[shape=document, 
+		  document_fold=10pt,
+		  draw, 
+		  minimum height=3.5cm,
+		  inner sep=2pt,
+		  anchor=west,
+		  thick] (mapping) at (-6,1.5) {\begin{tabular}{l@{$\,\,\rightarrow\,\,$}l}
+		  								 PE\,0 & Pipe\,0\\
+		  								 PE\,1 & Pipe\,1\\
+		  								 PE\,2 & Pipe\,1\\
+		  								 PE\,3 & Pipe\,2\\
+		  								 \end{tabular}};
+										 
+	\path[draw, thick, densely dashed] (mapping.north) edge[->, bend left=60] (1.5,3);
+\end{tikzpicture}
+\end{scaletikzpicturetowidth}

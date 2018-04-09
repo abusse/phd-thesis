@@ -1,0 +1,206 @@
+\chapter{Related Work}%
+\label{chap:related_work}
+
+This chapter discusses related work and technology relevant to this dissertation. The chapter is divided into three sections. The first section gives an overview mainly on other scheduler frameworks that have goals similar to this work. \Cref{sec:rw:adaptability} discusses research focusing on changing the scheduling policy or modifying an operating system kernel at runtime. The last section gives a brief insight on scheduler interfaces that have to be taken into consideration when designing a scheduler framework for modern operating systems.
+
+\section{Scheduler Frameworks}
+
+This section presents related work that describes a scheduler framework or similar approaches. Each sub-section is dedicated to a different research approach, with the exception of the last subsection that discusses the heterogeneity problem in distributed computing.
+
+\subsection{Bossa}%
+\label{sec:rw:bossa}
+
+The \emph{Bossa} project started with the introduction of the \emph{Bossa language} by \textcite{Barreto-2002-Bossa}, which was first intended as a \ac{DSL} to develop real-time schedulers and later extended to a framework for general purpose process scheduling. The research is mainly driven by programming language aspects. \Citeauthor{Barreto-2002-Bossa} based their \ac{DSL} on the insights of their previous paper that pointed out the limited code reuse and the problem of limited extensibility in operating system development~\cite{Muller-2000-TowardsRobusOSes}. \Citeauthor{Barreto-2002-Bossa} emphasize that experimentations with operating systems even in microkernel architectures are tough, because existing scheduler implementations are spread over the whole kernel and written in low-level languages that make the understanding of the code difficult and the implementation error prone. The proposed scheduler \ac{DSL} enforces a fixed process state model, uses queues as the data structure to hold existing tasks and implicitly assumes a computer model that is a single core machine. \emph{Bossa} uses events to propagate information from the kernel to the \emph{Bossa} runtime system and from the runtime system to the scheduler descriptions, which is discussed thoroughly in~\cite{Lawall-2002-OSExpertise}. \Textcite{Lawall-2005-BossaNova} also examine the theoretic extension of the \emph{Bossa language} to support some modularity that allows creating scheduler families that share common properties. The \emph{Bossa} project in its entirety is presented and summarized in \cite{Lawall-2004-SchedulingHierarchies} and \cite{Muller-2005-BossaFW}.
+
+\emph{Bossa} was implemented for the Linux kernel versions 2.4.20, 2.4.24, and 2.6.11~\cite{Bossa}. It is claimed that the approach should be feasible for other operating systems, yet, the proof is still to be delivered. Furthermore, the Bossa framework does not take into account many-core systems, heterogeneity regarding the underlying hardware, or dynamic changes to the system architecture.
+
+\subsection{Hierarchical Loadable Schedulers}%
+\label{sec:rw:hls}
+
+The Hierarchical Loadable Schedulers (HLS) framework strongly focuses on real-time scheduling. It was originally introduced by \textcite{Regehr-2001-HLSPhD}\cite{Regehr-2001-HLS} for the Windows~2000 kernel and ported to the Linux kernel~v2.4 by \textcite{Abeni-2002-HLS}\cite{HLSonLinux}. Its main goal is to extend the general-purpose operating system with general, heterogeneous hierarchical process scheduling and enable easy prototyping of real-time schedulers. The heterogeneous aspect of this approach does not regard heterogeneity of the underlying hardware but takes into account the scheduling strategies for different processes.
+
+The general architecture of HLS is depicted in \cref{fig:related:hls-arch}. The \emph{hierarchical scheduler infrastructure} (HSI) acts as glue logic between the operating system and the HLS framework. Inside the framework, there are different loadable schedulers that are each connected to a top and a bottom scheduler. The upper termination of the hierarchy lies in the HSI. Every physical processor represents one of these connections, hence in an \(n\) processor system \(n\) such connections exist. The lower termination of the hierarchy is also located in the HSI. Here, every task is assigned one connection. When a task is selected for a processor, the hierarchy is traversed from the top to the bottom, ending at the task that is supposed to be dispatched next.
+
+HLS does not completely remove the existing scheduler in a legacy operating system but relies on it. Furthermore, it was not designed for multi- or even many-core systems as it uses a single scheduler lock and the hierarchy of scheduling policies is iterated in a serialized manner. This means that only one processor can run the scheduler code at a time~\cite[36\psq]{Regehr-2001-HLSPhD}, which represents a significant bottleneck, especially in a many-core system.
+
+\Citeauthor{Abeni-2002-HLS} also emphasize the necessity to enable simple development of scheduling policy implementations. For that purpose, besides the Windows and Linux kernel implementation of HLS, they provide a simulator to test the scheduling algorithms in the user space. They acknowledge that their simulator is limited regarding multi-core operations~\cite[4]{Abeni-2002-HLS}.
+
+\begin{figure}[t!]\centering
+	\includetikz{figures/chapter4-related_work/hls}
+	\caption[The general architecture of the HLS framework.]{The general architecture of the HLS framework~\cite[35]{Regehr-2001-HLSPhD}. Three schedulers -- \emph{Fixed Priority}, \emph{Real-Time}, and \emph{Time-Sharing} -- are loaded into the hierarchical scheduler infrastructure (gray). Three tasks are assigned to the schedulers. The communication flow to and from the framework is indicated through dashed arrows.}%
+	\label{fig:related:hls-arch}
+\end{figure}
+
+\subsection{SF3P}
+
+\Textcite{Gomez-2014-SF3P} present the \emph{SF3P} framework that also uses a similar hierarchical scheduling approach as the HLS framework presented in the previous sub-section. However, the main focus of \citeauthor{Gomez-2014-SF3P} is the prototyping of real-time scheduling algorithms. In their work, they derive an interface for scheduler implementations tailored to the real-time domain. Based on this interface, they build a scheduling framework for the userland. In their evaluation of their approach, \citeauthor{Gomez-2014-SF3P} implemented a prototype of their framework on top of a POSIX layer.
+
+The SF3P approach shares the same drawbacks regarding the scope of this dissertation as the HLS framework. Moreover, they demonstrated the feasibility of their approach only in the userland on top of the POSIX layer. This design decision makes it easier for them to realize their goals; however, it strongly tailors their approach to the POSIX standard.
+
+\subsection{The Flux OS Toolkit}%
+\label{sec:rw:fluxos}
+
+The \emph{Flux OS Toolkit} was introduced in 1997 by \textcite{Ford-1997-FluxOSKit}. The authors identified the main challenge in operating system design by the specifics, complexity, and missing documentation of existing kernel implementations that hinder the exploration of new ideas and the creation of simple research prototypes. To tackle this problem, the authors created a toolkit that consists of several components offering common operating system functionalities like, \eg, process management, memory management, or file system support. They further argue that it is not always necessary to implement certain functionalities, but that they can be reused from different existing operating systems. However, those implementations might not be well documented, and the implementations are hardly integrable in another code basis. \citeauthor{Ford-1997-FluxOSKit} identified as those functionalities the file system, the networking stack,user space and generic device drivers that are used from NetBSD, FreeBSD, and Linux respectively. To still make them usable in the \emph{Flux OS Toolkit}, they embedded every component in glue code that is compatible with the rest of the toolkit.
+
+The Flux OS Toolkit is a collection of libraries and wrapper functions and cannot offer the functionality of a framework. The main goal is to support the building of an operating system from scratch and not specifically the reuse of an implementation in multiple systems. The challenges of current and future system architectures are not considered either explicitly or implicitly.
+
+\subsection{The S.Ha.R.K. Soft and Hard Real-time Kernel}%
+\label{sec:rw:shark}
+
+\begin{figure}[t!]\centering
+	\includetikz{figures/chapter4-related_work/shark}
+	\caption[The interaction between the Model Mapper and the QoS Mapper in the S.Ha.R.K. soft and hard real-time kernel.]{The interaction between the Model Mapper and the QoS Mapper in the S.Ha.R.K. soft and hard real-time kernel~\cite[\pno~202(4)]{Gai-2001-SHaRK}. During task creation, a model is selected for each task based on their requested QoS. When a Module fulfills the requested QoS, the QoS mapper converts the requirements to the model specific data structure.}%
+	\label{fig:related:shark}
+\end{figure}
+
+The S.Ha.R.K. Soft and Hard Real-Time Kernel was proposed by \textcite{Gai-2001-SHaRK} and was actively developed until 2008~\cite{SHaRK}. S.Ha.R.K. provides a generic real-time kernel that handles the resource management through \emph{Modules}. When a task is created, it can specify its requirements dependent on their task model through \acp{QoS}. A \emph{Generic Model Mapper} iterates over the Modules until it can find one that can satisfy the requested \ac{QoS}. The task is then assigned to that Module, and the \ac{QoS} parameters are converted by a \emph{\ac{QoS} Mapper} to a Module specific representation. The \ac{QoS} Mapper is specific to and provided by every Module individually. The whole process is outlined in \cref{fig:related:shark}.
+
+When the kernel needs to schedule a new task to a CPU, it iterates over all scheduling Modules in a fixed order. Each Module has its private ready-list, and if a task is ready to be scheduled, it will be reported to the kernel during the iteration. This means that the tasks from the second Module only have a chance to be scheduled when the first Module has no runnable tasks at that point. Modules in general and scheduling related Modules, in particular, can be added to S.Ha.R.K. during runtime.
+
+S.Ha.R.K. is tailored to the specific needs of real-time scheduling and does not consider many-core systems or heterogeneous architectures. Furthermore, the integration of S.Ha.R.K. in existing systems is questionable as it has a very specific task and scheduler model.
+
+\subsection{ExSched}%
+\label{sec:rw:exsched}
+
+ExSched was introduced by \textcite{Asberg-2012-ExSched}. The goal of ExSched is to provide a framework to develop real-time schedulers while being minimally invasive to the existing system. It is available for VxWorks version 6.6 and the Linux kernel v2.6.36~\cite{ExSched}. The architecture of the ExSched framework for the Linux kernel is illustrated in \cref{fig:related:exsched}. In Linux, ExSched is loaded as a kernel module, while in VxWorks it is directly integrated into the kernel. ExSched utilizes the existing scheduler. In Linux, for example, it uses the \code{SCHED_FIFO} priority of the real-time scheduling class. A user space application can load a new scheduling policy implementation and control the behavior of ExSched through a given user space library.
+
+Even though ExSched simplifies the implementation of new scheduling policies in the real-time domain, it is bound to the limitations and enforcements of the existing scheduler. For example, ExSched under Linux is bound to the constraints and properties of the decentralized scheduler approach used in the Linux kernel. Also, the approach is strongly tailored to the requirements of real-time scheduling and does not consider general purpose scheduling.
+
+\begin{figure}[t!]\centering
+	\includetikz{figures/chapter4-related_work/exsched}
+	\caption[The ExSched Framework for Linux.]{The ExSched Framework for Linux~\cite[\pno~242(3)]{Asberg-2012-ExSched}.}%
+	\label{fig:related:exsched}
+\end{figure}
+
+\subsection{Group Scheduling}
+
+The concept of \emph{group scheduling} was introduced by \textcite{Aswathanarayana-2005-GroupScheduling} and is located in the real-time domain. The approach assumes that certain task groups have the need for common scheduling decisions. Therefore, in the model developed by \citeauthor{Aswathanarayana-2005-GroupScheduling}, tasks are assigned to a certain group with a certain scheduling decision function. Furthermore, each scheduling group can be a member of another scheduling group. Hence, a hierarchical scheduling structure is possible. When a scheduling decision has to be made, for a particular group the assigned scheduling decision function is invoked. In case the function does not come to a result, the default operating system scheduler is used as a fallback. In their work, \citeauthor{Aswathanarayana-2005-GroupScheduling} briefly present two implementations of the group scheduling approach: one on the kernel level for the Linux kernel and one as middleware solution. An implementation for the Linux kernel of the group scheduling approach is pursued further by \textcite{Watkins-2009-GroupScheduling}. They present an implementation of the group scheduling approach as a \emph{flexible scheduling framework} for the real-time Linux patch~\cite{Rostedt-2007-RTLinux,RTLinux}. \citeauthor{Watkins-2009-GroupScheduling} extend the real-time scheduling strategy introduced by the real-time Linux patch through group scheduling capabilities.
+
+The concept of group scheduling presents another approach to employ different scheduling strategies for various requirements. However, the approach is strongly tailored to the real-time domain and falls short to provide features for general purpose scheduling. Furthermore, the kernel-based approach to enable group scheduling is strongly related to the Linux scheduling architecture.
+
+\subsection{Scheduling in Distributed Computing}
+
+With an increasing number of cores and heterogeneity, the traits of former distributed systems can be found in nowadays individual machines. Therefore, it is worthwhile to look briefly into research in that area. Regarding the process scheduling, prior research exists that looked into the challenge of heterogeneity in distributed computing. Two examples are the \emph{SmartNet} scheduling framework introduced by \textcite{Freund-1996-SmartNet} and the \emph{unified resource scheduling framework} introduced by \textcite{Alhusaini-1999-URSFramework}. The emphasis of both research projects lies on the heterogeneity of the resources of the computing hosts. Both \citeauthor{Freund-1996-SmartNet} and \citeauthor{Alhusaini-1999-URSFramework} show that the overall performance of the whole distributed system can vastly improve when optimizing the task assignments.
+
+Drawing a parallel to the current development in computer architecture, it can be expected that the situation in a single computer might become the same as described by \citeauthor{Freund-1996-SmartNet} and \citeauthor{Alhusaini-1999-URSFramework} for distributed systems. Therefore, enabling a similar approach as they did with distributed systems in a single machine can be expected to yield similar results. However, as they only present a very high-level abstraction to scheduling, their approach cannot be applied entirely to the process scheduling of a single machine.
+
+\section{Scheduler Adaptability}%
+\label{sec:rw:adaptability}
+
+This section discusses scientific research, existing operating systems, and technology regarding the adaptation of the process scheduler during runtime. \Cref{sec:related:patching} demonstrates also how important it is to avoid system rebooting. Therefore, the adaptation of the scheduler during runtime might not only be necessary due to dynamic changes of the underlying hardware, but also for other reasons.
+
+\subsection{User-Level Threads}
+
+\acp{ULT} are, in contrast to \acp{KLT}\footnote{In literature, \acp{KLT} are also referred to as \emph{kernel-supported threads} or \emph{lightweight processes}~\cite[184]{Stallings-2011-OperatingSystems}.}, completely managed in user space. Examples for \acp{ULT} are GNU Portable Threads~\cite{GNUPth}, Green Threads~\cite[Ch.~6]{Vanderburg-1996-GreenThreads}, or Fibers~\cite{Microsoft-2016-Fibers}. \acp{ULT} are encapsulated inside \acp{KLT} and can especially employ their own scheduling strategy. However, they suffer various drawbacks as the kernel has no knowledge of the existence of \acp{ULT}. The most noteworthy trait is the issue of I/O-operations when, \eg, the \ac{KLT} gets blocked because of an operation of one of the \acp{ULT}. This means that also otherwise runnable \acp{ULT} inside the \acp{KLT} get blocked. Some of the issues raised by this kind of behavior are tackled by \emph{Scheduler Activations}~\cite{Anderson-1992-SchedulerActivations}.
+
+Even though it allows a custom scheduling of the threads inside \acp{KLT}, the approach of \acp{ULT} is not suited for the purpose of this dissertation. It is not possible to change the overall system behavior with \acp{ULT}. The behavior of the system is still determined by the scheduling of the \acp{KLT}, and the introduction of \acp{ULT} can be seen as hierarchical scheduling. It is neither possible in any way to handle changes in the hardware architecture with \acp{ULT}.
+
+\subsection{DAMROS Reflective Scheduler}
+
+
+\begin{figure}[b!]\centering\hfill
+	\begin{subfigure}[b]{0.45\textwidth}\centering
+		\includetikz{figures/chapter4-related_work/damros-arch}\vspace{1cm}
+		\caption{General structure of the reflective operating system.}%
+		\label{fig:related:damros:arch}
+	\end{subfigure} \hfill\hfill
+	\begin{subfigure}[b]{0.45\textwidth}\centering
+		\includetikz{figures/chapter4-related_work/damros-sched}
+		\caption{Scheduler system module in the reflective operating system.}%
+		\label{fig:related:damros:sched}
+	\end{subfigure}\hfill\hfill
+	\caption[Architecture of a reflective operating system.]{Architecture of a reflective operating system~\cite{Patil-2005-DAMROS}.}%
+	\label{fig:related:damros}
+\end{figure}
+
+DAMROS is an acronym for Dynamically Adaptive Micro-Reflective Real-Time Operating System and was developed by \textcite{Patil-2005-DAMROS}. DAMROS realizes the idea of a reflective operating system the general architecture of which is depicted in \cref{fig:related:damros:arch}. The system consists, apart from the core, of several system modules that support reflection. These modules are, \eg, the scheduler or memory management system. The behavior of those modules can be influenced by the applications. Each module has a \emph{Base-Level Code} that represents the default behavior. This behavior can be changed through the reflection of the application via the reflection aware \emph{Base Kernel Core}.
+
+Based on this architecture, \citeauthor{Patil-2005-DAMROS} research the scheduler as a Reflective System Module. The resulting scheduler is depicted in \cref{fig:related:damros:sched}. The Base-Level Code, in this case, is a round-robin scheduling. As Meta-Level Code, it has a \emph{rSchedule} called scheduling implementation that can change its behavior based on the reflection of the running applications. It can, for example, postpone energy demanding tasks when the system has little battery life left or help an application meeting its deadline by an adapted task order. This is realized by, \eg, user-defined scheduling policies. The changes to the scheduling are done mainly on a per application basis. That means an application can control how itself and its children are scheduled. However, it cannot influence how other applications are scheduled. Therefore, this approach has its main scope not on the whole system but rather on specific applications.
+
+\subsection{The SPIN Operating System}
+
+The SPIN operating system was introduced by \textcite{Bershad-1995-SPIN}. SPIN is designed as an extensible operating system. The extensibility also covers the thread management. SPIN does not provide a specific thread model but can by extension handle arbitrary models. \textquote[{\cite[\pno~274(8)]{Bershad-1995-SPIN}}]{In SPIN, an application can provide its thread package and scheduler that is executed within the kernel.} However, in SPIN there is also a global scheduler that runs beneath the application specific schedulers.
+
+Even though SPIN is an interesting example for an extensible kernel, it cannot handle the issues covered by this dissertation. As with \acp{ULT}, the overall system behavior cannot be influenced by the task-specific schedulers.
+
+\subsection{Vassal}
+
+\begin{figure}[b!]\centering
+	\includetikz{figures/chapter4-related_work/vassal}
+	\caption[The Vassal architecture and its integration into Windows~NT~4.0.]{The Vassal architecture and its integration into Windows~NT~4.0~\cite[6]{Candea-1998-Vassal}.}%
+	\label{fig:related:vassal}
+\end{figure}
+
+Vassal is an extension to the Windows~NT~4.0 kernel that allows the dynamic loading and unloading of scheduling policies. It was introduced by \textcite{Candea-1998-Vassal}. The architecture of Vassal and its integration into Windows~NT~4.0 is depicted in \cref{fig:related:vassal}. In Vassal, the implementations of the scheduling policies are treated like device drivers, and they are loaded and unloaded like drivers as well. The loaded schedulers register with the Vassal Dispatcher. Threads are assigned to one of the scheduling policies. Vassal is coexisting with the default Windows~NT scheduler. The different loaded schedulers form a hierarchy inside which the default Windows~NT scheduler is at the bottom. When a new task has to be dispatched, the loaded schedulers are queried by a Request Decision until a runnable task is found.
+
+\Citeauthor{Candea-1998-Vassal} acknowledge that their approach has some limits, especially employing different scheduling strategies in parallel. Their implementation, for example, is only able to have one scheduler loaded at a time. Furthermore, they argue that having multiple schedulers loaded at the same time might lead to problems when the schedulers have conflicting goals. The issue of having a multi-core system is not discussed by \Citeauthor{Candea-1998-Vassal}.
+
+Even though the Vassal extension is a good example for loadable schedulers, it is very limited regarding its flexibility as it still requires the native scheduler. Based on that design decision, the loaded schedulers are limited to a centralized scheduling approach. Furthermore, the approach cannot handle changes to the system architecture as the default scheduler is simply augmented with additional scheduling policies.
+
+\subsection{Kernel Live Patching}%
+\label{sec:related:patching}
+
+Certain application scenarios make it necessary to reduce the downtime of a system to a minimum. For example, a \ac{SLA} of 99.9999\% results in a maximum downtime of the system of 31.5 seconds per year. In most cases, this is not even close to the reboot time of the system and bringing up all the services costs additional time. The importance of minimizing the unavailability of systems is backed by the fact that much literature exists that aims at system administrators to achieve that goal, \eg, \textcite{Binnie-2016-ZeroDownTime}. For avoiding restarting a system due to the operating system kernel having to be patched, three approaches were developed to patch the Linux kernel during runtime.
+
+\subsubsection{Ksplice}
+
+\emph{Ksplice}~\cite{Arnold-2009ksplice} allows the live patching of a Linux kernel by comparing the binary objects of the original and patched kernel on a by-function granularity. This will extract the differing functions and enable the creation of a patch for the running kernel. The patch is applied with the help of a kernel module by replacing the old function through a jump instruction to the new function. To avoid data corruption, the \code{stop_machine} function~\cite[\code{kernel/stop_machine.c}]{Linux44} of the Linux kernel is used putting a core basically in a shutdown state no longer executing any tasks. Ksplice works fully automatically except for semantic changes to data structures. These require custom code to be handled. Ksplice was successfully used to apply several security patches to running Linux kernels. It also allows further patching of previously patched kernels; however, a rollback mechanism is not provided. Ksplice is limited to the x86 architecture.
+
+\subsubsection{kpatch}
+
+\begin{figure}[t!]\centering
+	\begin{subfigure}[b]{0.3\textwidth}\centering
+		\includetikz{figures/chapter4-related_work/kpatch1}\vspace{0.75cm}
+		\caption{Before Patching.}%
+		\label{fig:related:kpatch1}
+	\end{subfigure} \hfill
+	\begin{subfigure}[b]{0.6\textwidth}\centering
+		\includetikz{figures/chapter4-related_work/kpatch2}
+		\caption{After Patching.}%
+		\label{fig:related:kpatch2}
+	\end{subfigure}
+	\caption[The kpatch kernel live patching mechanism.]{The kpatch kernel live patching mechanism~\cite{Jennings-2014-kpatch}.}%
+	\label{fig:related:kpatch}
+\end{figure}
+
+Another tool for live patching the Linux kernel is \emph{kpatch}~\cite{kpatch}. Instead of comparing binaries, it can work on source diffs. It also uses the \code{stop_machine} function to ensure consistency. To apply the patch to the running Linux kernel, kpatch uses the \emph{ftrace} facility~\cite{ftrace} of the Linux kernel. Ftrace is originally intended to profile the kernel. When activated, it is called at the beginning of every kernel function by replacing a previously inserted \code{noop} operation with a function call. This facility is reused by kpatch to introduce the replacement function (\cf \cref{fig:related:kpatch}). Kpatch allows the rollback of an applied patch by simply removing this code path again. However, with kpatch, it is not possible to apply patches that rely on changes to the kernel's internal data structures.
+
+\subsubsection{kGraft}
+
+The \emph{kGraft}~\cite{SUSE-2014-kGraft} live patching facility uses the same ftrace facility as kpatch to inject the patched code; however, contrary to Ksplice and kpatch, it does not require to stop the kernel for a short time through \code{stop_machine}. Instead, it uses two universes -- the unpatched and the patched one -- and migrates the existing tasks to the new reality when they leave the kernel space the next time (\cf{} \cref{fig:related:kgraft}). kGraft patches can be generated both from C source code and from object code.
+
+\begin{figure}[t!]\centering
+	\includetikz{figures/chapter4-related_work/kgraft}
+	\caption[The kGraft kernel live patching mechanism]{The kGraft kernel live patching mechanism~\cite{Pavlik-2014-kGraft}. Patched functions in the kernel are executed when the \emph{new universe} flag of a user process is set, otherwise the old, buggy function is still used.}%
+	\label{fig:related:kgraft}
+\end{figure}
+
+\section{Scheduler Interfaces}
+
+This section discusses details on the scheduler implementation of Linux and eCos. It gives a better understanding of how the state of the art schedulers are realized in different application domains.%
+\label{sec:related:patching!end}
+
+\subsection{Linux Scheduling Classes}%
+\label{sec:rw:linux_classes}
+
+The scheduler subsystem of the Linux kernel~\cite{Linux44} uses the concept of \emph{Scheduling Classes}. A Scheduling Class can implement a certain scheduling algorithm in the boundaries of the Linux scheduler architecture. It has to comply to a certain programming interface\footnote{For details on the interface refer to \code[style=bw,fontsize=\footnotesize]{kernel/sched/sched.h} Lines~1172--1231 in \cite{Linux44}.}. Currently, this means a decentralized scheduler with individual runqueues for every core and a centralized load balancing for the whole system. Every Scheduling Class has its runqueue. The Scheduling Classes are linked in the manner of an unidirectional list. Every time the scheduler subsystem has to determine the next task, the Scheduling Class at the head of the list is invoked and the task selected by the algorithm of that Scheduling Class is dispatched. If the runqueue of the first Scheduling Class is empty, the subsequent Scheduling Class in the list is invoked and so on.
+
+\begin{figure}[t!]\centering
+	\includetikz{figures/chapter4-related_work/linux-scheduler-classes}
+	\caption[Sequence of Scheduling Classes in the Linux kernel v4.4.]{Sequence of Scheduling Classes in the Linux kernel v4.4. The \emph{Stop Class} is used to overwrite any scheduling to shut down the machine or hot-plug a CPU. The \emph{Deadline} class implements the Earliest Deadline First scheduling policy~\cite{Liu-1973-EDF} with a Constant Bandwidth Server~\cite{Abeni-1998-ConstantBandwidthServer}. The \emph{Real-Time} scheduling class follows the UNIX specification for real-time process scheduling~\cite{POSIX}. The \emph{Completely Fair} scheduling class implements the Completely Fair Scheduling policy~\cite{Jones-2009-CFS}. The \emph{Idle-Task} class is solely responsible for the dispatching of the idle task.}%
+	\label{fig:intro:sched_classes}
+\end{figure}
+
+The current version of the Linux kernel implements five different scheduling classes, which are linked as depicted in \cref{fig:intro:sched_classes}. The Scheduling Classes are compiled into the Linux kernel and cannot be changed during runtime. Each task can be assigned to a Scheduling Class. However, the functionality of the scheduling classes is limited to the scheduling model of the Linux kernel, hence resulting in a decentralized scheduling approach. It is, for instance, not possible to realize a centralized scheduler through the means of a Scheduling Class. Evidence for that is the centralized \emph{BFS} by \textcite{BFS} that implements an alternative scheduling algorithm for the Linux kernel. It is based on the \emph{Earliest Eligible Virtual Deadline First} algorithm~\cite{Stoica-1995-EEVDA} and Staircase Deadline scheduler~\cite{SD}. \Citeauthor{BFS} refrains from using the Scheduling Class \ac{API} as it is not possible to implement the algorithm with the restriction of that API.
+
+\subsection{The eCos Scheduler}
+
+The eCos operating system~\cite{eCos}, like most other real-time operating systems, employs a priority-based scheduler by default. However, it is designed in a way that the scheduler implementation and therefore the scheduler algorithm can easily be replaced. For this purpose, eCos uses the inheritance feature of the C++ programming language. A new scheduler implementation is simply a child class of the main Scheduler class\footnote{For details on the class interface refer to \code[style=bw,fontsize=\footnotesize]{packages/kernel/v3_0/include/sched.hxx} in the source package in \cite{eCos}.}. As in Linux, the scheduler cannot be exchanged during runtime. Even if that feature existed, it would be of limited use as eCos is not designed as a very dynamic system and has very limited user space capabilities. As a real-time operating system, it is focused on a fixed functionality.
+
+Further limitations arise from the scheduler interface. Even though it allows a free implementation, the developer is very limited as in Linux he or she is bound to the scheduler architecture enforced by eCos. The interface does not allow an easy extension for acquiring additional information that might be useful to the scheduler or information that should be given from the scheduler to the operating system.
+
+\section{Summary}
+
+The assessment of the related work has shown that the challenges in process scheduler architecture have been identified as a research area before. One of the main goals of the research efforts was the simplification of the scheduler design process. The prior work reached that goal to a certain degree, but always in a limited scope. The most noteworthy missing feature in such architectures is the support for many-core systems and the possibility to build scalable schedulers for such systems. Moreover, the previous work covers heterogeneous system only to a very limited extent.
+
+The necessity to change fundamental parts of the operating system was also the object of prior research. As with the general scheduler architecture, the related work falls short to tackle many-core systems. The presented work regarding kernel live patching identified the problem of changing data structures that are actively used by the system. This is a special issue for the scheduler and not tackled by prior work regarding dynamic scheduling architectures.

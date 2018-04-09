@@ -1,0 +1,47 @@
+\begin{scaletikzpicturetowidth}{\textwidth}
+\begin{tikzpicture}[scale=\tikzscale, every node/.style={transform shape}]
+	\node[draw, minimum width=1cm, minimum height=1cm, anchor=north] (pe01) at (0,0) {PE};
+	\node[draw, minimum width=1cm, minimum height=1cm, anchor=north] (pe02) at (2,0) {PE};
+	\node[draw, minimum width=1cm, minimum height=1cm, anchor=north] (pe03) at (4,0) {PE};
+	\node[draw, minimum width=1cm, minimum height=1cm, anchor=north] (pe04) at (6,0) {PE};
+	\node[draw, minimum width=1cm, minimum height=1cm, anchor=north] (pe11) at (1.25,1.25) {PE};
+	\node[draw, minimum width=1cm, minimum height=1cm, anchor=north] (pe12) at (3.25,1.25) {PE};
+	\node[draw, minimum width=1cm, minimum height=1cm, anchor=north] (pe13) at (5.25,1.25) {PE};
+	\node[draw, minimum width=1cm, minimum height=1cm, anchor=north] (pe14) at (7.25,1.25) {PE};
+	\node[draw, minimum width=1cm, minimum height=1cm, anchor=north] (pe21) at (2.5,2.5) {PE};
+	\node[draw, minimum width=1cm, minimum height=1cm, anchor=north] (pe22) at (4.5,2.5) {PE};
+	\node[draw, minimum width=1cm, minimum height=1cm, anchor=north] (pe23) at (6.5,2.5) {PE};
+	\node[draw, minimum width=1cm, minimum height=1cm, anchor=north] (pe24) at (8.5,2.5) {PE};
+	\node[draw, minimum width=1cm, minimum height=1cm, anchor=north] (pe31) at (3.75,3.75) {PE};
+	\node[draw, minimum width=1cm, minimum height=1cm, anchor=north] (pe32) at (5.75,3.75) {PE};
+	\node[draw, minimum width=1cm, minimum height=1cm, anchor=north] (pe33) at (7.75,3.75) {PE};
+	\node[draw, minimum width=1cm, minimum height=1cm, anchor=north] (pe34) at (9.75,3.75) {PE};
+	
+	
+	\draw[fill=black, line width=1pt] (pe01.north) -- ++(0,0.5) circle[radius=2.5pt];
+	\draw[fill=black, line width=1pt] (pe02.north) -- ++(0,0.5) circle[radius=2.5pt];
+	\draw[fill=black, line width=1pt] (pe03.north) -- ++(0,0.5) circle[radius=2.5pt];
+	\draw[fill=black, line width=1pt] (pe04.north) -- ++(0,0.5) circle[radius=2.5pt];
+	\draw[fill=black, line width=1pt] (pe11.north) -- ++(0,0.5) circle[radius=2.5pt];
+	\draw[fill=black, line width=1pt] (pe12.north) -- ++(0,0.5) circle[radius=2.5pt];
+	\draw[fill=black, line width=1pt] (pe13.north) -- ++(0,0.5) circle[radius=2.5pt];
+	\draw[fill=black, line width=1pt] (pe14.north) -- ++(0,0.5) circle[radius=2.5pt];
+	\draw[fill=black, line width=1pt] (pe21.north) -- ++(0,0.5) circle[radius=2.5pt];
+	\draw[fill=black, line width=1pt] (pe22.north) -- ++(0,0.5) circle[radius=2.5pt];
+	\draw[fill=black, line width=1pt] (pe23.north) -- ++(0,0.5) circle[radius=2.5pt];
+	\draw[fill=black, line width=1pt] (pe24.north) -- ++(0,0.5) circle[radius=2.5pt];
+	\draw[fill=black, line width=1pt] (pe31.north) -- ++(0,0.5) circle[radius=2.5pt];
+	\draw[fill=black, line width=1pt] (pe32.north) -- ++(0,0.5) circle[radius=2.5pt];
+	\draw[fill=black, line width=1pt] (pe33.north) -- ++(0,0.5) circle[radius=2.5pt];
+	\draw[fill=black, line width=1pt] (pe34.north) -- ++(0,0.5) circle[radius=2.5pt];
+	
+	\draw[fill=black, line width=1pt] (0,0.5)     -- ++(6,0);
+	\draw[fill=black, line width=1pt] (1.25,1.75) -- ++(6,0);
+	\draw[fill=black, line width=1pt] (2.5,3)     -- ++(6,0);
+	\draw[fill=black, line width=1pt] (3.75,4.25) -- ++(6,0);
+	\draw[fill=black, line width=1pt] (0,0.5)     -- ++(3.75,3.75);
+	\draw[fill=black, line width=1pt] (2,0.5)     -- ++(3.75,3.75);
+	\draw[fill=black, line width=1pt] (4,0.5)     -- ++(3.75,3.75);
+	\draw[fill=black, line width=1pt] (6,0.5)     -- ++(3.75,3.75);
+\end{tikzpicture}
+\end{scaletikzpicturetowidth}

@@ -1,0 +1,15 @@
+/***************************
+* Component Implmentation
+***************************/
+
+
+int rr_init() {
+	/*************************
+	* Inititalization code
+	* for the component
+	*************************/
+	
+	fw_component_register(...);
+}
+
+fw_component_init(rr_init);

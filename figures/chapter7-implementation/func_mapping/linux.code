@@ -1,0 +1,9 @@
+/*****************
+* Linux specific
+* implemenation
+*****************/
+
+os_malloc()
+{
+	kmalloc();
+}

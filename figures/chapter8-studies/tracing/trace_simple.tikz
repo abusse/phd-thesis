@@ -1,0 +1,56 @@
+\begin{scaletikzpicturetowidth}{1.25\textwidth}
+\begin{tikzpicture}[>={Stealth[scale=1]},line join=bevel,scale=\tikzscale, every node/.style={transform shape}]
+\setlength\tabcolsep{2pt}
+%%
+\definecolor{fillcolor}{rgb}{.15000,.65,.81300};
+\node (__switch_to) at (249.0bp,525.0bp) [draw,fill=fillcolor,ellipse] {\small \begin{tabular}{c} \code{__switch_to} \\ \begin{tabular}{rr}Calls: & \multicolumn{1}{c}{1} \\ Time: & $105.50 \cdot 10^3$ \\ Avg.: & $105.50 \cdot 10^3$ \end{tabular}\end{tabular}};
+\definecolor{fillcolor}{rgb}{.15000,.65,.98300};
+\node (topo_get_termination) at (251.0bp,362.0bp) [draw,fill=fillcolor,ellipse] {\small \begin{tabular}{c} \code{topo_get_termination} \\ \begin{tabular}{rr}Calls: & \multicolumn{1}{c}{1} \\ Time: & $9.00 \cdot 10^3$ \\ Avg.: & $9.00 \cdot 10^3$ \end{tabular}\end{tabular}};
+\definecolor{fillcolor}{rgb}{.15000,.65,.98300};
+\node (fw_list_empty) at (426.0bp,362.0bp) [draw,fill=fillcolor,ellipse] {\small \begin{tabular}{c} \code{fw_list_empty} \\ \begin{tabular}{rr}Calls: & \multicolumn{1}{c}{1} \\ Time: & $7.50 \cdot 10^3$ \\ Avg.: & $7.50 \cdot 10^3$ \end{tabular}\end{tabular}};
+\definecolor{fillcolor}{rgb}{.20950,.94050,.15000};
+\node (fw_notify) at (601.0bp,525.0bp) [draw,fill=fillcolor,ellipse] {\small \begin{tabular}{c} \code{fw_notify} \\ \begin{tabular}{rr}Calls: & \multicolumn{1}{c}{2} \\ Time: & $528.00 \cdot 10^3$ \\ Avg.: & $264.00 \cdot 10^3$ \end{tabular}\end{tabular}};
+\definecolor{fillcolor}{rgb}{.15000,.65,.97450};
+\node (rcu_note_context_switch) at (795.0bp,525.0bp) [draw,fill=fillcolor,ellipse] {\small \begin{tabular}{c} \code{rcu_note_context_switch} \\ \begin{tabular}{rr}Calls: & \multicolumn{1}{c}{1} \\ Time: & $12.50 \cdot 10^3$ \\ Avg.: & $12.50 \cdot 10^3$ \end{tabular}\end{tabular}};
+\definecolor{fillcolor}{rgb}{.15000,.65,.85550};
+\node (term_pipe_update) at (251.0bp,199.0bp) [draw,fill=fillcolor,ellipse] {\small \begin{tabular}{c} \code{term_pipe_update} \\ \begin{tabular}{rr}Calls: & \multicolumn{1}{c}{1} \\ Time: & $84.50 \cdot 10^3$ \\ Avg.: & $84.50 \cdot 10^3$ \end{tabular}\end{tabular}};
+\definecolor{fillcolor}{rgb}{.15000,.65,.92350};
+\node (finish_task_switch) at (76.0bp,525.0bp) [draw,fill=fillcolor,ellipse] {\small \begin{tabular}{c} \code{finish_task_switch} \\ \begin{tabular}{rr}Calls: & \multicolumn{1}{c}{1} \\ Time: & $44.00 \cdot 10^3$ \\ Avg.: & $44.00 \cdot 10^3$ \end{tabular}\end{tabular}};
+\definecolor{fillcolor}{rgb}{.15000,.65,.95750};
+\node (__fw_block) at (772.0bp,362.0bp) [draw,fill=fillcolor,ellipse] {\small \begin{tabular}{c} \code{__fw_block} \\ \begin{tabular}{rr}Calls: & \multicolumn{1}{c}{1} \\ Time: & $21.50 \cdot 10^3$ \\ Avg.: & $21.50 \cdot 10^3$ \end{tabular}\end{tabular}};
+\definecolor{fillcolor}{rgb}{.15000,.65,.79600};
+\node (fw_schedule) at (425.0bp,525.0bp) [draw,fill=fillcolor,ellipse] {\small \begin{tabular}{c} \code{fw_schedule} \\ \begin{tabular}{rr}Calls: & \multicolumn{1}{c}{1} \\ Time: & $116.50 \cdot 10^3$ \\ Avg.: & $116.50 \cdot 10^3$ \end{tabular}\end{tabular}};
+\definecolor{fillcolor}{rgb}{.15000,.65,.28600};
+\node (__fw_dispatch) at (599.0bp,362.0bp) [draw,fill=fillcolor,ellipse] {\small \begin{tabular}{c} \code{__fw_dispatch} \\ \begin{tabular}{rr}Calls: & \multicolumn{1}{c}{1} \\ Time: & $415.00 \cdot 10^3$ \\ Avg.: & $415.00 \cdot 10^3$ \end{tabular}\end{tabular}};
+\definecolor{fillcolor}{rgb}{.15000,.65,.47300};
+\node (depth_pipe_update_stage_0) at (599.0bp,199.0bp) [draw,fill=fillcolor,ellipse] {\small \begin{tabular}{c} \code{depth_pipe_update_stage_0} \\ \begin{tabular}{rr}Calls: & \multicolumn{1}{c}{1} \\ Time: & $302.50 \cdot 10^3$ \\ Avg.: & $302.50 \cdot 10^3$ \end{tabular}\end{tabular}};
+\definecolor{fillcolor}{rgb}{1.00000,.15000,.15000};
+\node (__schedule) at (425.0bp,688.0bp) [draw,fill=fillcolor,ellipse] {\small \begin{tabular}{c} \code{__schedule} \\ \begin{tabular}{rr}Calls: & \multicolumn{1}{c}{1} \\ Time: & $988.00 \cdot 10^3$ \\ Avg.: & $988.00 \cdot 10^3$ \end{tabular}\end{tabular}};
+\draw [->] (__fw_dispatch) ..controls (599.0bp,302.08bp) and (599.0bp,270.82bp)  .. (depth_pipe_update_stage_0);
+\definecolor{strokecol}{rgb}{0.0,0.0,0.0};
+\pgfsetstrokecolor{strokecol}
+\draw (651.5bp,280.5bp) node[xshift=-3mm, yshift=-2.5mm] {\normalsize \begin{tabular}{rr}\multicolumn{2}{c}{\large [72.89\%]} \\ Calls: & \multicolumn{1}{c}{1} \\ Time: & $302.50 \cdot 10^3$ \\ Avg.: & $302.50 \cdot 10^3$ \end{tabular}};
+\draw [->] (__schedule) ..controls (347.09bp,656.94bp) and (329.8bp,646.6bp)  .. (316.0bp,634.0bp) .. controls (296.33bp,616.05bp) and (280.39bp,591.01bp)  .. (__switch_to);
+\draw (368.5bp,606.5bp) node[xshift=-15mm, yshift=-2.5mm] {\normalsize \begin{tabular}{rr}\multicolumn{2}{c}{\large [10.68\%]} \\ Calls: & \multicolumn{1}{c}{1} \\ Time: & $105.50 \cdot 10^3$ \\ Avg.: & $105.50 \cdot 10^3$ \end{tabular}};
+\draw [->] (__schedule) ..controls (425.0bp,628.08bp) and (425.0bp,596.82bp)  .. (fw_schedule);
+\draw (477.5bp,606.5bp) node[xshift=-3mm, yshift=-2.5mm] {\normalsize \begin{tabular}{rr}\multicolumn{2}{c}{\large [11.79\%]} \\ Calls: & \multicolumn{1}{c}{1} \\ Time: & $116.50 \cdot 10^3$ \\ Avg.: & $116.50 \cdot 10^3$ \end{tabular}};
+\draw [->] (fw_notify) ..controls (600.26bp,465.08bp) and (599.88bp,433.82bp)  .. (__fw_dispatch);
+\draw (653.5bp,443.5bp) node[xshift=-3mm, yshift=-2.5mm] {\normalsize \begin{tabular}{rr}\multicolumn{2}{c}{\large [78.60\%]} \\ Calls: & \multicolumn{1}{c}{1} \\ Time: & $415.00 \cdot 10^3$ \\ Avg.: & $415.00 \cdot 10^3$ \end{tabular}};
+\draw [->] (fw_schedule) ..controls (354.2bp,491.71bp) and (339.27bp,482.05bp)  .. (327.0bp,471.0bp) .. controls (306.43bp,452.49bp) and (288.45bp,427.39bp)  .. (topo_get_termination);
+\draw (374.5bp,443.5bp) node[xshift=-15mm, yshift=-2.5mm] {\normalsize \begin{tabular}{rr}\multicolumn{2}{c}{\large [7.73\%]} \\ Calls: & \multicolumn{1}{c}{1} \\ Time: & $9.00 \cdot 10^3$ \\ Avg.: & $9.00 \cdot 10^3$ \end{tabular}};
+\draw [->] (fw_notify) ..controls (679.19bp,494.25bp) and (696.41bp,483.83bp)  .. (710.0bp,471.0bp) .. controls (728.89bp,453.16bp) and (743.64bp,428.27bp)  .. (__fw_block);
+\draw (800.0bp,443.5bp) node[xshift=-3mm, yshift=-2.5mm] {\normalsize \begin{tabular}{rr}\multicolumn{2}{c}{\large [4.07\%]} \\ Calls: & \multicolumn{1}{c}{1} \\ Time: & $21.50 \cdot 10^3$ \\ Avg.: & $21.50 \cdot 10^3$ \end{tabular}};
+\draw [->] (fw_schedule) ..controls (425.37bp,465.08bp) and (425.56bp,433.82bp)  .. (fw_list_empty);
+\draw (473.5bp,443.5bp) node[xshift=-3mm, yshift=-2.5mm] {\normalsize \begin{tabular}{rr}\multicolumn{2}{c}{\large [6.44\%]} \\ Calls: & \multicolumn{1}{c}{1} \\ Time: & $7.50 \cdot 10^3$ \\ Avg.: & $7.50 \cdot 10^3$ \end{tabular}};
+\draw [->] (__schedule) ..controls (285.93bp,667.41bp) and (200.78bp,651.51bp)  .. (171.0bp,634.0bp) .. controls (143.54bp,617.85bp) and (119.96bp,590.92bp)  .. (finish_task_switch);
+\draw (221.0bp,606.5bp) node[xshift=-19mm, yshift=-2.5mm] {\normalsize \begin{tabular}{rr}\multicolumn{2}{c}{\large [4.45\%]} \\ Calls: & \multicolumn{1}{c}{1} \\ Time: & $44.00 \cdot 10^3$ \\ Avg.: & $44.00 \cdot 10^3$ \end{tabular}};
+\draw [->] (__schedule) ..controls (502.91bp,656.94bp) and (520.2bp,646.6bp)  .. (534.0bp,634.0bp) .. controls (553.67bp,616.05bp) and (569.61bp,591.01bp)  .. (fw_notify);
+\draw (628.5bp,606.5bp) node[xshift=-3mm, yshift=-2.5mm] {\normalsize \begin{tabular}{rr}\multicolumn{2}{c}{\large [53.44\%]} \\ Calls: & \multicolumn{1}{c}{2} \\ Time: & $528.00 \cdot 10^3$ \\ Avg.: & $264.00 \cdot 10^3$ \end{tabular}};
+\draw [->] (__schedule) ..controls (565.42bp,667.03bp) and (653.62bp,650.85bp)  .. (685.0bp,634.0bp) .. controls (715.22bp,617.77bp) and (742.64bp,590.65bp)  .. (rcu_note_context_switch);
+\draw (800.0bp,606.5bp) node[xshift=-0mm, yshift=-2.5mm] {\normalsize \begin{tabular}{rr}\multicolumn{2}{c}{\large [1.27\%]} \\ Calls: & \multicolumn{1}{c}{1} \\ Time: & $12.50 \cdot 10^3$ \\ Avg.: & $12.50 \cdot 10^3$ \end{tabular}};
+\draw [->] (depth_pipe_update_stage_0) -- (term_pipe_update) node[anchor=south, pos=0.5] {\normalsize \begin{tabular}{rr}\multicolumn{2}{c}{\large [27.93\%]} \\ Calls: & \multicolumn{1}{c}{1} \\ Time: & $84.50 \cdot 10^3$ \\ Avg.: & $84.50 \cdot 10^3$ \end{tabular}};
+%
+\end{tikzpicture}
+% End of code
+
+\end{scaletikzpicturetowidth}

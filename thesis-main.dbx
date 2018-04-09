@@ -1,0 +1,2 @@
+\DeclareDatamodelEntrytypes{standard}
+\DeclareDatamodelEntryfields[standard]{type,number}

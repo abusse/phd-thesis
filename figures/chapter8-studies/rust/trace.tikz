@@ -1,0 +1,55 @@
+%BEGIN-SIDEWAY
+
+\begin{scaletikzpicturetowidth}{0.9\textwidth}
+\begin{tikzpicture}[>={Stealth[scale=1]},line join=bevel,scale=\tikzscale, every node/.style={transform shape}]
+\setlength\tabcolsep{2pt}
+%%
+\definecolor{fillcolor}{rgb}{.15000,.65,.99150};
+\node (rust_unlock_pipe) at (488.99bp,240.25bp) [draw,fill=fillcolor,ellipse] {\small \begin{tabular}{c}\code{rust_unlock_pipe} \\ \begin{tabular}{rr}Calls: & \multicolumn{1}{c}{7897} \\ Time: & $47.38 \cdot 10^6$ \\ Avg.: & $6.00 \cdot 10^3$ \end{tabular}\end{tabular}};
+\definecolor{fillcolor}{rgb}{.15000,.65,.99150};
+\node (rust_int1) at (690.0bp,570.25bp) [draw,fill=fillcolor,ellipse] {\small \begin{tabular}{c}\code{core::ptr::_<impl *mut T>::offset::} \\ \begin{tabular}{rr}Calls: & \multicolumn{1}{c}{7898} \\ Time: & $67.13 \cdot 10^6$ \\ Avg.: & $8.50 \cdot 10^3$ \end{tabular}\end{tabular}};
+\definecolor{fillcolor}{rgb}{.15000,.65,.97450};
+\node (rust_int2) at (840.99bp,395.25bp) [draw,fill=fillcolor,ellipse] {\small \begin{tabular}{c}\code{_<core__option__Option<T>>::unwrap::} \\ \begin{tabular}{rr}Calls: & \multicolumn{1}{c}{7897} \\ Time: & $157.94 \cdot 10^6$ \\ Avg.: & $20.00 \cdot 10^3$ \end{tabular}\end{tabular}};
+\definecolor{fillcolor}{rgb}{.15000,.65,.98300};
+\node (rust_lock_pipe) at (667.99bp,240.25bp) [draw,fill=fillcolor,ellipse] {\small \begin{tabular}{c}\code{rust_lock_pipe} \\ \begin{tabular}{rr}Calls: & \multicolumn{1}{c}{7897} \\ Time: & $118.46 \cdot 10^6$ \\ Avg.: & $15.00 \cdot 10^3$ \end{tabular}\end{tabular}};
+\definecolor{fillcolor}{rgb}{.15000,.65,.80450};
+\node (term_pipe_update) at (305.99bp,240.25bp) [draw,fill=fillcolor,ellipse] {\small \begin{tabular}{c}\code{term_pipe_update} \\ \begin{tabular}{rr}Calls: & \multicolumn{1}{c}{16868} \\ Time: & $1417.14 \cdot 10^6$ \\ Avg.: & $84.01 \cdot 10^3$ \end{tabular}\end{tabular}};
+\definecolor{fillcolor}{rgb}{1.00000,.15000,.15000};
+\node (lb_pipe_update) at (252.99bp,624.58bp) [draw,fill=fillcolor,ellipse] {\small \begin{tabular}{c}\code{lb_pipe_update} \\ \begin{tabular}{rr}Calls: & \multicolumn{1}{c}{16870} \\ Time: & $12566.46 \cdot 10^6$ \\ Avg.: & $744.90 \cdot 10^3$ \end{tabular}\end{tabular}};
+\definecolor{fillcolor}{rgb}{.15000,.65,.67700};
+\node (_raw_spin_lock) at (161.99bp,78.083bp) [draw,fill=fillcolor,ellipse] {\small \begin{tabular}{c}\code{_raw_spin_lock} \\ \begin{tabular}{rr}Calls: & \multicolumn{1}{c}{314234} \\ Time: & $2403.43 \cdot 10^6$ \\ Avg.: & $7.65 \cdot 10^3$ \end{tabular}\end{tabular}};
+\definecolor{fillcolor}{rgb}{.15000,.65,.64300};
+\node (hq_pipe_update) at (158.99bp,432.42bp) [draw,fill=fillcolor,ellipse] {\small \begin{tabular}{c}\code{hq_pipe_update} \\ \begin{tabular}{rr}Calls: & \multicolumn{1}{c}{8971} \\ Time: & $2645.31 \cdot 10^6$ \\ Avg.: & $294.87 \cdot 10^3$ \end{tabular}\end{tabular}};
+\definecolor{fillcolor}{rgb}{.15000,.65,.60900};
+\node (rust_pipe_update) at (346.99bp,432.42bp) [draw,fill=fillcolor,ellipse] {\small \begin{tabular}{c}\code{rust_pipe_update} \\ \begin{tabular}{rr}Calls: & \multicolumn{1}{c}{7897} \\ Time: & $2902.35 \cdot 10^6$ \\ Avg.: & $367.53 \cdot 10^3$ \end{tabular}\end{tabular}};
+\draw [->, line width=0.66pt] (hq_pipe_update) ..controls (178.94bp,359.46bp) and (191.53bp,329.11bp)  .. (209.99bp,306.33bp) .. controls (217.79bp,296.71bp) and (227.39bp,287.94bp)  .. (term_pipe_update);
+
+\definecolor{strokecol}{rgb}{0.0,0.0,0.0};
+\pgfsetstrokecolor{strokecol}
+\draw (253.49bp,332.63bp) node {\small \begin{tabular}{rr}\multicolumn{2}{c}{\normalsize [28.49\%]} \\ Calls: & \multicolumn{1}{c}{8971} \\ Time: & $753.77 \cdot 10^6$ \\ Avg.: & $84.02 \cdot 10^3$ \end{tabular}};
+\draw [->, line width=0.66pt] (rust_pipe_update) ..controls (421.29bp,389.86bp) and (434.2bp,378.88bp)  .. (443.99bp,366.33bp) .. controls (459.52bp,346.43bp) and (469.99bp,320.7bp)  .. (rust_unlock_pipe);
+\draw (513.99bp,332.63bp) node {\small \begin{tabular}{rr}\multicolumn{2}{c}{\normalsize [1.63\%]} \\ Calls: & \multicolumn{1}{c}{7897} \\ Time: & $47.38 \cdot 10^6$ \\ Avg.: & $6.00 \cdot 10^3$ \end{tabular}};
+\draw [->, line width=0.66pt] (term_pipe_update) ..controls (251.55bp,167.36bp) and (223.57bp,130.41bp)  .. (_raw_spin_lock);
+\draw (289.49bp,140.47bp) node {\small \begin{tabular}{rr}\multicolumn{2}{c}{\normalsize [8.35\%]} \\ Calls: & \multicolumn{1}{c}{16868} \\ Time: & $118.33 \cdot 10^6$ \\ Avg.: & $7.01 \cdot 10^3$ \end{tabular}};
+\draw [->, line width=0.66pt] (lb_pipe_update) ..controls (301.79bp,574.6bp) and (307.49bp,566.64bp)  .. (311.99bp,558.5bp) .. controls (323.52bp,537.62bp) and (331.5bp,512.63bp)  .. (rust_pipe_update);
+\draw (381.99bp,524.8bp) node {\small \begin{tabular}{rr}\multicolumn{2}{c}{\normalsize [23.10\%]} \\ Calls: & \multicolumn{1}{c}{7897} \\ Time: & $2902.35 \cdot 10^6$ \\ Avg.: & $367.53 \cdot 10^3$ \end{tabular}};
+\draw [->, line width=0.66pt] (rust_pipe_update) ..controls (331.22bp,358.25bp) and (324.16bp,325.51bp)  .. (term_pipe_update);
+\draw (376.49bp,332.63bp) node {\small \begin{tabular}{rr}\multicolumn{2}{c}{\normalsize [22.86\%]} \\ Calls: & \multicolumn{1}{c}{7897} \\ Time: & $663.37 \cdot 10^6$ \\ Avg.: & $84.00 \cdot 10^3$ \end{tabular}};
+\draw [->, line width=0.66pt] (hq_pipe_update) ..controls (129.21bp,357.71bp) and (117.32bp,321.64bp)  .. (111.99bp,288.33bp) .. controls (105.23bp,246.13bp) and (104.84bp,234.3bp)  .. (111.99bp,192.17bp) .. controls (117.05bp,162.36bp) and (127.64bp,130.49bp)  .. (_raw_spin_lock);
+\draw (151.99bp,236.55bp) node {\small \begin{tabular}{rr}\multicolumn{2}{c}{\normalsize [2.57\%]} \\ Calls: & \multicolumn{1}{c}{8971} \\ Time: & $67.87 \cdot 10^6$ \\ Avg.: & $7.56 \cdot 10^3$ \end{tabular}};
+\draw [->, line width=0.66pt] (rust_lock_pipe) ..controls (599.54bp,201.78bp) and (589.05bp,196.65bp)  .. (578.99bp,192.17bp) .. controls (467.26bp,142.33bp) and (332.49bp,98.946bp)  .. (_raw_spin_lock);
+\draw (565.99bp,140.47bp) node {\small \begin{tabular}{rr}\multicolumn{2}{c}{\normalsize [46.67\%]} \\ Calls: & \multicolumn{1}{c}{7897} \\ Time: & $55.28 \cdot 10^6$ \\ Avg.: & $7.00 \cdot 10^3$ \end{tabular}};
+\draw [->, line width=0.66pt] (rust_pipe_update) ..controls (513.36bp,421.06bp) and (640.09bp,405.44bp)  .. (rust_int2.west);
+\draw (610.49bp,440.63bp) node {\small \begin{tabular}{rr}\multicolumn{2}{c}{\normalsize [5.44\%]} \\ Calls: & \multicolumn{1}{c}{7897} \\ Time: & $157.94 \cdot 10^6$ \\ Avg.: & $20.00 \cdot 10^3$ \end{tabular}};
+\draw [->, line width=0.66pt] (rust_pipe_update) to [bend right=10] (rust_int1);
+\draw (505bp,520bp) node {\small \begin{tabular}{rr}\multicolumn{2}{c}{\normalsize [2.31\%]} \\ Calls: & \multicolumn{1}{c}{7898} \\ Time: & $67.13 \cdot 10^6$ \\ Avg.: & $8.50 \cdot 10^3$ \end{tabular}};
+\draw [->, line width=0.66pt] (lb_pipe_update) ..controls (207.55bp,573.99bp) and (202.26bp,566.28bp)  .. (197.99bp,558.5bp) .. controls (186.41bp,537.4bp) and (177.74bp,512.38bp)  .. (hq_pipe_update);
+\draw (234.99bp,524.8bp) node {\small \begin{tabular}{rr}\multicolumn{2}{c}{\normalsize [21.05\%]} \\ Calls: & \multicolumn{1}{c}{8971} \\ Time: & $2645.31 \cdot 10^6$ \\ Avg.: & $294.87 \cdot 10^3$ \end{tabular}};
+\draw [->, line width=0.66pt] (lb_pipe_update) ..controls (153.69bp,562.2bp) and (101.68bp,523.87bp)  .. (64.989bp,480.5bp) .. controls (27.971bp,436.73bp) and (18.722bp,421.98bp)  .. (4.9889bp,366.33bp) .. controls (-20.144bp,264.49bp) and (58.045bp,157.41bp)  .. (_raw_spin_lock);
+\draw (48.49bp,332.63bp) node {\small \begin{tabular}{rr}\multicolumn{2}{c}{\normalsize [0.96\%]} \\ Calls: & \multicolumn{1}{c}{16870} \\ Time: & $120.61 \cdot 10^6$ \\ Avg.: & $7.14 \cdot 10^3$ \end{tabular}};
+\draw [->, line width=0.66pt] (rust_pipe_update) ..controls (476.78bp,413.13bp) and (534.39bp,396.86bp)  .. (577.99bp,366.33bp) .. controls (603.87bp,348.21bp) and (625.02bp,320.2bp)  .. (rust_lock_pipe);
+\draw (675.49bp,332.63bp) node {\small \begin{tabular}{rr}\multicolumn{2}{c}{\normalsize [4.08\%]} \\ Calls: & \multicolumn{1}{c}{7897} \\ Time: & $118.46 \cdot 10^6$ \\ Avg.: & $15 \cdot 10^3$ \end{tabular}};
+\end{tikzpicture}
+\end{scaletikzpicturetowidth}
+
+%END-SIDEWAY

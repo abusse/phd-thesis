@@ -1,0 +1,619 @@
+\chapter[A Component-Based Scheduler Framework]{A Component-Based\\Scheduler Framework}%
+\label{chap:arch}
+
+\begin{figure} \centering
+	\includetikz{figures/chapter5-architecture/overview}
+	\caption{Overview of the \cobas{} architecture.}%
+	\label{fig:arch:overview}
+\end{figure}
+
+\Cref{chap:intro,chap:analysis} have outlined the challenges process scheduler design is facing and from that, \cref{chap:requirements} deduced requirements necessary to be addressed by a future scheduling architecture. The previous chapter has shown that the current state of the art falls short of addressing all the issues at the same time. For this reason, this dissertation introduces a novel approach to the architecture of process schedulers -- the Component-Based Scheduler (\cobas{}) framework. \Cref{fig:arch:overview} illustrates the overall architecture of the framework. It is designed as main scheduling facility for a runtime system like, in most cases, an operating system. However, the framework can schedule arbitrary task sets that fall into the task model outlined later in this chapter and is, therefore, not necessarily limited to operating systems. It can be used in every system that needs task management. The \cobas{} framework consists of five major elements:
+
+\begin{itemize*}
+	\item \textbf{Components} that are enforcing the scheduling policies and enable to control the scheduling (\cf{}~\cref{sec:arch:components}).
+	\item \textbf{Pipes} that are an extension to the concept of runqueues and transport tasks from one Component to another (\cf{}~\cref{sec:arch:pipes}).
+	\item \textbf{A Notification System} that distributes events inside the framework on publish–subscribe based messaging pattern (\cf{}~\cref{sec:arch:notifications}).
+	\item \textbf{A Runtime System Adapter} that connects the runtime system independent parts of the \cobas{} framework to the surrounding runtime system (\cf{}~\cref{sec:arch:adapter}).
+	\item \textbf{Topologies} that determine the layout and connection of Components to Pipes (\cf{}~\cref{sec:arch:topologies}).
+\end{itemize*}
+
+The framework does not have a general restriction how the tasks have to look like. They can be jobs, processes, threads, or whole virtual machines as described in \cref{sec:analysis:exec}. Through the standardized interfaces inside the framework, the Components are highly reusable and independent of the surrounding runtime system. Hence, the implementation of a scheduling policy within the \cobas{} framework can be used in every system that integrates the framework. Furthermore, the encapsulation of the scheduling policy enforcement in Components allows the dynamic creation, deletion, and exchange of Component instances even during runtime. This approach allows the scheduler to be adapted to changes in the scheduling goals or even the underlying system architecture.
+
+This chapter describes the \cobas{} architecture in detail. It starts with the presentation and discussion of the system model that was used to create the framework. The Sections from~\ref{sec:arch:components} up to~\ref{sec:arch:topologies} are discussing the different elements of \cobas{} in detail. \Cref{sec:arch:example} explains the interaction between the elements of the \cobas{} framework with the help of examples to give a better understanding of the architecture and the interaction of the different parts of the framework among each other. \Cref{sec:prop:compo} continues with a discussion on composability in the context of the \cobas{} framework. \Cref{sec:arch:rationales} concludes this chapter with a discussion on the design rationales of the \cobas{} framework, which focuses on the decision to use the component and the framework approach. Note that the concepts presented in \cref{sec:model:scheduler,sec:arch:components,sec:arch:pipes,sec:arch:adapter} of this Chapter were previously published in parts in \textcite{Busse-2015-CoBaS}.
+
+\section{System Model}%
+\label{sec:model}
+
+The model that is the foundation for the \cobas{} framework can be subdivided into two parts: a task model and a scheduler model. The task model describes the properties of tasks the \cobas{} framework can handle, while the scheduler model describes the scheduling process.
+
+\subsection{Task Model}
+
+Starting points for the task model are the traditional two- and three-state task models as described in literature (\cf{}{} \textcite[Ch.~3]{Stallings-2011-OperatingSystems} and \textcite[Ch.~2]{Tanenbaum-2007-ModernOS}). The two-state model is very limited and does not allow preemption. Therefore, it is only suitable for batch processing granularity as described in \cref{sec:analysis:exec:batch} and not sufficient for the purpose of this dissertation. The three-state model (\cref{fig:intro:three-states}) is a further generalization of the two-state model that is not only suited for the batch processing granularity, but also for the other granularities as discussed in \crefrange{sec:analysis:exec:process}{sec:analysis:exec:vm}.
+
+\begin{figure}[t!]\centering
+	\begin{subfigure}{\linewidth}\centering
+		\includetikz{figures/chapter5-architecture/three-state-machine}
+		\caption[State transition diagram.]{State transition diagram~\cite[p. 88]{Tanenbaum-2007-ModernOS}.}%
+		\label{fig:intro:three-states:state}
+		\vspace{0.75cm}
+	\end{subfigure}
+	\begin{subfigure}{\linewidth}\centering
+		\includetikz{figures/chapter5-architecture/three-state-queue}
+		\caption[Queueing diagram.]{Queueing diagram~\cite[p. 140]{Stallings-2011-OperatingSystems}.}%
+		\label{fig:intro:three-states:queue}
+	\end{subfigure}
+	\caption[The classical three-state task model.]{The classical three-state task model. Tasks can be blocked because of the interaction with other tasks.}%
+	\label{fig:intro:three-states}
+\end{figure}
+
+However, it is questionable whether this rather simple academic model is also suitable for complex real-world systems. Take for example the task state machine of the \uitron{} system (\cref{fig:intro:uitron}). Although it has a \texttt{READY} state that is equivalent to the \emph{ready} state of the three-state model and a \texttt{RUNNING} state that is equal to the \emph{running} state of the three-state model as well, no single state can be identified as \emph{blocked} state and a task can exit from a waiting state in contrast to the classical three-state model. Similar differences can be found looking at other legacy systems' task states, \eg{}, in UNIX systems (\cf{} \textcite[148]{Bach-1986-Unix}) or Windows (\cf{} \textcite[200]{Stallings-2011-OperatingSystems}).
+
+\begin{figure}[t!]\centering
+	\includetikz{figures/chapter5-architecture/uitron-states}
+	\caption[\uitron{} task states and transitions]{\uitron{} task states and transitions~\cite[54]{uITRON}.}%
+	\label{fig:intro:uitron}
+\end{figure}
+
+To obtain a holistic task model for \cobas{}, it is necessary to be independent of the actual state machine of the tasks. Looking closer at both the simplified three-state task model and the real-world examples reveals that the scheduler does not necessarily need all information in that task model. The only challenging part in task scheduling is the question which task to transit from the \emph{ready} to the \emph{running} state and vice versa. In the simple three-state model, the transitions from the \emph{ready} to the \emph{blocked} state and from the \emph{blocked} to the \emph{ready} state are a given fact and not based on a decision. When a resource needed by the running task is not available, it is not questionable whether it gets blocked or not because there is no alternative. The same applies to the unblocking. Unlike the dispatching, the tasks do not get unblocked based on policy but on the fact that resources become available.
+
+For more complex task state models, this reasoning might not be so obvious as there is a category of transitions that are not necessarily intrinsic but driven by a policy. Take for example the \emph{swap out} of tasks, where the task is moved from main to secondary memory. This decision is based on policy. However, the memory management subsystem and not the scheduler subsystem is responsible for this decision. From the scheduler's point of view, the task is missing a resource, \ie{} memory, to progress. The same line of argument can be applied to other properties. Take for example the \texttt{SUSPENDED} state of the \uitron{} state model. There, the task is forcefully denied the CPU, which can be modeled as a logical resource: \emph{Permission to be dispatched}. This approach allows the same approach for tasks that are supposed to be put in the \texttt{SUSPENDED} state as it does for \emph{swap out} tasks.
+
+Based on this insight, only the two transitions between the \emph{ready} and the \emph{running} state remain to be considered for the scheduler. The \cobas{} framework uses an enhanced three-state task model as illustrated in \cref{fig:arch:cobas-states}. The framework only considers tasks that are assigned to it by the runtime system. Those tasks are either \emph{running}, meaning they are currently processed by a \ac{PE} similar to the classical three-state model or they are \emph{schedulable}, meaning they can be dispatched to a \ac{PE}. The latter state differs from the classical \emph{ready} state as all tasks that are not blocked or currently executed are \emph{ready}. With \cobas{}, the runtime system can decide whether it wants a task to be considered for scheduling no matter if it is dispatchable or not. Tasks transit from the \emph{ready} to the \emph{running} state through dispatching and from the running to the ready state through relinquishment or preemption of the \ac{PE}. The third state in the \cobas{} model is the \emph{unconsidered} state that, from the perspective of \cobas{}, collects all the tasks that are not to be considered for the scheduling. The runtime system can put every task in that state if it comes to the conclusion that the task should not be considered by the scheduling algorithm. It has to be emphasized that the \cobas{} framework only considers tasks in the \emph{schedulable} and \emph{running} state. Every task in the \emph{unconsidered} state is not known to the framework and therefore not considered for scheduling.
+
+\begin{figure}[t!] \centering
+	\includetikz{figures/chapter5-architecture/cobas-state-machine}
+	\caption[The \cobas{} task model.]{The \cobas{} task state model.}%
+	\label{fig:arch:cobas-states}
+\end{figure}
+
+Besides the changes to the meaning of the states, the \cobas{} model introduces additional state transition to be as versatile as possible. With the \cobas{} model, a task can be destroyed from every state, eliminating the need to dispatch a task before destroying it. Furthermore, the runtime system can remove a task from the \emph{schedulable} state at any time, for any reason it deems necessary.
+
+\subsection{Scheduler Model}%
+\label{sec:model:scheduler}
+
+
+\begin{figure}[t!] \centering
+	\includetikz{figures/chapter5-architecture/cobas-model}
+	\caption[The CoBaS scheduler model.]{The CoBaS scheduler model.}\vspace{-2.5mm}%
+	\label{fig:arch:cobas-model}
+\end{figure}
+
+After defining a task model, a scheduler model can be built that can accept such tasks and is suited for this dissertation. The model is depicted in \cref{fig:arch:cobas-model}. The scheduler can be queried for a task for a specific \ac{PE} and will output a task for that \ac{PE}. Furthermore, the scheduler can receive information and events from the system that may influence its scheduling decision. Those events could be for example a frequency change of a \ac{PE}, the change from permanent to battery power, or reaching a critical temperature in the system. Also, the scheduler is informed about task state transitions over that interface and the system informs the scheduler that it has dispatched a task or that a task should no longer be considered for scheduling. On the other hand, the scheduler can notify the system about certain events like, \eg{}, an overload situation on a specific \ac{PE}.
+
+Even though the model is very simple, it is very flexible as it can be used to process every kind of information relevant to the scheduler or the system, while still fulfilling the main task of a scheduler: selecting tasks for specific \acp{PE}.
+
+\section{Components}%
+\label{sec:arch:components}
+
+\begin{figure}[b!] \centering \vspace{-2.5mm}
+	\includetikz{figures/chapter5-architecture/components}
+	\caption[Example of task ordering and filtering by \cobas{} Components.]{Example of task ordering and filtering by \cobas{} Components. A task set is ordered by Component~A. The ordered task set is further refined by Component~B through filtering, in this case by filtering out the tasks identified by an uppercase letter index.}%
+	\label{fig:arch:components}
+\end{figure}
+
+\emph{Components} are the core of the \cobas{} framework and the means used to enforce scheduling policies. Components can order and filter tasks. An initial simple example is given in \cref{fig:arch:components}. In the example, Component~A reorders the incoming task set, while Component~B refines the ordered task-set by filtering.
+
+\cobas{} differentiates between \emph{Components} and \emph{Component instances}. While the Component is the implementation, several instances of one Component can exist during runtime. For the remainder of this dissertation, the notion Component is used for both Components and Component instances. If a differentiation between those two is necessary and not obvious, it is pointed out.
+
+Besides their direct functionality, Components serve three main purposes: Separation of concerns, workload distribution, and reusability. A Component is a stateless entity that holds instructions to perform a certain functionality like, \eg{}, task ordering or filtering. When using a Component, a Component instance has to be created that is stateful and can be executed by the runtime system. How Components serve their purpose is discussed subsequently.
+
+\subsection{Separation of Concerns}%
+\label{sec:arch:components:concerns}
+
+\begin{figure}[b!] \centering
+	\includetikz{figures/chapter5-architecture/high-level}
+	\caption{Separation of concerns for a multi-core scheduler.}%
+	\label{fig:arch:separation}
+\end{figure}
+
+Why the component approach allows a separation of concerns shall be explained on the example of a decentralized multi-core scheduling with support for affinities to \acp{PE} and a round-robin policy for each \ac{PE}. With a traditional scheduler architecture, the scheduler logic would be implemented as one entity. For example, the FreeBSD operating system uses a scheduling approach very similar to that, except that it also supports priorities. In the given example, three concerns can be identified:
+\begin{itemize*}
+	\item Load-Balancing for all \acp{PE}.
+	\item The Assignment of an affinity to every task.
+	\item A round-robin policy on each \ac{PE}.
+\end{itemize*}
+
+Each of these concerns can be handled by an individual Component or, to be more exact, by instances of Components. The resulting scheduler is depicted in \cref{fig:arch:separation} on the example of a quad-core system. It consists of a Component instance that can assign an affinity to every task, an instance that enforces the load-balancing between \acp{PE} with the support of the Affinity Component instance, and finally \(n\) instances of a Component that applies a round-robin policy, in the quad-core example \(n\) being four. The interaction between the Components is explained in detail later on in \cref{sec:arch:example}.
+
+
+\subsection{Code Path Separation and Workload Distribution}%
+\label{sec:arch:components:distribution}
+
+Having a heterogeneous many-core system that, for example, consists of two parts -- one part a classical flat multi-core topology and one a mesh-based many-core topology (\cf{}~\cref{fig:req:metro} on page~\pageref{fig:req:metro}) requires, possibly fundamentally, different scheduling strategies for the different parts. The state of the art approach to scheduler design would result in one scheduler implementation that needs to handle both scheduling approaches. Even though a differentiation in the code paths for the different architectures might exist, it would be hard to distinguish.
+
+The component-based approach allows a much easier differentiation and division between the different scheduling strategies and therefore code paths. \Cref{fig:arch:flow} illustrates this separation on the example mentioned above: A shared load-balancing Component would assign the tasks either to the flat multi-core part of the heterogeneous processor or the mesh-based many-core part. The assigned tasks would then be scheduled based on the most efficient policy for the respective topologies.
+
+\begin{figure}[t!] \centering
+	\includetikz{figures/chapter5-architecture/mesh}
+	\caption[Code path separation for a heterogeneous system.]{Code path separation for a heterogeneous system with dissimilar scheduling requirements.}%
+	\label{fig:arch:flow}
+\end{figure}
+
+The decomposition of the scheduler implementation in distinct Components also allows an easier to comprehend workload distribution. Assuming that the scheduler logic is executed by several \acp{PE}~in~parallel, bottlenecks are likely to occur and become more likely the more \acp{PE} try to run the scheduler at the same time. For example in the scheduler layout in \cref{fig:arch:flow}, it can be reasoned that the Task Distributor might become a bottleneck because both parts of the heterogeneous system have to access it, while the dedicated implementations for the distinct scheduling policies can be accessed in parallel. How such contention is handled in \cobas{} is discussed thoroughly in \cref{sec:prop:computation}.
+
+\subsection{Reusability}%
+\label{sec:arch:reusability}
+
+Reusability consists of two aspects: The reuse of one scheduler implementation in different runtime systems and the reuse of existing parts of a scheduler implementation in the implementation of a new policy. The \cobas{} framework allows both. The reuse between different runtime systems is given by the framework approach. A runtime system has to be adapted only once to the framework and can then use every scheduler implementation that was programmed against the framework's \ac{API}.
+
+The component approach also allows a broader reuse of existing parts of the scheduler. The round-robin Component from the example mentioned above can, for instance, be used in different scenarios like a simple single-core scheduling (Figure~\ref{fig:arch:reuse:single}), a centralized multi-core scheduler (Figure~\ref{fig:arch:reuse:central}), a hierarchic scheduler (Figure~\ref{fig:arch:reuse:hierarchy}), or a decentralized scheduler (Figure~\ref{fig:arch:reuse:decentral}). Compared to the state of the art approach to scheduler implementation, the reuse is promoted by the clear functional distinction between individual Components.
+
+\begin{figure}[t!]\centering \hfill
+	\begin{subfigure}[b]{0.48\linewidth}\centering
+		\includetikz{figures/chapter5-architecture/reuse/single} \vspace{0.1cm}
+		\caption{Single-Core scheduler.}%
+		\label{fig:arch:reuse:single}
+	\end{subfigure} \hfill
+	\begin{subfigure}[b]{0.48\linewidth}\centering
+		\includetikz{figures/chapter5-architecture/reuse/central} \vspace{0.1cm}
+		\caption{Centralized multi-core scheduler.}%
+		\label{fig:arch:reuse:central}
+	\end{subfigure} \hfill \\ \vspace{1mm} \hfill
+	\begin{subfigure}[b]{0.48\linewidth}\centering
+		\includetikz{figures/chapter5-architecture/reuse/hirarchy} \vspace{0.7cm}
+		\caption{Hierarchical multi-core scheduler.}%
+		\label{fig:arch:reuse:hierarchy}
+	\end{subfigure} \hfill
+	\begin{subfigure}[b]{0.48\linewidth}\centering
+		\includetikz{figures/chapter5-architecture/reuse/decentral}
+		\caption{Decentralized multi-core scheduler.}%
+		\label{fig:arch:reuse:decentral}
+	\end{subfigure} \hfill
+
+	\caption[Reuse of a Component implementation.]{Reuse of a single Component implementation in different scheduler and scheduling approaches.}%
+	\label{fig:arch:reuse}
+\end{figure}
+
+\section{Pipes}%
+\label{sec:arch:pipes}
+
+\emph{Pipes} are one of two interfaces that are connecting Components to other Components or the framework. Components, as described above, are manipulating task sets by ordering or filtering of tasks. Those ordered and filtered task sets have to be handed over from one Component to another to compose several Components to a complete scheduler implementation. In current systems, tasks are managed in runqueues~\cite[Ch.~9]{Stallings-2011-OperatingSystems}\cite[Ch.~2]{Tanenbaum-2007-ModernOS}\cite[\code{sys/sys/runq.h}]{FreeBSD11}\cite[\code{kernel/sched/sched.h}]{Linux44}. However, for the \cobas{} system, this data structure is both ineffective and not sufficient.
+
+For the \cobas{} framework, the concept of runqueues is extended to \emph{Pipes}. A Pipe contains, besides a list of tasks assigned to the Pipe, a list of added and removed tasks, a list of moved tasks, a hook for the connected Component, and a lock (\cref{fig:arch:pipe}). When a task is added to or removed from the Pipe, the change will not only be applied to the task list but also noted in a dedicated list. This will take the burden from the receiving Component to determine the difference of the previous configuration of the task list to the current, which has, for example for the \emph{Hunt–McIlroy} algorithm, a complexity of \(\mathcal{O}(m \cdot n \cdot \log n )\) where \(m\) and \(n\) is the length of the input lists~\cite{Hunt-1976-Diff}. The same goes for changes to the task list that only change the relative order but do not add or remove a task. The reason to differentiate between these two kinds of changes is that it has no significant overhead to distinguish between in the Pipe but might introduce a significant computational overhead when handled in the Component as the two types of changes would have to be separated again if only one kind is needed. Furthermore, this allows an optimization of the Pipe structure. When, for example, a task is first added to the Pipe and later removed before the receiving Component instance reacts on these change, the two operations can cancel each other out. Besides the task management, the Pipe holds a hook for the connected Component. With this hook, one Component instance can hand over the flow of the scheduler execution to the next Component instance.
+
+
+\begin{figure}[t!] \centering
+	\includetikz{figures/chapter5-architecture/task_pipe}
+	\caption[The structure of a \cobas{} Pipe.]{The structure of a \cobas{} Pipe. The Pipe manages tasks in three distinct lists: A list for all tasks in the Pipe (green), a list with the tasks added and removed since the last access of the receiving Component (red), and a list with tasks rearranged since the last access of the receiving Component (blue).}%
+	\label{fig:arch:pipe}
+\end{figure}
+
+\section{Notification System}%
+\label{sec:arch:notifications}
+
+To decide on the task order, a scheduling algorithm needs additional information about the system state as discussed in \cref{sec:model}. The \cobas{} approach assumes that changes to the scheduling decision are mainly event based, for example, the system changes from main power to battery operation, a timer runs out, the priority of a task changes, or a new \ac{PE} arrives. Furthermore, the system is supposed to be dynamic and different Components should work together without necessarily knowing each other. To meet these requirements, \cobas{} uses a topic-based publish-subscribe communication\footnote{For more details on the publish-subscribe communication pattern refer to, \eg{}, \textcite{Eugster-2003-PubSub}.}.
+
+Components and other elements of the \cobas{} framework can both subscribe to topics and publish notification for topics. The \cobas{} framework incorporates a \emph{Broker} that manages all subscriptions and distributes events to the subscribed Components. The indirect communication pattern of publish-subscribe is not always sufficient for the communication of the framework. Certain aspects and information are at a certain location and might need to be queried by a Component or the framework itself. Therefore, the concept of a \emph{Topic Responder} is introduced. The framework allows exactly one Component to register as a responder for a certain topic. This Component will answer to every query for the registered topic. The framework is limited to one responder to keep the Broker as simple as possible. More than one responder for one topic would raise the question on folding or reduction of the results collected from the responders.
+
+\section{Runtime System Adapter}%
+\label{sec:arch:adapter}
+
+The \emph{Runtime System Adapter} is the link between the actual runtime system and the \cobas{} framework. It is unique to every runtime system and allows the runtime system to use the framework as well as allowing the framework to access facilities of the runtime system like \eg{}, memory management or logging facilities.
+
+To work properly, an actual implementation of the \cobas{} framework will need a certain set of functionalities. For instance, as it is designed in a dynamic way, it needs to offer some memory allocation functionality. The \emph{Runtime System Adapter} has to realize this feature by either implementing a memory management algorithm itself or by forwarding memory allocation and deallocation requests to the surrounding runtime system.
+
+The other way around, the \emph{Runtime System Adapter} has to transform particular runtime system calls to, \eg{}, \cobas{} notifications. Take for example the priority of a task in a priority-based scheduling policy. The priority can be set by a userland application via a system call. The system call would then be redirected to the \emph{Runtime System Adapter}, which creates a notification that is submitted to the \cobas{} framework. This approach is most feasible for information that is not part of the legacy system. Another method can be used for information or functionality that exists in the legacy system but is now handled by the \cobas{} framework like, \eg{}, the creation of the new task. As this function might not only be used in system calls but also by other legacy code, the best approach is to provide the function in the \emph{Runtime System Adapter} and link the existing code against the function in the Adapter. Finally, because of the flexible structure of \cobas{}, it is also possible to directly interact with the framework bypassing the \emph{Runtime System Adapter}. A notification in \cobas{} can be created in the userland and, through a system call, directly inserted into the framework. All three interactions are illustrated in \cref{fig:arch:adapter} on the next page on the example of an operating system with strict division between user and kernel space.
+
+\begin{sidewaysfigure} \centering
+	\includetikz{figures/chapter5-architecture/adapter}
+	\caption[Example of a CoBaS Runtime System Adapter.]{Example of a CoBaS Runtime System Adapter in an operating system with user and kernel space separation. Three different interactions are depicted: The interaction of legacy kernel code with the framework, the indirect interaction of the user space with the framework through modified system calls, and the direct interaction of the user space with the framework through a notification system call.}%
+	\label{fig:arch:adapter}
+\end{sidewaysfigure}
+
+\section{Topologies}%
+\label{sec:arch:topologies}
+
+To obtain a functional scheduler, \cobas{} Components have to be instantiated and, where necessary, connected to Pipes. This goal is achieved with \cobas{} \emph{Topologies}. In general, Topologies can be considered as a set of rules how Components are instantiated and connected to each other. Furthermore, Topologies are responsible for assigning the entry and exit points of tasks into and out of the framework. The Topology decides to which Pipe a submitted task is added or from which Pipe a requested task for a \ac{PE} is taken. Depending on how flexible they are regarding changes, Topologies can be divided into three groups: \emph{Static Topologies}, \emph{Dynamic Topologies}, and \emph{Adaptive Topologies}. Note that the flexibility only reflects how well a scheduler can react to changes in the system, but not how well a system can handle heterogeneity.
+
+\subsection{Static Topologies}%
+\label{sec:arch:topologies:static}
+
+
+\begin{figure}[b!] \centering
+	\includetikz{figures/chapter5-architecture/topo-static}
+	\caption[Example for a static Topology with four PE.]{Example for a static Topology generated by \cref{alg:arch:topo:static} with four \ac{PE}.}%
+	\label{fig:arch:topo:static}
+\end{figure}
+
+\begin{listing}[t!]
+	\begin{minipage}{.75\textwidth}
+		\vspace{-2mm}\rule{\textwidth}{0.5pt}
+		\caption{Example algorithm of a static Topology.
+			\label{alg:arch:topo:static}}
+		\begin{algorithmic}[1]
+			\Require{$|PE|$ is the number of PEs in the system.}
+			\Statex
+			\Function{BuildTopology}{}
+				\For{$i \gets 1 \textrm{ to } (2 \cdot |PE| + 1)$}
+					\Let{$p_i$}{\textbf{new}~\Call{pipe}{}}
+				\EndFor
+				\Let{$c_1$}{\Call{LoadBalancing}{$p_1 \cdot p_{(2 \cdot |PE| + 1)}$}}
+				\For{$i \gets 2 \textrm{ to } (|PE| + 1)$}
+					\Let{$c_{i}$}{\Call{RoundRobin}{$p_i$, $p_{i+|PE|}$}}
+				\EndFor
+			\EndFunction
+		\end{algorithmic}
+		\vspace{-3mm}\rule{\textwidth}{0.5pt}
+	\end{minipage}
+\end{listing}
+
+The simplest Topologies in \cobas{} are \emph{Static Topologies}. Static Topologies are part of the final system and configure the Component layout once at boot-time and will leave it untouched. Take the example of a decentralized multi-core scheduler for \(n\) \acp{PE} with load-balancing and a round-robin policy for the tasks assigned to each \ac{PE}. \Cref{fig:arch:topo:static} depicts this scheduler Topology and \cref{alg:arch:topo:static} shows the algorithm used to create this Topology. When the \cobas{} framework is initialized, the code is executed. Based on the number of advised \acp{PE}, which is either given for the Topology or obtained from the runtime system via the Runtime System Adapter, the Topology computes the number of required Pipes, allocates, and initializes them (Lines~2~to~4). If, for example, the runtime adapter would report \(4\) \acp{PE}, the Topology would instantiate \(p = 2 \cdot |PE| + 1 = 9\) Pipes. Next, the Topology creates one Load-Balancing instance (Line~5) and as many instances of the Round-Robin Component (Lines~6~to~8) as the number of \acp{PE}. During creation, it assigns the Pipes to the proper Components. Note that in \cref{alg:arch:topo:static} it is assumed that the order of arguments of the Component instantiation implies which Pipe has which purpose.
+
+\subsection{Dynamic Topologies}%
+\label{sec:arch:topologies:dynamic}
+
+\begin{figure}[t!] \centering
+	\includetikz{figures/chapter5-architecture/topo-dynamic}
+	\caption[Changes in a dynamic Topology.]{Changes in a dynamic Topology.}%
+	\label{fig:arch:topo:dynamic}
+\end{figure}
+
+In contrast to \emph{static Topologies}, \emph{dynamic Topologies} can react to changes of the running system. Take the example above, but now the system starts with only two \acp{PE} and two more \acp{PE} will come up later through, \eg{}, CPU hotplugging (Figure~\ref{fig:arch:topo:dynamic}). The initial scheduler is created as described above. However, the dynamic Topology is capable of reacting to the newly arriving \ac{PE}. The runtime system adapter, for example, can create a notification once a new \ac{PE} arrives. The Topology will change the scheduler layout accordingly, for instance by creating new Pipes and round-robin Components for the arrived \ac{PE} and by replacing the existing two-output load-balancing instance by a four-output load balancing instance. Note that in \cobas{} several possibilities exist to cope with this problem that is not only limited to the Topology. For example, also a \emph{static Topology} could have been used and the arriving of new cores could be handled by the load-balancing Component.
+
+\subsection{Adaptive Topologies}%
+\label{sec:arch:topologies:adative}
+
+For future systems, even \emph{Dynamic Topologies} might not be sufficient. Take for example a system to which a processing accelerator like, \eg{}, a neural net engine is added. This would make it necessary to transform the \cobas{} layout as depicted in \cref{fig:arch:topo_adaptive}. The initial Topology with the gray background had to be extended to the whole Topology that can distinguish different ISAs and is able to assign the task to the right Sub-Topology. Even though it is possible to achieve this with a \emph{dynamic Topology}~in~general, it would be necessary to predict all possible system changes and program the \emph{dynamic Topology} accordingly. As this is infeasible, \cobas{} offers \emph{Adaptive Topologies}, which has two different forms: \emph{Runtime System Controlled} and \emph{Runtime System Assisted}.
+
+\begin{figure}[b!] \centering
+	\includetikz{figures/chapter5-architecture/topo-adaptive}
+	\caption[Example for an Adaptive Topology.]{Example for an Adaptive Topology. Due to the introduction of a computation accelerator, the initial Topology in the gray box is no longer sufficient. It is extended towards the adapted Topology in the green box that includes the initial Topology.}%
+	\label{fig:arch:topo_adaptive}
+\end{figure}
+
+\subsubsection{Runtime System Controlled}
+
+The active \cobas{} Topology can be controlled from user space to make changes to the scheduling policy. Take the example above: A user space daemon could monitor the system for changes relevant to the scheduling. Once it detects a change, it can proactively reconfigure the current Topology. In the example, it would create an instance of the \emph{ISA-Splitter} Component, the round-robin Component, and connect the Pipes accordingly. The request goes through the Runtime System Adapter, as the call to \cobas{} might be implemented as, \eg{}, a system call. The actual implementation depends strongly on the runtime system.
+
+\emph{Static Topologies} can always be converted to user space assisted \emph{dynamic Topologies} as they only set up the \cobas{} layout once. The situation is more complicated for \emph{dynamic Topologies} as the changes triggered from user space might interfere with the Topology logic and invalidate assumptions it made. However, in certain situations, it is also possible. Take, again, the example: The general processing cores can be managed by a \emph{dynamic Topology}, which is not necessarily influenced by changes induced from user space, hence making the old Topology a subset of the new one (\cf{}~\cref{fig:arch:topo_adaptive}).
+
+\subsubsection{Runtime System Assisted}
+
+The \cobas{} architecture allows the Topology logic to be changed during runtime. As Topologies, as well as the Components, are only loosely coupled to the system, they can be easily swapped. This process needs assistance from the runtime system to induce the new Topology. In the example above, the vendor of the processing accelerator could ship a scheduler layout that has the necessary changes. During the initialization of the processing accelerator, the new Topology could be loaded, while replacing the old one.
+
+Another approach than shipping a separate scheduler Topology could be the extraction and patching of the existing Topology. Compared to the runtime system controlled approach, this method has the benefit that, \eg{}, a user space tool could try and evaluate several new scheduler Topologies and finally submit the best one to the framework.
+
+\section{Scheduling Example}%
+\label{sec:arch:example}
+
+To achieve a better understanding of the interaction of the different elements of the \cobas{} framework and how it forms a complete scheduler, this section shows how a simple \cobas{} scheduler implementation behaves regarding different scheduler tasks. The example is based on a dual-core system that is supposed to have a priority based scheduling on the first core for compute intensive tasks and a round-robin scheduling on the second core for interactive tasks. The \cobas{} Topology that can enforce such behavior could consist of the following Component instances. Note that this Topology is only one way to implement a scheduler in \cobas{} with the behavior as described:
+\begin{itemize*}
+	\item A load-balancing instance that distributes the work among the two cores.
+	\item A priority instance that applies a priority based policy on the first core.
+	\item A round-robin instance that enforces a round-robin policy on the second core.
+	\item A Component that assigns a \ac{PE} affinity to every task.
+	\item A Component that assigns a priority to every task.
+\end{itemize*}
+
+\begin{figure}[b!] \centering
+	\includetikz{figures/chapter5-architecture/example/step0}
+	\caption[The initial state of the CoBaS scheduling example.]{The initial state of the \cobas{} scheduling example. Tasks are depicted as colored balls. Different balls with the same color indicate references to the same task. Yellow boxes are depicting \emph{Components} instances. The blue box represents the \emph{Broker} that is an integral part of the framework. The \emph{Runtime System Adapter} is not illustrated for a better comprehensibility. Note that the figure depicts the state of the whole system at a certain point in time. That means in particular that most tasks are referenced by multiple Pipes at once.}%
+	\label{fig:arch:example:step0}
+\end{figure}
+
+\Cref{fig:arch:example:step0} shows the layout of such a scheduler. For a better understanding, the tasks are referred to in the figures as well as in the subsequent text through pictograms of colored balls, \eg{}, \arraytaskball{red}{3.75pt}. Component instances are depicted as yellow boxes, whereas the Broker of the \cobas{} framework is illustrated as blue box. The Component instances of the load-balancer, round-robin policy enforcement, and priority policy enforcement are connected by Pipes that are holding references to the submitted tasks. A table in every figure summarizes the properties of each task before the changes depicted in that figure. On the first \ac{PE}, the task \arraytaskball{cyan}{3.75pt} is running, while the second \ac{PE} is currently idle. The Runtime System Adapter is left out from the figures for an improved comprehensibility. Every event that does not originate from a Component is assumed to originate from or have as a target the Runtime System Adapter or the framework itself. The figures in this section show the state of the system at a certain point in time. That means in particular that most tasks are referenced by multiple Pipes at once. For example in \cref{fig:arch:example:step0}, the task \arraytaskball{red}{3.75pt} is referenced by three Pipes: the initial Pipe and the two Pipes connected to the round-robin policy Component. Even though from a conceptional point of view the tasks are handed over from one Pipe to another, to be able to avoid unnecessary re-computations of the whole task sets on every change, every Pipe can hold its state and therefore reference to a task. This does not limit the framework as it is still possible to do the computation at every change if that is desired. However, it is also possible to only consider changes. The examples given in the subsequent sub-sections are based on the idea to only consider changes and therefore, only changes are applied to the Pipes through the steps explained in the examples.
+
+\Cref{sec:arch:example:step1,sec:arch:example:step2,sec:arch:example:step3,sec:arch:example:step4} explain the simulation of the following list of events that happen successively after the initial situation depicted in \cref{fig:arch:example:step0}:
+
+\begin{itemize*}
+	\item The next task for the second \ac{PE} is requested from the \cobas{} framework and subsequently dispatched by the runtime system.
+	\item A new task is submitted to the scheduler.
+	\item The priority of one of the tasks is changed.
+	\item The affinity to a certain \ac{PE} of one task is changed.
+\end{itemize*}
+
+\subsection{Example for a Task Selection}%
+\label{sec:arch:example:step1}
+
+\begin{figure}[b!] \centering
+	\includetikz{figures/chapter5-architecture/example/step1}
+	\caption[Example for the task selection by the CoBaS framework.]{Example for the task selection by the CoBaS framework. The next task for the second PE is requested by the runtime system and subsequently dispatched.}%
+	\label{fig:arch:example:step1}
+\end{figure}
+
+In the first operation of the example, the runtime system queries the \cobas{} framework for the next task that is supposed to run on the second \ac{PE} and dispatches it to that \ac{PE}. For that purpose, the runtime system invokes a function in the \emph{Runtime System Adapter} that selects the task. In the example, the \emph{Runtime System Adapter} takes the first task from the Pipe that is designated to the \ac{PE}~in~question. For the example, this is the far right lower Pipe. Therefore, the \emph{Runtime System Adapter} will report the \arraytaskball{blue}{3.75pt} task to the runtime system (\circled{1}~in~\cref{fig:arch:example:step1}). The \arraytaskball{blue}{3.75pt} task is then dispatched on the second \ac{PE}, which results in a notification on the \texttt{DISPATCH} topic generated by the \emph{Runtime System Adapter} (\circled{2}~in~\cref{fig:arch:example:step1}). The framework is by default subscribed to the \texttt{DISPATCH} topic as it always triggers a change in an initial Pipe (\circled{3}~in~\cref{fig:arch:example:step1}). However, also other Components could be interested in dispatch events; therefore, the event is processed through the \cobas{} notification system. The Runtime System Adapter removes the task from the initial Pipe and triggers a Pipe update (\circled{4}~in~\cref{fig:arch:example:step1}). This Pipe update and, therefore, the task removal is propagated through the pipeline: The Load-Balancing Component removes the tasks from its outgoing Pipes and triggers a Pipe update on its own (\circled{5}~in~\cref{fig:arch:example:step1}). The same happens in the Round-Robin Policy Component (\circled{6}~in~\cref{fig:arch:example:step1}), which finalizes the process of task selection and dispatching.
+
+\subsection{Example for a Task Submission}%
+\label{sec:arch:example:step2}
+
+\begin{figure}[b!] \centering
+	\includetikz{figures/chapter5-architecture/example/step2}
+	\caption[Submission of a new task to the CoBaS framework.]{Submission of a new task to the \cobas{} framework.}%
+	\label{fig:arch:example:step2}
+\end{figure}
+
+In this example, a new task is submitted to the scheduler. The framework is notified about the task transmission via the \emph{Runtime System Adapter} (\circled{1}~in~\cref{fig:arch:example:step2}). The notification is forwarded to the framework (\circled{2}~in~\cref{fig:arch:example:step2}) that puts the newly created \arraytaskball{orange}{3.75pt} task in the first Pipe of the Topology and causes a Pipe update that triggers the load-balancing Component instance (\circled{3}~in~\cref{fig:arch:example:step2}). Again like in the previous example regarding the task removal, in this example, the task addition is propagated through the pipeline. However, additional steps are necessary to do so. To assign the newly added task to one of its outgoing Pipes, the load-balancing Component has to acquire the affinities of the tasks as it might be supposed to run on a certain \ac{PE}. In order to do so, it sends a request for the \texttt{AFFINITY} topic to the \emph{Broker} (\circled{4}~in~\cref{fig:arch:example:step2}). During the instantiation of the Component instance, the affinities instance has registered for that topic as the responder, therefore the \emph{Broker} will forward this request to it (\circled{5}~in~\cref{fig:arch:example:step2}). The affinity Component will then reply with the default affinity, which allows the task to run on every \ac{PE}, as no specific affinity was submitted for the \arraytaskball{orange}{3.75pt} task (\circled{6}~in~\cref{fig:arch:example:step2}). The reply is then forwarded further by the \emph{Broker} to the originating Component instance (\circled{7}~in~\cref{fig:arch:example:step2}). The load-balancing instance can then assign the new task to one of its outgoing Pipes. It selects the lower Pipe that is connected to the round-robin Component, which causes a Pipe update for the round-robin Component (\circled{8}~in~\cref{fig:arch:example:step2}). The change in its incoming Pipe makes the round-robin Component change its outgoing Pipe by appending the new tasks to the existing ones. This operation, again, results in a Pipe update. As in the first step of the operation of the example, the update has no effect as the outgoing Pipe of the round-robin Component is the last one of the Pipeline (\circled{9}~in~\cref{fig:arch:example:step2}).
+
+The example would work the same way for a task that is not newly created but woken up after it was, \eg{}, blocked. The only difference is that the affinities Component might have already stored information about the task. As a result, it has to be submitted to the other outgoing Pipe of the load-balancing Component.
+
+\subsection{Example for a Change of a Task Priority}%
+\label{sec:arch:example:step3}
+
+\begin{figure}[b!] \centering
+	\includetikz{figures/chapter5-architecture/example/step3}
+	\caption{Change of the priority property of a task.}%
+	\label{fig:arch:example:step3}
+\end{figure}
+
+The third operation in the example changes the property of one of the tasks. The priority of the \arraytaskball{red}{3.75pt} task is changed from the default priority to the high priority level. The initial notification that triggers the change of priority comes from the \emph{Runtime System Adapter} (\circled{1}~in~\cref{fig:arch:example:step3}). The change could, for example, be initiated from user space either through a dedicated system call that is translated by the Runtime System Adapter to a notification or through a user space tool that can send notifications through a generic system call to the scheduler. In the example, both the Priorities Component and the Priority Policy Component are subscribed to the \code{PRIORITY} topic. The Priorities Component keeps track of all priorities of all processes, so it is natural that it is subscribed to that topic. The Priority Policy Component is subscribed to the topic, as a priority change might require an immediate change to the outgoing Pipe. Because of the subscriptions, the \emph{Broker} distributes the notifications to those two Components (\circled{2a} and \circled{2b}~in~\cref{fig:arch:example:step3}). The order of delivering the notifications is not deterministic. As the \arraytaskball{red}{3.75pt} task is currently not in the Pipes of the Priority Policy Component, the notification will simply be dropped by that Component. The Priorities Component will save the change for the specified task. As both the Load-Balancing and the Round-Robin Policy Component are not influenced by the priority, the change has no impact of the current task order in the system.
+
+\subsection{Example for a Change of a Task Affinity}%
+\label{sec:arch:example:step4}
+
+\begin{figure}[b!] \centering
+	\includetikz{figures/chapter5-architecture/example/step4}
+	\caption[Change of the affinity property of a task.]{Change of the affinity property of a task. Note that the steps for the acquisition of the priority of the task prior to step \circled{9*} are not shown. Refer to \cref{sec:arch:example:step2} for details on that process.}%
+	\label{fig:arch:example:step4}
+\end{figure}
+
+The last operation of the example changes the affinity of the \arraytaskball{red}{3.75pt} task. The initial step is the same as in the example above: A notification with the modification of the affinity from both \acp{PE} to an affinity towards only the first core is sent to the \emph{\cobas{} Broker} (\circled{1}~in~\cref{fig:arch:example:step4}). Both the Affinities Component as well as the Load-Balancing Component are subscribed to the \code{AFFINITY} topic. Again, the distribution of the notification by the \emph{Broker} to the subscribed Components is not deterministic (\circled{2a} and \circled{2b}~in~\cref{fig:arch:example:step4}). The Affinities Component will save the new affinity for the \arraytaskball{red}{3.75pt} task the same way as the Priorities Component saved the \arraytaskball{red}{3.75pt} task's priority in the operation above. However, contrary to the example above, the Load-Balancing Component does not simply drop the notification as the \arraytaskball{red}{3.75pt} task is in one of its Pipes. It conducts a migration of the task from the lower of its output Pipes to the upper one (\circled{3}~in~\cref{fig:arch:example:step4}). This action results in a Pipe update to both output Pipes subsequently (\circled{4} and \circled{7}~in~\cref{fig:arch:example:step4}) that is propagated through the connected Component instances (\circled{5} and \circled{8}~in~\cref{fig:arch:example:step4}). The Round-Robin Policy Component simply removes the task from its output Pipe and triggers an update on that Pipe (\circled{6}~in~\cref{fig:arch:example:step4}). However, the Priority Policy Component needs to query for the priority of the \arraytaskball{red}{3.75pt} task, which works analogously to the request of the affinity from the Load-Balancing Component presented in \cref{sec:arch:example:step2}. As the process was already described, it is not depicted in \cref{fig:arch:example:step4}, but only the resulting Pipe update is shown (\circled{9*}~in~\cref{fig:arch:example:step4}).
+
+\section{Composition}%
+\label{sec:prop:compo}
+
+To obtain a working and sensible scheduler, \cobas{} Components cannot be combined arbitrarily. Sometimes, those Components cannot be used together in a Topology at all; sometimes, they can only be utilized in a certain manner. Take for example a Component that enforces a \ac{FCFS} policy and another Component that applies the \ac{LCFS} policy. In a single-core system, these two Components cannot be combined in a meaningful way, as an instance of one of these Components will always change the order in a way that does not comply with the policy of the other Component. However, in a multi-core system, instances of these two Components can co-exist in a sensible manner, when used on different cores.
+
+This section first discusses general considerations regarding optimization goals for scheduling and the composition of partial solutions for those aims. The second part shows how \cobas{} Components can be classified and composed based on these considerations.
+
+\subsection{Composability}%
+\label{sec:prop:compo:ability}
+
+Composition is a technique that allows finding a solution for a problem by solving distinct aspects of that problem and combining those solvers to find the best overall option. The basis for this approach is the assumption that it is easier and more efficient to concentrate on different aspects of the whole problem in each component and optimize the partial solution. Looking only at one aspect at a time allows a better comprehension and therefore a potentially better solution.
+
+However, applying this technique requires certain degrees of freedom to solve the problem and can be considered a combinatorial problem. If two components use the same degree of freedom, they can come to contradicting decisions how to use it, making a composition suboptimal or even impossible. Take the following abstract scheduling example: A system requires the optimization towards two goals \(\mathfrak{X}\) and \(\mathfrak{Y}\). This could be, for example, responsiveness and energy efficiency. Assume a certain task set \(\tau_0 \ldots \tau_n\) with \(n \in \mathbb{N}\) to be scheduled. Furthermore, two value functions \(|\tau_i|_\mathfrak{X}\) and \(|\tau_i|_\mathfrak{Y}\) that calculate a value for each task regarding the goals are given. The parameter \(p_i\) is the position of task \(i\) in the computed schedule, \eg{}, for the next task \(p_i = 0\), for the second next task \(p_i = 1\), and so on. Moreover, a task can be selected to be never scheduled, resulting in \(p_i = \varnothing\):
+
+\begin{center}
+	\(|\tau_i|_\mathfrak{X} = \left\{ \begin{array}{ll}
+		i \cdot 2p_i & \mbox{if } p_i \neq \varnothing \\
+		- \infty     & \mbox{if } p_i = \varnothing
+	\end{array}\right.\)
+	\hspace{1cm} and \hspace{1cm}
+	\(|\tau_i|_\mathfrak{Y} = \left\{ \begin{array}{ll}
+		-i \cdot p_i & \mbox{if } p_i \neq \varnothing \\
+		- \infty     & \mbox{if } p_i = \varnothing
+	\end{array}\right.\)
+\end{center}
+
+The total value functions of the computed schedule regarding the goals \(\mathfrak{X}\) and \(\mathfrak{Y}\) for this example are defined as:
+
+\begin{center}
+	\(|\mathfrak{X}| = \displaystyle\sum_{i=0}^n |\tau_i|_\mathfrak{X}\) \hspace{1cm} and \hspace{1cm} \(|\mathfrak{Y}| = \displaystyle\sum_{i=0}^n |\tau_i|_\mathfrak{Y}\)
+\end{center}
+
+The value function for the whole system regarding the computed schedules is defined in this example as \(\Pi = |\mathfrak{X}| + |\mathfrak{Y}|\) and the optimization goal is \(\max\left\{ \Pi \right\}\). The optimal schedule for this problem is \(\tau_0 \rightarrow \tau_1 \rightarrow \ldots \rightarrow \tau_{n-1} \rightarrow \tau_n\).
+
+Now let us assume the problem gets decomposed in two components, one finding the optimal schedule for \(\mathfrak{X}\) and one for \(\mathfrak{Y}\) so that \(\max\left\{ |\mathfrak{X}| \right\}\) and \(\max\left\{ |\mathfrak{Y}| \right\}\) holds. For \(\mathfrak{X}\), this is the same solution as above, however, for \(\mathfrak{Y}\) the optimal solution would be \(\tau_n \rightarrow \tau_{n-1} \rightarrow \ldots \rightarrow \tau_1 \rightarrow \tau_0\).  Because the two results are completely contradicting, it is not possible to compose these two solutions. Looking closer at the two value functions for the optimization goals, it can be seen that the value function for \(\mathfrak{Y}\) is strictly dominated by the value function of \(\mathfrak{X}\), therefore, an optimization towards \(\mathfrak{Y}\) is in general not possible. This example is one extreme of the composition problem. The other extreme would be that both optimizations come to the same result, which is, for example, the case when the value function for \(\mathfrak{Y}\) is changed to \(\mathfrak{Z}\) as following:
+
+\begin{center}
+	\(|\tau_i|_\mathfrak{Z} = \left\{ \begin{array}{ll}
+		i \cdot p_i & \mbox{if } p_i \neq \varnothing \\
+		- \infty    & \mbox{if } p_i = \varnothing
+	\end{array}\right.\)
+\end{center}
+
+The value functions \(|\mathfrak{X}|\) and \(|\mathfrak{Z}|\) are only a linear combination of each other as \(|\mathfrak{X}| = 2 \cdot |\mathfrak{Z}|\). In such a case, the composition of two components optimizing for each goal separately is trivial as they should come to the same solution. The following paragraphs discuss the cases that lie between these two border cases in more detail.
+
+\subsubsection{Absolute Decisions}%
+\label{sec:prop:compo:ability:absolute}
+
+Some optimization goals may require that tasks are never scheduled, as, for example, a task is not suited to run on a specific \ac{PE} or the energy budget does not allow the execution right now, or that a task needs to be executed at a certain point, \eg{}, next, to improve responsiveness of the system. Take the following example that depicts the former of the two situations above. In the task set \(\tau_0 \ldots \tau_n\) with \(n \in \mathbb{N}\), the subset \(\tau_k \ldots \tau_n\) with \(k \in \mathbb{N} \wedge k < n\) is currently not suited to be executed. It shall be modeled through the optimization goal \(\mathfrak{A}\) with the following value function:
+
+\begin{center}
+	\(|\tau_i|_\mathfrak{A} = \left\{ \begin{array}{ll}
+		0        & \mbox{if } p_i \neq \varnothing \\
+		- \infty & \mbox{if } p_i = \varnothing
+	\end{array}\right\} \forall i < k
+	\text{\hspace{0.5cm} and \hspace{0.5cm} }
+	|\tau_i|_\mathfrak{A} = \left\{ \begin{array}{ll}
+		- \infty & \mbox{if } p_i \neq \varnothing \\
+		0        & \mbox{if } p_i = \varnothing
+	\end{array}\right\} \forall i \geq k\)
+\end{center}
+
+The optimization goal \(\mathfrak{A}\) is indifferent regarding the schedule for task \(\tau_0\) through \(\tau_{k-1}\), however, it requires tasks \(\tau_k\) through \(\tau_n\) never to be scheduled. A component optimizing for this goal requires a solution that simply excludes tasks \(\tau_k\) through \(\tau_n\) and does not have to care about the order of the other tasks.
+
+Now assume that schedule shall not only be optimized regarding the goal \(\mathfrak{A}\), but also regarding \(\mathfrak{X}\) from above. Having two distinct components, each optimizing regarding one of those two goals can be composed without any restriction in a subsequent order to achieve the optimal schedule.
+
+\subsubsection{Degrees of Freedom}%
+\label{sec:prop:compo:ability:freedom}
+
+As discussed above, the composition also depends on the degrees of freedom. Again, the impact is explained via an example. Take a system that consists of two \acp{PE} \(0\) and \(1\) and a new optimization goal \(\mathfrak{M}\) that depends on the assigned \ac{PE} \(c_i\) because the system might, \eg{}, be heterogeneous:
+
+\begin{center}
+	\(|\tau_i|_\mathfrak{M} = \left\{ \begin{array}{ll}
+		1 & \mbox{if } c_i = 0 \\
+		0 & \mbox{if } c_i = 1
+	\end{array}\right\} \forall i \in \left\{x | x\pmod 2 = 0 \right\}\)
+	\\ \vspace{2mm}
+	\(|\tau_i|_\mathfrak{M} = \left\{ \begin{array}{ll}
+		0 & \mbox{if } c_i = 0 \\
+		1 & \mbox{if } c_i = 1
+	\end{array}\right\} \forall i \in \left\{x | x\pmod 2 = 1 \right\}\)
+\end{center}
+
+Again as above, a component that optimizes for this goal can be combined with a component that optimizes for goal \(\mathfrak{X}\). In this example, the reason lies in the fact that the criterion for optimality only depends on the degree of freedom regarding the assignment to a \ac{PE} or the order respectively. This allows a sequential composition of those two components. The order is, again, not relevant as long as the component only touches one of the degrees of freedom, \ie{}, does not change the task order when it assigns tasks to a \ac{PE}.
+
+In current multi- and many-core systems, only two degrees of freedom exist: task order and assignment to \ac{PE}. However, by the wider introduction of \ac{FPGA} technology, additional degrees of freedom can emerge regarding the scheduling (\cf{}~\cref{sec:analysis:environment:reconf}).
+
+\subsubsection{Decision Refinement}%
+\label{sec:prop:compo:ability:refinement}
+
+Certain situations exist that allow a composition even though two optimization goals are bearing the same degree of freedom. An example is a priority based scheduling like the ULE scheduler~\cite{Roberson-2003-ULE}. It consists of two aspects: Each task is assigned to a priority group that is scheduled subsequently, beginning with the highest priority. Inside the priority groups, another scheduling scheme is applied regarding a specific optimization goal. This would result in the following model with the target \(\mathfrak{P}\) representing the priority and the goal \(\mathfrak{I}\) representing the scheduling inside the groups:
+
+\begin{center}
+	\(|\tau_i|_\mathfrak{P} = \left\{ \begin{array}{ll}
+		\displaystyle \left( i \bmod 3 \right) \cdot p_i & \mbox{if } p_i \neq \varnothing \\
+		- \infty                                         & \mbox{if } p_i = \varnothing
+	\end{array}\right.\)
+	\hspace{1cm} and \hspace{1cm}
+	\(|\tau_i|_\mathfrak{I} = \left\{ \begin{array}{ll}
+		-i \cdot p_i & \mbox{if } p_i \neq \varnothing \\
+		- \infty     & \mbox{if } p_i = \varnothing
+	\end{array}\right.\)
+\end{center}
+
+To achieve the scheduling described above, a particular composition is required. First, the component that enforces \(\mathfrak{P}\) has to be applied to the task set. It will group the incoming tasks in three groups:
+
+\begin{center}\vspace{-5mm} \[
+		\tau_0 \rightarrow \dots \rightarrow \tau_{\left\lfloor\frac{n}{3} \right\rfloor \cdot 3i} \rightarrow
+		\tau_1 \rightarrow \dots \rightarrow \tau_{\left\lfloor\frac{n}{3} \right\rfloor \cdot 3j + 1} \rightarrow
+		\tau_2 \rightarrow \dots \rightarrow \tau_{\left\lfloor\frac{n}{3} \right\rfloor \cdot 3k + 2} \] \[
+		\forall i \in \mathbb{N} \wedge \left\lfloor\textstyle\frac{n}{3} \right\rfloor \cdot 3i \leq n \text{\hspace{0.2cm}and\hspace{0.2cm}}
+		\forall j \in \mathbb{N} \wedge \left\lfloor\textstyle\frac{n}{3} \right\rfloor \cdot 3j + 1 \leq n \text{\hspace{0.2cm}and\hspace{0.2cm}}
+		\forall k \in \mathbb{N} \wedge \left\lfloor\textstyle\frac{n}{3} \right\rfloor \cdot 3k + 2 \leq n \]
+\end{center}
+
+Because the goal \(\mathfrak{P}\) is indifferent to the order of tasks inside the groups, the optimization of \(\mathfrak{I}\) can be applied to each cluster:
+\begin{center}\vspace{-5mm} \[
+		\underbrace{\tau_0 \rightarrow \dots \rightarrow \tau_{\left\lfloor\frac{n}{3} \right\rfloor \cdot 3i    }}_{\begin{array}{c}|\\\max\{|\mathfrak{I}|\}\\|\end{array}} \rightarrow
+		\underbrace{\tau_1 \rightarrow \dots \rightarrow \tau_{\left\lfloor\frac{n}{3} \right\rfloor \cdot 3j + 1}}_{\begin{array}{c}|\\\max\{|\mathfrak{I}|\}\\|\end{array}} \rightarrow
+		\underbrace{\tau_2 \rightarrow \dots \rightarrow \tau_{\left\lfloor\frac{n}{3} \right\rfloor \cdot 3k + 2}}_{\begin{array}{c}|\\\max\{|\mathfrak{I}|\}\\|\end{array}}
+	\]\vspace{-3mm}\[
+		\overbrace{\vphantom{I}\tau_{\left\lfloor\frac{n}{3} \right\rfloor \cdot 3i    } \rightarrow \dots \rightarrow \tau_0} \rightarrow
+		\overbrace{\vphantom{I}\tau_{\left\lfloor\frac{n}{3} \right\rfloor \cdot 3j + 1} \rightarrow \dots \rightarrow \tau_1} \rightarrow
+		\overbrace{\vphantom{I}\tau_{\left\lfloor\frac{n}{3} \right\rfloor \cdot 3k + 2} \rightarrow \dots \rightarrow \tau_2} \]
+\end{center}
+
+
+
+\subsection{Component Classification}%
+\label{sec:prop:composition:classification}
+
+Components in \cobas{} can be classified based on their functionality and the considerations of the section above. A Component does not necessarily only belong to one of those classes, but can also have properties of multiple classes at the same time.
+
+\subsubsection{Task Filtering Components}
+
+\emph{Task Filtering} Components are enforcing absolute decisions as discussed above. They have one incoming Pipe and one outgoing Pipe. They do not change the order of the incoming tasks but remove tasks from the pipeline (Figure~\ref{fig:features:filtering}). A Task Filtering Component can be integrated into every pipeline without restriction. However, it should be noted that the composition of multiple Task Filtering Components in one pipeline can lead to the removal of all tasks in the current scheduling epoch. The occurrence of such a situation is not caused by the composition itself but results from the fact that the resulting schedule is the one satisfying all specified optimization goals.
+
+\subsubsection{Task Ordering Components}
+
+Every Component that relies on defining a certain task order to create a solution participates in the class of \emph{Task Ordering} Components. These Components are connected to one input pipe and one output pipe. They apply certain rules to the set of current tasks that result in a certain task order to be submitted to the outgoing pipe or pipes (Figure~\ref{fig:features:ordering}). A task ordering pipe can, for example, apply the \ac{FCFS} policy to a task set.
+
+\subsubsection{Task Distributing Components}
+
+Components belonging to the class of \emph{Task Distributing} Components make use of the spatial aspect of process scheduling. They split one incoming Pipe to several outgoing Pipes while maintaining the relative order between Tasks (Figure~\ref{fig:features:distributing}). An example for a Task Distributing Component would be a load balancing implementation that distributes the tasks among \acp{PE} or a Component that sorts tasks according to their priority.
+
+\subsubsection{Task Consolidating Components}
+
+\emph{Task Consolidating} Components have different functionality from Task Distributing Components. They merge several Pipes (Figure~\ref{fig:features:consolidating}). Task Consolidating Components do not only touch the spatial but also the temporal aspect of scheduling as a new task order has to be defined on the outgoing pipes.
+
+\subsubsection{Task Annotating Components}
+
+Components of the \emph{task annotating} class are not necessarily connected to any Pipe. They store information about tasks that might be relevant to other Components or the rest of the system. The former information could be, for example, the priority of a task or the \ac{ISA} it can be executed on, the latter information could be the number of task switches since the system start or the current system load.
+
+\begin{figure}[t!]
+	\centering\vspace{5mm}
+	\begin{subfigure}[b]{0.48\textwidth}\centering
+		\includetikz{figures/chapter5-architecture/classes/filter}
+		\caption{Task Filtering Component}%
+		\label{fig:features:filtering}
+	\end{subfigure}%
+	\hfill %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc.
+	%(or a blank line to force the subfigure onto a new line)
+	\begin{subfigure}[b]{0.48\textwidth}\centering
+		\includetikz{figures/chapter5-architecture/classes/ordering}
+		\caption{Task Ordering Component}%
+		\label{fig:features:ordering}
+	\end{subfigure}
+	\\ \vspace{0.75cm}
+	\begin{subfigure}[b]{0.48\textwidth}\centering
+		\includetikz{figures/chapter5-architecture/classes/distribution}
+		\caption{Task Distributing Component}%
+		\label{fig:features:distributing}
+	\end{subfigure}%
+	\hfill %add desired spacing between images, e. g. ~, \quad, \qquad, \hfill etc.
+	%(or a blank line to force the subfigure onto a new line)
+	\begin{subfigure}[b]{0.48\textwidth}\centering
+		\includetikz{figures/chapter5-architecture/classes/consolidate}
+		\caption{Task Consolidating Component}%
+		\label{fig:features:consolidating}
+	\end{subfigure}
+	\caption[Component classes in CoBaS.]{Component classes in \cobas{}.}
+\end{figure}
+
+\section{Design Rationales}%
+\label{sec:arch:rationales}
+
+The two primary architectural decisions in the \cobas{} architecture are the use of the framework and the component approach. After describing and discussing such an approach in the scope of this dissertation, this section gives more insights about the rationales to use these two methods and discusses them. In particular, they are compared to possible alternatives.
+
+\subsection{On Frameworks and Libraries}
+
+Frameworks as a design pattern first became prominent in the late 1980s~\cite{Johnson-1988-Framework,Deutsch-1989-Framework}. Today, they are widely used for a huge variety of purposes, like application software~\cite{Cocoa,MFC,Qt}, web applications~\cite{Django,AngularJS,RoR}, or big data processing~\cite{Hadoop}, to name just a few.
+
+\Citeauthor{Tahchiev-2010-Junit} are defining a framework as follows:
+\vspace{5mm}
+\begin{shadequote}[r]{\Textcite[4]{Tahchiev-2010-Junit}}
+	A framework is a semi-complete application. A framework provides a reusable, common structure to share among applications. Developers incorporate the framework into their application and extend it to meet their specific needs. Frameworks differ from toolkits by providing a coherent structure, rather than a simple set of utility classes.
+\end{shadequote}
+
+Another definition for frameworks, in general, is given by \citeauthor{Gamma-1995-DesignPattnerns}:
+\vspace{5mm}
+\begin{shadequote}[r]{\Textcite[26\psq]{Gamma-1995-DesignPattnerns}}
+	The framework dictates the architecture \elide{} It will define the overall structure, its partitioning into classes and objects, the key responsibilities thereof, how the classes and objects collaborate \elide{} A framework predefines these design parameters so that you, the application designer/implementer, can concentrate on the specifics of your application. The framework captures the design decisions that are common to its application domain. Frameworks thus emphasize design reuse over code reuse, though a framework \elide{} you can put to work immediately.
+\end{shadequote}
+
+By these definitions, it seems feasible that the framework approach is perfectly suited to the challenges addressed by this dissertation. The \emph{application}~in~this context is the task or process scheduler of an arbitrary runtime system like an operating system. The user of the framework is the developer, implementing a scheduling policy for that runtime system.
+As it is feasible to apply the framework approach to the scheduling problem, the traits of the framework approach are beneficial to tackle the problem of process scheduling. The usage of a framework will allow a more structured approach to scheduler design and enable an easier reuse of existing scheduler designs in other runtime systems. Further benefits of the framework approach that are desirable for the purpose of this dissertation are noted by  \citeauthor{Gamma-1995-DesignPattnerns}: ``Not only can you build applications faster as a result, but the
+applications have similar structures. They are easier to maintain, and they seem
+more consistent to their
+users''~\cite[27]{Gamma-1995-DesignPattnerns}.
+
+Even though the framework approach appears to be fitting, the alternative has to be considered; that would be a \emph{library}. Libraries, in general, are collections of implementations for certain functionalities that can be used in user applications. A library offers a well-defined interface to fulfill the desired purpose. An example is the C standard library~\cite{C-2011} that implements commonly used functions like string handling, mathematical functions, or standard in- and output. For the in- and output example, the C standard library acts as an adapter between the C programs and the operating system. This exemplifies the relation between Libraries and programming patterns. The Library implementation uses the programming pattern to solve the problem. However, an arbitrary implementation of the C standard library does not necessarily address the problem for every environment. For example, there are distinct implementations of the C standard library for the Windows~\cite{WindowsC}, Linux~\cite{glibc}, and BSD operating systems~\cite{bsdlibc} that are not interchangeable even though they implement the same functionality and use the same programming pattern regarding the access of C programs to operating system services.
+
+As libraries are mostly a collection of implementations of common algorithms, they do not give the developer any kind of structure on how to solve a problem. Furthermore, they often are very fine grained regarding their functionality. For that reason, they are inferior for the purpose of this dissertation compared to frameworks. For developers, they would only offer algorithms for common problems but no facility to embed their work into. Moreover, it would be difficult to create an adaptive scheduler only based on libraries.
+
+Another perspective regarding the difference between libraries and frameworks is the \emph{inversion of control}~\cite[\cf{}][]{Fayad-1997-Frameworks}. With libraries, the programmer using the library is in control of the execution flow; the programmer's code calls the library functions. With a framework, it is usually the other way around. The framework uses and calls the code provided by the programmer. Therefore, the framework is in control of the execution flow. Regarding the proposed \cobas{} architecture, this characteristic is not an obvious reason for a decision. The \cobas{} approach can be seen from two perspectives: the developer of new scheduling policies and the runtime system itself. From the viewpoint of the scheduler developer, the framework approach seems more suitable as the main goal is to determine the task order. From the perspective of the runtime system, the \cobas{} framework itself can be considered as a library as it is invoked by the runtime system and implements a functionality needed by the runtime system. However, as the main focus of this dissertation is the creation of an architecture to create schedulers for future systems, the interest of the scheduling developer is also in focus.
+
+\subsection{On Components, Interfaces, Objects, and Modules}
+
+\begin{figure}[t!] \centering
+	\includetikz{figures/chapter5-architecture/cop}
+	\caption[Relation between structured, modular, object-oriented, and
+		component-oriented programming.]{Relation between structured, modular, object-oriented, and
+		component-oriented programming~\cite[19]{Froehlich-2003-COP}.}%
+	\label{fig:intro:cop}
+\end{figure}
+
+The \cobas{} framework as described in this chapter uses a component based approach. The basic idea of \ac{COP} dates back to \textcite{McIlroy-1969-SoftwareComponent} with a discussion in 1968. He advocated a software design principle that is comparable to industrial mass production, where component producers create generic components that are sold to application developers who compose those pre-made components to full applications for the end-user market. According to \textcite[8]{Szyperski-2002-ComponentSoftware}, components can be considered the software equivalent to what \acp{IC} are in hardware. There is no general definition for a software component, however, \textcite{Szyperski-2003-Factory} are listing five properties for a software component:
+
+\begin{itemize*}
+	\item multiple-use
+	\item non-context-specific
+	\item composable with other components
+	\item encapsulated (cannot be modified or, typically, even examined)
+	\item a unit of independent deployment and versioning.
+\end{itemize*}
+
+In the beginning, \ac{COP} was considered an alternative approach to \ac{OOP}. An example of this effort is the Objective-C programming
+language, even though it is mostly considered
+object-oriented today. The modern view on \ac{COP} is a higher-level programming
+paradigm that uses \ac{OOP} as well as modular programming to construct
+composable components (\cf{}~Figure~\ref{fig:intro:cop}).
+
+
+The subsequent sections are discussing properties of further programming approaches and why they were discarded for the purpose of this dissertation.
+
+\subsubsection{Interface-Based Programming}%
+\label{sec:rw:module:interface}
+
+The idea of interfaces in software development can be traced back to Dijkstra~\cite{Dijkstra-1968THEMultiprogrammingSystem} and Parnas~\cite{Parnas-1972-SoftwareModuleSpecification}. Before the introduction of the concept of \ac{OOP}, interfaces were used to distinguish a module or software component description from the actual implementation. In many programming languages, this difference became explicit in a way that interface descriptions are placed in separate files with distinct file extensions differentiating between the module description and implementation \eg{} \file{*.ads} and \file{*.adb}~in~Ada, \file{*.def} and \file{*.mod}~in~Modula-2, or \file{*.c} and \file{*.h}~in~C. Interfaces enabled reusability of existing implementation since it was unambiguous how to use a certain implementation.
+
+The term \emph{interface-based programming} was coined mainly by Pattison~\cite{Pattison-2000-DistributedApplications} and was thoroughly discussed by \textcite{Steinmann-2005-Interface-BasedProgramming}. Even though with the introduction of \ac{OOP} the modularity aspect of interface-based programming was replaced by the class concept, interface-based programming did not become obsolete. On the contrary, it is heavily used in \ac{OOP} languages and interfaces are even types on their own in languages like Java or \Csh{}.
+
+Even though the \emph{interface-based programming} would allow composition in general, it falls short for other aspects necessary for the purpose of this dissertation. For example, it makes no statement regarding the management of the functional implementation itself and therefore how to handle, \eg{}, different versions of an implementation or how to encapsulate functionality. The last aspects would make it hard to create reusable entities of scheduling policy implementations.
+
+\subsubsection{Object-Oriented Programming}
+
+\ac{OOP} is the next evolutionary step in programming languages after procedural programming. Instead of handling data and procedures or processing instructions separately, \ac{OOP} bundles them in \emph{objects}. The structure of objects is described by \emph{classes}. Therefore, \emph{objects} are instances of \emph{classes}. This structure significantly improves the modularity and reusability of the code. The concept of \emph{inheritance}, which is very common in \ac{OOP}, creates a hierarchy in the code and increases reusability even further.
+
+The idea of \ac{OOP} was introduced with the \emph{SIMULA} programming language~\cite{Holmevik-1994-Simula}, even though first ideas of objects and object-orientation were already available in the \emph{LISP} programming language~\cite{McCarthy-1960-LISP1,McCarthy-1962-LISP1.5}. A general overview on design patterns in \ac{OOP} is given by \textcite{Gamma-1995-DesignPattnerns}. The most popular programming languages today are object-oriented~\cite{tiobe-2015-may}.
+
+Even though intended for reusability and modularity, \ac{OOP} is sometimes criticized for not reaching that goal~\cite{Cardelli-1996-BadEngineeringProperties}. Particularly in respect to operating systems, it is also argued that \ac{OOP} programming is an inferior approach. \textcite[101--103]{Raymond-2003-ArtOfUNIX} argues in the UNIX context that \ac{OOP} has strong incentives for the programmer to introduce thick abstraction layers that destroy transparency. This claim can be backed by the fact that operating systems that offer an object-oriented interface to the userland use a procedural programming language for the kernel. Examples are Windows~NT derivatives~\cite{WRK}, OS~X~\cite{OSX}, the Be operating system~\cite{BeOS}. However, several operating systems use an \ac{OOP} language for the kernel like eCos~\cite{eCos} or Haiku~\cite{Haiku}, which succeeded the Be operating system.
+
+For the purpose of this dissertation, \ac{OOP} alone falls short to enable composition of different aspects of the scheduler. Furthermore, as \ac{OOP} focuses on encapsulation of complete entities in classes, this approach is not optimal for the given problem as not all areas of the scheduling can be seen as such an entity.
+
+\subsubsection{Modular Programming}
+
+The concept of modular programming became prominent with the first, and only, national symposium on modular programming~\cite{Barnett-1968-ModularProgramming}. Today, the idea of modular programming is widely spread and available on most higher-level programming languages. Modular programming introduces the concept of \emph{modules}\footnote{In some programming languages \eg{} Go~\cite{Go}, the term \emph{package} is used instead of \emph{module}.} that offer a certain functionality. In contrast to a simple library, modules offer their service through an interface (\cf{}~Section~\ref{sec:rw:module:interface}), therefore hiding details of the data processing inside the module.
+
+Even though the modular approach comes close to fulfilling the requirements necessary for the goals of the dissertation, it lacks the notion of types that would significantly limit an actual implementation of the proposed framework.

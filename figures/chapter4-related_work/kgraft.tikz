@@ -1,0 +1,40 @@
+\begin{scaletikzpicturetowidth}{0.95\textwidth}
+	\begin{tikzpicture}[scale=\tikzscale, every node/.style={transform shape}]
+		\draw[fill=gray!30] (0,5) {[rounded corners=0.5em] -- ++(0,0.75) -- ++(3,0)} -- ++(0,-0.75) -- cycle;
+		\draw (0,5) {[rounded corners=0.5em] -- ++(0,-5) -- ++(3,0)} -- ++(0,5);
+		\node at ($(0,5)!0.5!(3,5.75)$) {\code{kernel_func}};
+		\node at (1.5,4.2) {\thread{0.8}};
+		\node at (1.5,3.4) {\thread{0.8}};
+		\node at (1.5,2.5) {\code{buggy_func();}};
+		\node at (1.5,1.7) {\thread{0.8}};
+		\node at (1.5,0.9) {\thread{0.8}};
+		
+		\draw[fill=gray!30] (5.5,4.5) {[rounded corners=0.5em] -- ++(0,0.75) -- ++(3,0)} -- ++(0,-0.75) -- cycle;
+		\draw (5.5,4.5) {[rounded corners=0.5em] -- ++(0,-2) -- ++(3,0)} -- ++(0,2);
+		\node at ($(5.5,4.5)!0.5!(8.5,5.25)$) {\code{realitiy_check}};
+		\node at ($(5.5,2.5)!0.5!(8.5,4.5)$) {\breakC{Which universe\\are you\\coming from?}};
+
+		\draw[fill=gray!30] (11,6) {[rounded corners=0.5em] -- ++(0,0.75) -- ++(3,0)} -- ++(0,-0.75) -- cycle;
+		\draw (11,6) {[rounded corners=0.5em] -- ++(0,-2) -- ++(3,0)} -- ++(0,2);
+		\node at ($(11,6)!0.5!(14,6.75)$) {\code{buggy_func}};
+		\node[yshift=0.25em] at ($(11,4)!0.5!(14,6)$) {\thread{1.25}};
+
+		\draw[fill=gray!30] (11,1) {[rounded corners=0.5em] -- ++(0,0.75) -- ++(3,0)} -- ++(0,-0.75) -- cycle;
+		\draw (11,1) {[rounded corners=0.5em] -- ++(0,-2) -- ++(3,0)} -- ++(0,2);
+		\node at ($(11,1)!0.5!(14,1.75)$) {\code{fixed_func}};
+		\node[yshift=0.25em] at ($(11,-1)!0.5!(14,1)$) {\thread{1.25}};
+		
+		\draw[thick] (3,2.8) edge[out=0,in=180,->] (5.5,3.875);
+		\draw[thick] (8.5,3.75) edge[out=0,in=180,->] (11,6.375);
+		\draw[thick] (8.5,3.25) edge[out=0,in=180,->] (11,1.375);
+		\draw[thick] (12.5,4) {[rounded corners=0.5em] -- ++(0,-1.25) -- ++(2,0) -- ++(0,-4.5) -- ++(-8.5,0)} edge[out=180,in=0,->] (3,2.2);
+		\draw[thick, ->] (12.5,-1) -- ++(0,-0.75);
+		
+		\draw[<-, thick, rounded corners=0.5em] (1.5,5.75) -- node[anchor=west, pos=0.88] {\large per-process \emph{new universe} flags} ++(0,2.5);
+		\draw[->, thick, rounded corners=0.5em] (1.5,0) -- ++(0,-0.5) -- ++ (-2,0) -- ++(0,7) -- ++(1.5,0) -- ++(0,1.75);
+		
+		\draw[very thick, dot diameter=1.5pt, dot spacing=4pt, dots] (-2.5,7.5) -- ++(18,0);
+		\node[anchor=south west] at (-2.25,7.5) {\Large User Space};
+		\node[anchor=north west] at (-2.25,7.4) {\Large Kernel Space};
+	\end{tikzpicture}
+\end{scaletikzpicturetowidth}

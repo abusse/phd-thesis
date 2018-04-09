@@ -1,0 +1,51 @@
+\begin{scaletikzpicturetowidth}{0.95\textwidth}
+	\begin{tikzpicture}[scale=\tikzscale, every node/.style={transform shape}]
+		\definecolor{outerpipe}{gray}{0.5}
+		\definecolor{innerpipe}{gray}{0.8}
+		
+		\definecolor{shadow}{gray}{0.8}
+	
+		\path[draw, fill=Component, line width=1pt] (0,0) -- ++(22,0) -- ++(0,10) -- ++(-22,0) -- cycle;
+	
+		\path [top color = outerpipe, bottom color = outerpipe, middle color = innerpipe]
+				(-2,9) -- ++(3,0) arc (90:-90:-0.3 and 0.6) -- ++(-3,0) arc (-90:90:-0.3 and 0.6);	
+		\path [top color = innerpipe, bottom color = innerpipe, middle color = outerpipe]
+				(1,9) arc (90:-90:-0.3 and 0.6) arc (-90:90:0.3 and 0.6);
+		
+		\path[->, line width=2pt, draw, rounded corners=6pt, line cap=round] (0.8,8.4) -| (3.5,7);
+		
+		\path[draw, fill=white] (2.5,1.5) -- ++(3,0) -- ++(0,5) -- ++(-3,0) -- cycle;
+		\path[draw, fill=white] (2,1) -- ++(3,0) -- ++(0,5) -- ++(-3,0) -- cycle;
+		\path[draw, fill=white] (1.5,0.5) -- ++(3,0) -- ++(0,5) -- ++(-3,0) -- cycle;
+		
+		\node[anchor=north, align=center] at (3,5.5) {\textsf{Task Set}};
+		\node[anchor=north, align=center] at (3.5,6) {\textsf{Added Tasks}};
+		\node[anchor=north, align=center] at (4,6.5) {\textsf{Moved Tasks}};
+		
+		\path[<->, line width=2pt, draw, rounded corners=6pt, line cap=round] (5.6,4) -- (7.9,4);
+		\path[draw, fill=red!30, line width=0.66pt] (8,1) rectangle ++(6,6) node[pos=0.5] {\Huge \breakC{FPGA\vspace{0.5cm}\\Logic}};
+		\path[<->, line width=2pt, draw, rounded corners=6pt, line cap=round] (14.1,4) -- (16.4,4);
+		
+		\path[draw, fill=white, line width=0.66pt] (8,8) rectangle ++(6,1) node[pos=0.5] {\LARGE Software Layer};
+		\path[<->, line width=1pt, draw, rounded corners=6pt, line cap=round] (11,8) -- (11,7);
+		\path[->, line width=1.5pt, draw, rounded corners=6pt, line cap=round] (3,11) -| (10,9.1);
+		\node[anchor=south, align=center] at (6.5,11.1) {\LARGE Notification};
+		\path[->, line width=1.5pt, draw, rounded corners=6pt, line cap=round] (12,9.1) |- (19,11);
+		\node[anchor=south, align=center] at (15.5,11.1) {\LARGE Notification};
+		
+		\path[draw, fill=white] (17.5,1.5) -- ++(3,0) -- ++(0,5) -- ++(-3,0) -- cycle;
+		\path[draw, fill=white] (17,1) -- ++(3,0) -- ++(0,5) -- ++(-3,0) -- cycle;
+		\path[draw, fill=white] (16.5,0.5) -- ++(3,0) -- ++(0,5) -- ++(-3,0) -- cycle;
+		
+		\node[anchor=north, align=center] at (18,5.5) {\textsf{Task Set}};
+		\node[anchor=north, align=center] at (18.5,6) {\textsf{Added Tasks}};
+		\node[anchor=north, align=center] at (19,6.5) {\textsf{Moved Tasks}};
+		
+		\path [top color = outerpipe, bottom color = outerpipe, middle color = innerpipe]
+				(21,9) -- ++(3,0) arc (90:-90:-0.3 and 0.6) -- ++(-3,0) arc (-90:90:-0.3 and 0.6);	
+		\path [top color = innerpipe, bottom color = innerpipe, middle color = outerpipe]
+				(24,9) arc (90:-90:-0.3 and 0.6) arc (-90:90:0.3 and 0.6);
+				
+		\path[->, line width=2pt, draw, rounded corners=6pt, line cap=round] (18.5,7) |- (20.7,8.4);
+	\end{tikzpicture}
+\end{scaletikzpicturetowidth}

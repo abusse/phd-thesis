@@ -1,0 +1,56 @@
+\begin{scaletikzpicturetowidth}{\textwidth}
+	\begin{tikzpicture}[scale=\tikzscale, every node/.style={transform shape}]
+		\path [draw, fill=green!20, style=dashed] (-2.5,3.2) -- ++(11.2,0) -- ++(0,-8.2) -- ++(-11.2,0) -- cycle;
+		\path [draw, fill=gray!20, style=dashed]   (1.6,3) -- ++(6.9,0) -- ++(0,-6) -- ++(-6.9,0) -- cycle;
+		\node [align=left, anchor=north west] at (1.7,2.8) {\textsf{Native Scheduling}}; 
+		\node [align=left, anchor=north west] at (-2.4,3) {\textsf{\breakC{Support for a\\Foreign PE}}};
+
+		\node[rectangle, fill=Component, draw, anchor=west, minimum height=2.5cm, minimum width=2.2cm, inner sep=0] at (-2,0) (isa) {\breakC{ISA\\Demux}};
+		\node[rectangle, fill=Component, draw, anchor=west, minimum height=1cm, minimum width=2.2cm, inner sep=0] at (4,-4) (fcfs) {FCFS};
+
+		\node[rectangle, fill=Component, draw, anchor=west, minimum height=1cm, minimum width=2.2cm, inner sep=0] at (-1.7,-2.5) (isa-tagging) {ISA Tagging};
+		\node[rectangle, fill=Component, draw, anchor=west, minimum height=1cm, minimum width=2.2cm, inner sep=0] at (-2.2,-4) (tcb) {TCB Entry};
+
+		\node[rectangle, fill=Component, draw, anchor=west, minimum height=1.8cm, minimum width=2.2cm, inner sep=0] at (2,0) (load) {\breakC{Load-\\Balancing}};
+		\node[rectangle, fill=Component, draw, anchor=west, minimum height=1cm, minimum width=2.2cm, inner sep=0] at (6,2.33) (rr1) {\breakC{Head\\Queue}};
+		\node[rectangle, fill=Component, draw, anchor=west, minimum height=1cm, minimum width=2.2cm, inner sep=0] at (6,1) (rr2) {\breakC{Head\\Queue}};
+		\node[rectangle, fill=Component, draw, anchor=west, minimum height=1cm, minimum width=2.2cm, inner sep=0] at (6,-1) (rr3) {\breakC{Head\\Queue}};
+		\node[rectangle, fill=Component, draw, anchor=west, minimum height=1cm, minimum width=2.2cm, inner sep=0] at (6,-2.33) (rr4) {\breakC{Head\\Queue}};
+
+		\node[rectangle, fill=Component, draw, anchor=west, minimum height=1cm, minimum width=2.2cm, inner sep=0] at (2.2,-2) (affinity) {Affinity};
+
+		\path [->, draw, line width=0.75pt] (isa.30)  -- node[anchor=south, align=center]{} (load.150);
+		\path [->, draw, line width=0.75pt] (isa.15)  -- node[anchor=south, align=center]{} (load.165);
+		\path [->, draw, line width=0.75pt] (isa.345) -- node[anchor=south, align=center]{} (load.195);
+		\path [->, draw, line width=0.75pt] (isa.330) -- node[anchor=south, align=center]{} (load.210);
+
+		\path [->, draw, line width=0.75pt] (load.30)  -- node[anchor=south, align=center]{} (rr1.180);
+		\path [->, draw, line width=0.75pt] (load.15)  -- node[anchor=south, align=center]{} (rr2.180);
+		\path [->, draw, line width=0.75pt] (load.345) -- node[anchor=south, align=center]{} (rr3.180);
+		\path [->, draw, line width=0.75pt] (load.330) -- node[anchor=south, align=center]{} (rr4.180);
+
+		\path [->, draw, line width=0.75pt] (rr1.0) -- node[anchor=south, align=center]{} ++(2,0) node[anchor=west, align=center] {Native PE~0} ;
+		\path [->, draw, line width=0.75pt] (rr2.0) -- node[anchor=south, align=center]{} ++(2,0) node[anchor=west, align=center] {Native PE~1} ;
+		\path [->, draw, line width=0.75pt] (rr3.0) -- node[anchor=south, align=center]{} ++(2,0) node[anchor=west, align=center] {Native PE~$n$-1} ;
+		\path [->, draw, line width=0.75pt] (rr4.0) -- node[anchor=south, align=center]{} ++(2,0) node[anchor=west, align=center] {Native PE~$n$} ;
+
+		\path [->, draw, line width=0.75pt] (isa.319) -- ++(0.9,0) |- (fcfs.180);
+		\path [->, draw, line width=0.75pt] let \p1=(rr3.0) in (fcfs.0) -- (\x1,-4) -- ++(2,0) node[anchor=west, align=center] {Foreign PE} ;
+
+		\draw [decorate,decoration={brace,amplitude=5pt}] let \p1=(rr1.north east), \p2=(rr4.south east) in
+		(\x1 + 130, \y1) -- (\x2 + 130, \y2) node [midway, anchor=west, xshift=5pt] {\breakC{Used by the \\Built-In\\ Scheduling}};
+
+		\draw [decorate,decoration={brace,amplitude=5pt}] let \p1=(fcfs.north east), \p2=(fcfs.south east), \p3=(rr1.north east) in
+		(\x3 + 130, \y1) -- (\x3 + 130, \y2) node [midway, anchor=west, xshift=5pt] {\breakC{Used by the \\External PE \\Emulation}};
+
+		\path [<-, draw, line width=0.75pt] (isa.150) -- node[anchor=south, align=center]{} ++(-2,0);
+		\path [<-, draw, line width=0.75pt] (isa.165) -- node[anchor=south, align=center]{} ++(-2,0);
+		\path [<-, draw, line width=0.75pt] (isa.195) -- node[anchor=south, align=center]{} ++(-2,0);
+		\path [<-, draw, line width=0.75pt] (isa.210) -- node[anchor=south, align=center]{} ++(-2,0);
+		\path [<-, draw, line width=0.75pt] (isa.221) -- node[anchor=south, align=center]{} ++(-2,0);
+
+		\path (isa.180) -- node[anchor=center, align=center] {\textbullet~\textbullet~\textbullet} ++(-2.5,0);
+		\path (isa.0)   -- node[anchor=center, align=center] {\textbullet~\textbullet~\textbullet\,\,\,\,} (load.180);
+		\path (rr2.270) -- node[anchor=center, align=center] {\textbullet~\textbullet~\textbullet} (rr3.90);
+	\end{tikzpicture}
+\end{scaletikzpicturetowidth}

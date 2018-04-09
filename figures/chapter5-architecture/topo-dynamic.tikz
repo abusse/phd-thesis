@@ -1,0 +1,58 @@
+\begin{scaletikzpicturetowidth}{0.95\textwidth}
+\begin{tikzpicture}[scale=\tikzscale, every node/.style={transform shape}]
+	
+	\def\yoffset{0}
+	
+	\node[rectangle, draw, fill=Component, anchor=west, minimum height=1.8cm, minimum width=1.8cm, inner sep=0] at (2,0+\yoffset)    (load){\breakC{Load-\\Balancing}};
+	\node[rectangle, draw, fill=Component, anchor=west, minimum height=1cm, minimum width=1.8cm, inner sep=0]   at (6,2+\yoffset)    (rr1) {\breakC{Round-\\Robin}};
+	\node[rectangle, draw, fill=Component, anchor=west, minimum height=1cm, minimum width=1.8cm, inner sep=0]   at (6,0.66+\yoffset) (rr2) {\breakC{Round-\\Robin}};
+
+	
+	\path [->, draw] (0,0+\yoffset) -- node[anchor=south, align=center]{$p_1$} (load);
+	\path [->, draw] (load.30)      -- node[anchor=south, align=center]{$p_2$} (rr1.180);
+	\path [->, draw] (load.10)      -- node[anchor=south, align=center]{$p_3$} (rr2.180);
+
+	\path [->, draw] (rr1.0) -- node[anchor=south, align=center] {$p_4$} ++(2,0);
+	\path [->, draw] (rr2.0) -- node[anchor=south, align=center] {$p_5$} ++(2,0);
+
+	\def\yoffset{-4}
+
+	\node[rectangle, draw, fill=Component, anchor=west, minimum height=1.8cm, minimum width=1.8cm, inner sep=0] at (14,0+\yoffset)     (load){\breakC{Load-\\Balancing}};
+	\node[rectangle, draw, fill=Component, anchor=west, minimum height=1cm, minimum width=1.8cm, inner sep=0]   at (18,2+\yoffset)     (rr1) {\breakC{Round-\\Robin}};
+	\node[rectangle, draw, fill=Component, anchor=west, minimum height=1cm, minimum width=1.8cm, inner sep=0]   at (18,0.66+\yoffset)  (rr2) {\breakC{Round-\\Robin}};
+	\node[rectangle, draw, fill=Component, anchor=west, minimum height=1cm, minimum width=1.8cm, inner sep=0]   at (18,-0.66+\yoffset) (rr3) {\breakC{Round-\\Robin}};
+	
+	\path [->, draw] (12,0+\yoffset) -- node[anchor=south, align=center]{$p_1$} (load);
+	\path [->, draw] (load.30)       -- node[anchor=south, align=center]{$p_2$} (rr1.180);
+	\path [->, draw] (load.10)       -- node[anchor=south, align=center]{$p_3$} (rr2.180);
+	\path [->, draw] (load.350)      -- node[anchor=south, align=center]{$p_6$} (rr3.180);
+
+	\path [->, draw] (rr1.0) -- node[anchor=south, align=center] {$p_4$} ++(2,0);
+	\path [->, draw] (rr2.0) -- node[anchor=south, align=center] {$p_5$} ++(2,0);
+	\path [->, draw] (rr3.0) -- node[anchor=south, align=center] {$p_7$} ++(2,0);
+
+	\def\yoffset{-8}
+
+	\node[rectangle, draw, fill=Component, anchor=west, minimum height=1.8cm, minimum width=1.8cm, inner sep=0] at (2,0+\yoffset)     (load){\breakC{Load-\\Balancing}};
+	\node[rectangle, draw, fill=Component, anchor=west, minimum height=1cm, minimum width=1.8cm, inner sep=0]   at (6,2+\yoffset)     (rr1) {\breakC{Round-\\Robin}};
+	\node[rectangle, draw, fill=Component, anchor=west, minimum height=1cm, minimum width=1.8cm, inner sep=0]   at (6,0.66+\yoffset)  (rr2) {\breakC{Round-\\Robin}};
+	\node[rectangle, draw, fill=Component, anchor=west, minimum height=1cm, minimum width=1.8cm, inner sep=0]   at (6,-0.66+\yoffset) (rr3) {\breakC{Round-\\Robin}};
+	\node[rectangle, draw, fill=Component, anchor=west, minimum height=1cm, minimum width=1.8cm, inner sep=0]   at (6,-2+\yoffset)    (rr4) {\breakC{Round-\\Robin}};
+	
+	\path [->, draw] (0,0+\yoffset) -- node[anchor=south, align=center]{$p_1$} (load);
+	\path [->, draw] (load.30) -- node[anchor=south, align=center] {$p_2$} (rr1.180);
+	\path [->, draw] (load.10) -- node[anchor=south, align=center] {$p_3$} (rr2.180);
+	\path [->, draw] (load.350) -- node[anchor=south, align=center]{$p_6$} (rr3.180);
+	\path [->, draw] (load.330) -- node[anchor=south, align=center]{$p_8$} (rr4.180);
+
+	\path [->, draw] (rr1.0) -- node[anchor=south, align=center] {$p_4$} ++(2,0);
+	\path [->, draw] (rr2.0) -- node[anchor=south, align=center] {$p_5$} ++(2,0);
+	\path [->, draw] (rr3.0) -- node[anchor=south, align=center] {$p_7$} ++(2,0);
+	\path [->, draw] (rr4.0) -- node[anchor=south, align=center] {$p_9$} ++(2,0);
+
+\path [draw, bend left=40]  (11,1)  edge[->, line width=1pt] node[anchor=west, align=center, yshift=10pt] {\large \breakC{The third \\ PE arrives}} ++(4,-3); 
+
+\path [draw, bend right=40] (11,-9) edge[<-, line width=1pt] node[anchor=west, align=center, yshift=-10pt] {\large \breakC{The fourth \\ PE arrives}} ++(4,3); 
+
+\end{tikzpicture}
+\end{scaletikzpicturetowidth}

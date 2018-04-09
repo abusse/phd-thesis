@@ -1,0 +1,10 @@
+/*****************
+* CoBaS component
+*****************/
+do_somthing() {
+	foo();
+	...
+	fw_malloc();
+	...
+	bar();
+}

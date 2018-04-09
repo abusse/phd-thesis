@@ -1,0 +1,13 @@
+\begin{scaletikzpicturetowidth}{0.66\textwidth}
+\begin{tikzpicture}[scale=\tikzscale, every node/.style={transform shape}]
+	\draw[<->, line width=1.5pt] (0,0) -- ++(5,0);
+	
+	\node[draw, minimum width=1cm, minimum height=1cm, anchor=north] (pe1) at (1  ,-1) {PE};
+	\node[draw, minimum width=1cm, minimum height=1cm, anchor=north] (pe2) at (2.5,-1) {PE};
+	\node[draw, minimum width=1cm, minimum height=1cm, anchor=north] (pe3) at (4  ,-1) {PE};
+	
+	\draw[fill=black, line width=1pt] (pe1.north) -- ++(0,1) circle[radius=2.5pt];
+	\draw[fill=black, line width=1pt] (pe2.north) -- ++(0,1) circle[radius=2.5pt];
+	\draw[fill=black, line width=1pt] (pe3.north) -- ++(0,1) circle[radius=2.5pt];
+\end{tikzpicture}
+\end{scaletikzpicturetowidth}

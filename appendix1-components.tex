@@ -1,0 +1,243 @@
+\chapter{CoBaS Components}%
+\label{appendix:cobas}
+
+This appendix summarizes details on \cobas{} Components that were implemented for the prototype and mainly used during the quantitative evaluation in \cref{chap:study}. \Cref{appendix:components} gives an overview of all the implemented Components. \Cref{appendix:code} presents the source code of the Pipe update functions of the \emph{Head Queue} and \emph{Rusty} Components as used in particular in \cref{sec:studies:language}.
+
+\section{Implemented Components}%
+\label{appendix:components}
+
+Several components were implemented to test and evaluate the \cobas{} prototype. These components will be described subsequently. Besides a short description, the following Component properties are summarized in an introductory box:
+
+\begin{tabularx}{\columnwidth}{lX}
+	\textbf{Ingoing Pipes}       & The number of Pipes that can be connected as an input to a Component instance. Non-Fixed numbers indicate that the number of ingoing Pipes can be configured during instantiation. \\
+	\textbf{Outgoing Pipes}      & The number of Pipes that are leaving the Component instance. Non-Fixed numbers indicate that the number of outgoing Pipes can be configured during instantiation.                  \\
+	\textbf{Classification}      & Classification of the Component according to Section~\ref{sec:prop:composition:classification}.                                                                                    \\
+	\textbf{Topic Subscriptions} & The list of topics the component subscribes to.                                                                                                                                    \\
+	\textbf{Topic Responder}     & The list of topics the component acts as a Responder to.                                                                                                                           \\
+	\textbf{Topic Dependencies}  & The list of responders the component relies on.
+\end{tabularx}
+
+\vfill
+
+\tcbset{colback=white,
+colframe=black,
+colbacktitle=gray!30,
+coltitle=black,
+center title, width=\textwidth, tabularx={m{2.4cm}m{3.25cm}|m{3.1cm}m{2.5cm}}}
+
+\begin{center}\small
+	\begin{tcolorbox}[title=\textbf{\normalsize Head Queue Component (\texttt{0x01})}]
+		Ingoing Pipes  & \(1\)   & Topic Subscriptions & \emph{none} \\ \hline
+		Outgoing Pipes & \(1\)   & Topic Responder     & \emph{none} \\ \hline
+		Classification & Neutral & Topic Dependencies  & \emph{none} \\ \hline
+		\multicolumn{4}{m{0.965\textwidth}}{The \emph{Head Queue Component} is the simplest possible \cobas{} Component that utilizes the Pipe system. It consist of one ingoing and one outgoing Pipe. Its only functionality is to forward all changes from the ingoing to the outgoing Pipe. It was used primarily for testing and experimentation on the general functionality of the \cobas{} framework. It was also used to simulate a round-robin behavior as that is the default behavior of \cobas{} when new tasks are submitted to the framework.}
+	\end{tcolorbox}
+\end{center}\vspace{0.5cm}
+
+
+
+
+\begin{center}\small
+	\begin{tcolorbox}[title=\textbf{\normalsize First-Come, First-Served Component (\texttt{0x02})}]
+		Ingoing Pipes  & \(1\)    & Topic Subscriptions & \emph{none}      \\ \hline
+		Outgoing Pipes & \(1\)    & Topic Responder     & \emph{none}      \\ \hline
+		Classification & Ordering & Topic Dependencies  & \texttt{Lamport} \\ \hline
+		\multicolumn{4}{m{0.965\textwidth}}{The \emph{First-Come, First-Served Component} enforces, as the name implies, a \emph{FCFS} policy on the in-going tasks. It requires that a responder for the \texttt{Lamport} topic as it uses a \emph{Lamport} time to determine the task order.}
+	\end{tcolorbox}
+\end{center}\vspace{0.5cm}
+
+
+\begin{center}\small
+	\begin{tcolorbox}[title=\textbf{\normalsize Last-Come, First-Served Component (\texttt{0x03})}]
+		Ingoing Pipes  & \(1\)    & Topic Subscriptions & \emph{none}      \\ \hline
+		Outgoing Pipes & \(1\)    & Topic Responder     & \emph{none}      \\ \hline
+		Classification & Ordering & Topic Dependencies  & \texttt{Lamport} \\ \hline
+		\multicolumn{4}{m{0.965\textwidth}}{The \emph{Last-Come, First-Served Component} enforces, as the name implies, a \emph{LCFS} policy on the in-going tasks. It requires that a responder for the \texttt{Lamport} topic as it uses a \emph{Lamport} time to determine the task order.}
+	\end{tcolorbox}
+\end{center}\vspace{0.5cm}
+
+
+
+\begin{center}\small
+	\begin{tcolorbox}[title=\textbf{\normalsize Burn Component (\texttt{0x04})}]
+		Ingoing Pipes  & \(1\)   & Topic Subscriptions & \texttt{Burn} \\ \hline
+		Outgoing Pipes & \(1\)   & Topic Responder     & \emph{none}   \\ \hline
+		Classification & Neutral & Topic Dependencies  & \emph{none}   \\ \hline
+		\multicolumn{4}{m{0.965\textwidth}}{The \emph{Burn} Component works similar to the \emph{Head Queue} Component. However, in addition it is possible to assign a number of cycles that are burned in a busy wait loop. This feature was used to simulate more complex scheduling algorithms.
+
+			Each Component instance subscribes to the \texttt{Burn} topic that contains the number of cycles that will be burned at each update. The Component uses the same busy wait function as outlined in Listing~\ref{lst:eval:speed} on Page~\pageref{lst:eval:speed}. In the gem5 simulator, that results in 2500~simulator ticks or five clock cycles of the simulated CPU per burn cycle.}
+	\end{tcolorbox}
+\end{center}\vspace{0.5cm}
+
+
+
+\begin{center}\small
+	\begin{tcolorbox}[title=\textbf{\normalsize Depth Component (\texttt{0x05})}]
+		Ingoing Pipes  & \(1\)   & Topic Subscriptions & \texttt{Burn} \\ \hline
+		Outgoing Pipes & \(1\)   & Topic Responder     & \emph{none}   \\ \hline
+		Classification & Neutral & Topic Dependencies  & \emph{none}   \\ \hline
+		\multicolumn{4}{m{0.965\textwidth}}{The \emph{Depth} Component works in a similar way as the \emph{Burn} Component. However, it has an adjustable name of the Pipe update function to allow the differentiation between the update functions of different Component instances.}
+	\end{tcolorbox}
+\end{center}\vspace{0.5cm}
+
+
+
+\begin{center}\small
+	\begin{tcolorbox}[title=\textbf{\normalsize Rust Component (\texttt{0x09})}]
+		Ingoing Pipes  & \(1\)   & Topic Subscriptions & \emph{none} \\ \hline
+		Outgoing Pipes & \(1\)   & Topic Responder     & \emph{none} \\ \hline
+		Classification & Neutral & Topic Dependencies  & \emph{none} \\ \hline
+		\multicolumn{4}{m{0.965\textwidth}}{The \emph{Rust} Component has, by intention, exactly the same functionality as the \emph{Head Queue} Component. However, instead of being implemented in C as the rest of the \cobas{} prototype, the \emph{Rust} Component is implemented in Rust.}
+	\end{tcolorbox}
+\end{center}\vspace{0.5cm}
+
+
+
+
+\begin{center}\small
+	\begin{tcolorbox}[title=\textbf{\normalsize Task Distributor Component (\texttt{0x10})}]
+		Ingoing Pipes  & \(1\)                          & Topic Subscriptions & \texttt{CPU\_STATUS} \\ \hline
+		Outgoing Pipes & \(n \in \mathbb{N}^+\)         & Topic Responder     & \emph{none}          \\ \hline
+		Classification & Filtering, \mbox{Distributing} & Topic Dependencies  & \texttt{AFFINITY}    \\ \hline
+		\multicolumn{4}{m{0.965\textwidth}}{A crucial part of a multi-core scheduler is the distribution of tasks to \acp{PE} based on their affinity. In some operating systems like, \eg{} Linux or FreeBSD, some specific tasks are required to run on a certain CPU or required not to run on a certain CPU. Therefore, it is not possible to activate additional cores in those systems without enforcing the affinity. The \emph{Task Distributor} Component performs that task and can be considered a very minimalistic load balancing facility. It schedules all tasks on the first \ac{PE} except the task has to run on a specific \ac{PE} or cannot run on the first \ac{PE}.
+
+			The number of output Pipes are configured during the instantiation. The Component uses the \texttt{CPU\_STATUS} notification to keep track to which output Pipes tasks can be assigned. If a task requires to be scheduled on a specific \ac{PE}, but has not arrived yet, the Component will withhold this task until the \ac{PE} in question arrives. Furthermore, the Component depends on a Component instance that can response to the \texttt{AFFINITY} topic in order to determine the affinity of each task.}
+	\end{tcolorbox}
+\end{center}\vspace{0.5cm}
+
+
+
+\begin{center}\small
+	\begin{tcolorbox}[title=\textbf{\normalsize Task Mux Component (\texttt{0x11})}]
+		Ingoing Pipes  & \(m \in \mathbb{N}^+\)                                   & Topic Subscriptions & \texttt{CPU\_STATUS} \\ \hline
+		Outgoing Pipes & \(n \in \mathbb{N}^+\)                                   & Topic Responder     & \emph{none}          \\ \hline
+		Classification & Filtering,\,\, \mbox{Distributing}, \mbox{Consolidating} & Topic Dependencies  & \texttt{AFFINITY}    \\ \hline
+		\multicolumn{4}{m{0.965\textwidth}}{The \emph{Task Mux} Component works similarly to the \emph{Task Distributor} Component. However, instead of only one ingoing Pipe, it has a configurable number of ingoing Pipes that are determined during the instantiation.}
+	\end{tcolorbox}
+\end{center}
+
+
+
+\begin{center}\small
+	\begin{tcolorbox}[title=\textbf{\normalsize Load Balancer Component (\texttt{0x12})}]
+		Ingoing Pipes  & \(m \in \mathbb{N}^+\)                                   & Topic Subscriptions & \texttt{CPU\_STATUS} \\ \hline
+		Outgoing Pipes & \(n \in \mathbb{N}^+\)                                   & Topic Responder     & \emph{none}          \\ \hline
+		Classification & Filtering,\,\, \mbox{Distributing}, \mbox{Consolidating} & Topic Dependencies  & \texttt{AFFINITY}    \\ \hline
+		\multicolumn{4}{m{0.965\textwidth}}{The \emph{Load Balancer} Component works similarly to the \emph{Task Mux} Component. However, it additionally employs a real load balancing algorithm. The algorithm checks the load of the outgoing Pipelines and tries to achieve an equal distribution of the load among all outgoing Pipes. The balancing algorithm has a complexity of \(\mathcal{O}(n)\). The \emph{Load Balancer} Component implicitly assumes that the affinities are mapped 1:1 to its assigned outgoing Pipes.}
+	\end{tcolorbox}
+\end{center}
+
+
+
+\begin{center}\small
+	\begin{tcolorbox}[title=\textbf{\normalsize Advanced Balancer Component (\texttt{0x13})}]
+		Ingoing Pipes  & \(m \in \mathbb{N}^+\)                                   & Topic Subscriptions & \texttt{CPU\_STATUS} \\ \hline
+		Outgoing Pipes & \(n \in \mathbb{N}^+\)                                   & Topic Responder     & \emph{none}          \\ \hline
+		Classification & Filtering,\,\, \mbox{Distributing}, \mbox{Consolidating} & Topic Dependencies  & \texttt{AFFINITY}    \\ \hline
+		\multicolumn{4}{m{0.965\textwidth}}{The \emph{Advanced Balancer} Component works similar to the \emph{Balancer} Component. However, it can be configured with a mapping of \ac{PE} to outgoing Pipes. This feature can, for example, be used for a hierarchical scheduling when several \acp{PE} are mapped to one outgoing Pipe. This approach is illustrated in Figure\ref{fig:appendix:advanced_balancer}.}
+	\end{tcolorbox}
+\end{center}
+
+\begin{figure}[h!] \centering
+	\includetikz{figures/appendix1-components/advanced_balancer}
+	\caption{Mapping in the Advanced Balancer Component.}
+	\label{fig:appendix:advanced_balancer}
+\end{figure}
+
+
+
+\begin{center}\small
+	\begin{tcolorbox}[title=\textbf{\normalsize ISA Demux Component (\texttt{0x14})}]
+		Ingoing Pipes  & \(m \in \mathbb{N}^+\) & Topic Subscriptions & \texttt{ISA} \\ \hline
+		Outgoing Pipes & \(n \in \mathbb{N}^+\) & Topic Responder     & \emph{none}  \\ \hline
+		Classification & \mbox{Distributing}    & Topic Dependencies  & \texttt{ISA} \\ \hline
+		\multicolumn{4}{m{0.965\textwidth}}{The \emph{ISA Demux} Component distributes a stream of incoming tasks to its outgoing Pipes according to their \ac{ISA} requirements. During instantiation, asides of the outgoing Pipes themselves, the Component is supplied with a mapping which outgoing Pipe supports which \ac{ISA}. If a task is added, the Component will acquire the \ac{ISA} requirement of the task via the responder for the \texttt{ISA} topic. When the \ac{ISA} requirement of a task is changed while it is present in one of the outgoing Pipes, the Component will migrate it to a new, fitting outgoing Pipes. If no fitting outgoing Pipe is available for a task to fulfill its \ac{ISA} requirement, an error will be reported.}
+	\end{tcolorbox}
+\end{center}\vspace{0.5cm}
+
+
+\begin{center}\small
+	\begin{tcolorbox}[title=\textbf{\normalsize CPU Affinity Component (\texttt{0x20})}]
+		Ingoing Pipes  & \emph{none} & Topic Subscriptions & \texttt{AFFINITY} \\ \hline
+		Outgoing Pipes & \emph{none} & Topic Responder     & \texttt{AFFINITY} \\ \hline
+		Classification & Neutral     & Topic Dependencies  & \emph{none}       \\ \hline
+		\multicolumn{4}{m{0.965\textwidth}}{The \emph{Affinity} Component can store a \ac{PE} affinity for every task. The affinity can be retrieved through the responder system.}
+	\end{tcolorbox}
+\end{center}\vspace{0.5cm}
+
+
+
+\begin{center}\small
+	\begin{tcolorbox}[title=\textbf{\normalsize Lamport Component (\texttt{0x21})}]
+		Ingoing Pipes  & \emph{none} & Topic Subscriptions & \emph{none}      \\ \hline
+		Outgoing Pipes & \emph{none} & Topic Responder     & \texttt{LAMPORT} \\ \hline
+		Classification & Neutral     & Topic Dependencies  & \emph{none}      \\ \hline
+		\multicolumn{4}{m{0.965\textwidth}}{The \emph{Lamport} Component creates a Lamport time stamp for every task. Each time a new task is created, the time stamp is increased. Through the timestamp, it is possible to put the task in a relation to the arrival in the system. The time stamp is retrieved through the \texttt{LAMPORT} topic request.}
+	\end{tcolorbox}
+\end{center}\vspace{0.5cm}
+
+
+
+\begin{center}\small
+	\begin{tcolorbox}[title=\textbf{\normalsize Status Component (\texttt{0x22})}]
+		Ingoing Pipes  & \emph{none} & Topic Subscriptions & \emph{none}     \\ \hline
+		Outgoing Pipes & \emph{none} & Topic Responder     & \texttt{STATUS} \\ \hline
+		Classification & Neutral     & Topic Dependencies  & \emph{none}     \\ \hline
+		\multicolumn{4}{m{0.965\textwidth}}{The \emph{Status} Component is designed to retrieve several statics about the current state of the scheduler framework, \eg{}, the load of all or a specific Pipe. It responds to the \texttt{STATUS} topic request. The exact kind of information that shall be retrieved has to be specified in the request message.}
+	\end{tcolorbox}
+\end{center}\vspace{0.5cm}
+
+
+
+\begin{center}\small
+	\begin{tcolorbox}[title=\textbf{\normalsize TCB Entry Component (\texttt{0x23})}]
+		Ingoing Pipes  & \emph{none} & Topic Subscriptions & \texttt{TCB} \\ \hline
+		Outgoing Pipes & \emph{none} & Topic Responder     & \texttt{TCB} \\ \hline
+		Classification & Neutral     & Topic Dependencies  & \emph{none}  \\ \hline
+		\multicolumn{4}{m{0.965\textwidth}}{The \emph{TCB} Component can store a pointer in an arbitrary data set. The data set is assigned through a notification. The retrieval of the data can either be requested through a shallow copy, which is in general just the return of a reference, or a deep copy, which duplicates the data in the response message.}
+	\end{tcolorbox}
+\end{center}\vspace{0.5cm}
+
+
+
+\begin{center}\small
+	\begin{tcolorbox}[title=\textbf{\normalsize Marker Component (\texttt{0x24})}]
+		Ingoing Pipes  & \emph{none} & Topic Subscriptions & \texttt{TCB} \\ \hline
+		Outgoing Pipes & \emph{none} & Topic Responder     & \emph{none}  \\ \hline
+		Classification & Neutral     & Topic Dependencies  & \emph{none}  \\ \hline
+		\multicolumn{4}{m{0.965\textwidth}}{The \emph{Marker} Component was designed as a tracking facility to create markings in the call-trace of a system. The triggering of the \emph{Marker} Component through a notification will result in the execution of a code path that can be observed in the call trace of the system. The notification for this component is intended to be generated in user space and has no specific payload.}
+	\end{tcolorbox}
+\end{center}\vspace{0.5cm}
+
+
+
+\begin{center}\small
+	\begin{tcolorbox}[title=\textbf{\normalsize Termination Component (\texttt{0xFD})}]
+		Ingoing Pipes  & 1           & Topic Subscriptions & \emph{none} \\ \hline
+		Outgoing Pipes & \emph{none} & Topic Responder     & \emph{none} \\ \hline
+		Classification & Neutral     & Topic Dependencies  & \emph{none} \\ \hline
+		\multicolumn{4}{m{0.965\textwidth}}{The \emph{Termination} Component is a mandatory Component and used internally for the framework. It is used as an endpoint for the Pipe update chain and its Pipe is used by the scheduling function of the \cobas{} framework to acquire tasks for specific \acp{PE}.}
+	\end{tcolorbox}
+\end{center}\vspace{0.5cm}
+
+\vfill
+
+\section{Source Code Excerpts from the Prototype}%
+\label{appendix:code}
+
+\begin{center}
+	\begin{minipage}{0.95\textwidth}
+		\begin{listing}[H]
+			\captionsetup{margin=0pt}
+			\caption{Pipe update function of the Head Queue Component.}
+			\label{lst:eval:hqC}
+			\inputminted[fontsize=\scriptsize]{C}{listings/head_queue.c}
+		\end{listing}
+		\begin{listing}[H]
+			\captionsetup{margin=0pt}
+			\caption{Pipe update function of the Rust based Component.}
+			\label{lst:eval:hqRust}
+			\inputminted[fontsize=\scriptsize]{Rust}{listings/mod.rs}
+		\end{listing}
+	\end{minipage}
+\end{center}

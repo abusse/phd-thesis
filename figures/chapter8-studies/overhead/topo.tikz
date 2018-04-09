@@ -1,0 +1,29 @@
+\begin{scaletikzpicturetowidth}{0.95\textwidth}
+\begin{tikzpicture}[scale=\tikzscale, every node/.style={transform shape}]
+	
+	\node[rectangle, draw, anchor=west, minimum height=1cm, minimum width=1.8cm, inner sep=0, fill=yellow!30] at (2,0) (d1) {\breakC{Depth}};
+	\node[rectangle, draw, anchor=west, minimum height=1cm, minimum width=1.8cm, inner sep=0, fill=yellow!30] at (5,0) (d2) {\breakC{Depth}};
+	\node[rectangle, draw, anchor=west, minimum height=1cm, minimum width=1.8cm, inner sep=0, fill=yellow!30] at (10,0) (d3) {\breakC{Depth}};
+	\node[rectangle, draw, anchor=west, minimum height=1cm, minimum width=1.8cm, inner sep=0, fill=yellow!30] at (13,0) (d4) {\breakC{Depth}};
+	
+	\path [<-, draw] (d1.180) -- ++(-1.5,0);
+	\path [->, draw] (d1.0) -- (d2.180);
+	\path [->, draw] (d2.0) -- ++(1,0);
+	\path [->] (d2.0) -- node[anchor=center, align=center] {\textbullet~\textbullet~\textbullet} (d3.180);
+	\path [<-, draw] (d3.180) -- ++(-1,0);
+	\path [->, draw] (d3.0) -- (d4.180);
+	\path [->, draw] (d4.0) -- ++(1.5,0);
+
+	\node[rectangle, draw, anchor=west, minimum height=1cm, minimum width=1.8cm, inner sep=0, fill=yellow!30] at (1 ,1.95) (marker) {Marker};
+
+	\draw [decorate,decoration={brace,amplitude=5pt,raise=1pt}]
+	(d1.south east) -- (d1.south west) node [black,midway,yshift=-16pt] {\footnotesize Stage~0};
+	\draw [decorate,decoration={brace,amplitude=5pt,raise=1pt}]
+	(d2.south east) -- (d2.south west) node [black,midway,yshift=-16pt] {\footnotesize Stage~1};
+	\draw [decorate,decoration={brace,amplitude=5pt,raise=1pt}]
+	(d3.south east) -- (d3.south west) node [black,midway,yshift=-16pt] {\footnotesize Stage~$n$-1};
+	\draw [decorate,decoration={brace,amplitude=5pt,raise=1pt}]
+	(d4.south east) -- (d4.south west) node [black,midway,yshift=-16pt] {\footnotesize Stage~$n$};
+
+\end{tikzpicture}
+\end{scaletikzpicturetowidth}

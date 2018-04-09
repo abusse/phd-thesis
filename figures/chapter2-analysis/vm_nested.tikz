@@ -1,0 +1,167 @@
+\begin{scaletikzpicturetowidth}{0.95\textwidth}
+\begin{tikzpicture}[scale=\tikzscale, every node/.style={transform shape}]	
+	
+	\colorlet{processColor}{magenta!30!white}
+	\colorlet{threadColor}{orange!30!white}
+	\colorlet{vmColor}{cyan!30!white}
+	\colorlet{connection}{black!50!white}
+	
+	\def\xo{0}
+	\def\yo{0}
+	
+	\path[draw, fill=processColor, line width=0.75pt] (0+\xo,0+\yo) -- ++(3,0) -- ++(0,3) -- ++(-3,0) -- cycle;
+	\path (0.2+\xo,1.6+\yo) -- coordinate(title) (2.8+\xo,2.8+\yo);
+	\foreach \i in {0,...,3} {
+		\path[draw, fill=threadColor] (\i * 0.7 + 0.2 + \xo,0.2+\yo) -- ++(0.5,0) -- ++(0,0.5) -- ++(-0.5,0) -- cycle;
+		\path[draw, fill=threadColor] (\i * 0.7 + 0.2 + \xo,0.9+\yo) -- ++(0.5,0) -- ++(0,0.5) -- ++(-0.5,0) -- cycle;
+	}
+	\coordinate (bl_anchor_\xo) at (2.3+\xo,0.9+\yo);
+	\coordinate (br_anchor_\xo) at (2.8+\xo,0.9+\yo);
+	\coordinate (tr_anchor_\xo) at (2.8+\xo,1.4+\yo);
+	\coordinate (tl_anchor_\xo) at (2.3+\xo,1.4+\yo);
+	\node at (title) {\Large \bf Process};
+
+	\def\xo{4}
+	\def\yo{0}
+	
+	\draw[color=connection] (tl_anchor_0) -- (0+\xo,3+\yo);
+	\draw[color=connection] (tr_anchor_0) -- (3+\xo,3+\yo);
+	\draw[color=connection] (bl_anchor_0) -- (0+\xo,0+\yo);
+	\draw[color=connection] (br_anchor_0) -- (3+\xo,0+\yo);
+	\path[draw, fill=threadColor, line width=0.75pt] (0+\xo,0+\yo) -- ++(3,0) -- ++(0,3) -- ++(-3,0) -- cycle;
+	\path (0.2+\xo,1.6+\yo) -- coordinate(title) (2.8+\xo,2.8+\yo);
+	\foreach \i in {0,...,3} {
+		\path[draw, fill=vmColor] (\i * 0.7 + 0.2 + \xo,0.2+\yo) -- ++(0.5,0) -- ++(0,0.5) -- ++(-0.5,0) -- cycle;
+		\path[draw, fill=vmColor] (\i * 0.7 + 0.2 + \xo,0.9+\yo) -- ++(0.5,0) -- ++(0,0.5) -- ++(-0.5,0) -- cycle;
+	}
+	\coordinate (bl_anchor_\xo) at (2.3+\xo,0.9+\yo);
+	\coordinate (br_anchor_\xo) at (2.8+\xo,0.9+\yo);
+	\coordinate (tr_anchor_\xo) at (2.8+\xo,1.4+\yo);
+	\coordinate (tl_anchor_\xo) at (2.3+\xo,1.4+\yo);
+	\node at (title) {\Large \bf Thread};
+	
+	\def\xo{8}
+	\def\yo{0}
+	
+	\draw[color=connection] (tl_anchor_4) -- (0+\xo,3+\yo);
+	\draw[color=connection] (tr_anchor_4) -- (3+\xo,3+\yo);
+	\draw[color=connection] (bl_anchor_4) -- (0+\xo,0+\yo);
+	\draw[color=connection] (br_anchor_4) -- (3+\xo,0+\yo);
+	\path[draw, fill=vmColor, line width=0.75pt] (0+\xo,0+\yo) -- ++(3,0) -- ++(0,3) -- ++(-3,0) -- cycle;
+	\path (0.2+\xo,1.6+\yo) -- coordinate(title) (2.8+\xo,2.8+\yo);
+	\foreach \i in {0,...,3} {
+		\path[draw, fill=processColor] (\i * 0.7 + 0.2 + \xo,0.2+\yo) -- ++(0.5,0) -- ++(0,0.5) -- ++(-0.5,0) -- cycle;
+		\path[draw, fill=processColor] (\i * 0.7 + 0.2 + \xo,0.9+\yo) -- ++(0.5,0) -- ++(0,0.5) -- ++(-0.5,0) -- cycle;
+	}
+	\coordinate (bl_anchor_\xo) at (2.3+\xo,0.2+\yo);
+	\coordinate (br_anchor_\xo) at (2.8+\xo,0.2+\yo);
+	\coordinate (tr_anchor_\xo) at (2.8+\xo,0.7+\yo);
+	\coordinate (tl_anchor_\xo) at (2.3+\xo,0.7+\yo);
+	\node at (title) {\Large \bf \breakC{Virtual\\Machine}};
+
+	\def\xo{9}
+	\def\yo{-4}
+	
+	\draw[color=connection] (tl_anchor_8) -- (0+\xo,3+\yo);
+	\draw[color=connection] (tr_anchor_8) -- (3+\xo,3+\yo);
+	\draw[color=connection] (bl_anchor_8) -- (0+\xo,0+\yo);
+	\draw[color=connection] (br_anchor_8) -- (3+\xo,0+\yo);
+	
+	\path[draw, fill=processColor, line width=0.75pt] (0+\xo,0+\yo) -- ++(3,0) -- ++(0,3) -- ++(-3,0) -- cycle;
+	\path (0.2+\xo,1.6+\yo) -- coordinate(title) (2.8+\xo,2.8+\yo);
+	\foreach \i in {0,...,3} {
+		\path[draw, fill=threadColor] (\i * 0.7 + 0.2 + \xo,0.2+\yo) -- ++(0.5,0) -- ++(0,0.5) -- ++(-0.5,0) -- cycle;
+		\path[draw, fill=threadColor] (\i * 0.7 + 0.2 + \xo,0.9+\yo) -- ++(0.5,0) -- ++(0,0.5) -- ++(-0.5,0) -- cycle;
+	}
+	\coordinate (bl_anchor_\xo) at (2.3+\xo,0.9+\yo);
+	\coordinate (br_anchor_\xo) at (2.8+\xo,0.9+\yo);
+	\coordinate (tr_anchor_\xo) at (2.8+\xo,1.4+\yo);
+	\coordinate (tl_anchor_\xo) at (2.3+\xo,1.4+\yo);
+	\node at (title) {\Large \bf Process};
+
+	\def\xo{13}
+	\def\yo{-4}
+	
+	\draw[color=connection] (tl_anchor_9) -- (0+\xo,3+\yo);
+	\draw[color=connection] (tr_anchor_9) -- (3+\xo,3+\yo);
+	\draw[color=connection] (bl_anchor_9) -- (0+\xo,0+\yo);
+	\draw[color=connection] (br_anchor_9) -- (3+\xo,0+\yo);
+	\path[draw, fill=threadColor, line width=0.75pt] (0+\xo,0+\yo) -- ++(3,0) -- ++(0,3) -- ++(-3,0) -- cycle;
+	\path (0.2+\xo,1.6+\yo) -- coordinate(title) (2.8+\xo,2.8+\yo);
+	\foreach \i in {0,...,3} {
+		\path[draw, fill=vmColor] (\i * 0.7 + 0.2 + \xo,0.2+\yo) -- ++(0.5,0) -- ++(0,0.5) -- ++(-0.5,0) -- cycle;
+		\path[draw, fill=vmColor] (\i * 0.7 + 0.2 + \xo,0.9+\yo) -- ++(0.5,0) -- ++(0,0.5) -- ++(-0.5,0) -- cycle;
+	}
+	\coordinate (bl_anchor_\xo) at (2.3+\xo,0.9+\yo);
+	\coordinate (br_anchor_\xo) at (2.8+\xo,0.9+\yo);
+	\coordinate (tr_anchor_\xo) at (2.8+\xo,1.4+\yo);
+	\coordinate (tl_anchor_\xo) at (2.3+\xo,1.4+\yo);
+	\node at (title) {\Large \bf Thread};
+	
+	\def\xo{17}
+	\def\yo{-4}
+	
+	\draw[color=connection] (tl_anchor_13) -- (0+\xo,3+\yo);
+	\draw[color=connection] (tr_anchor_13) -- (3+\xo,3+\yo);
+	\draw[color=connection] (bl_anchor_13) -- (0+\xo,0+\yo);
+	\draw[color=connection] (br_anchor_13) -- (3+\xo,0+\yo);
+	\path[draw, fill=vmColor, line width=0.75pt] (0+\xo,0+\yo) -- ++(3,0) -- ++(0,3) -- ++(-3,0) -- cycle;
+	\path (0.2+\xo,1.6+\yo) -- coordinate(title) (2.8+\xo,2.8+\yo);
+	\foreach \i in {0,...,3} {
+		\path[draw, fill=processColor] (\i * 0.7 + 0.2 + \xo,0.2+\yo) -- ++(0.5,0) -- ++(0,0.5) -- ++(-0.5,0) -- cycle;
+		\path[draw, fill=processColor] (\i * 0.7 + 0.2 + \xo,0.9+\yo) -- ++(0.5,0) -- ++(0,0.5) -- ++(-0.5,0) -- cycle;
+	}
+	\coordinate (bl_anchor_\xo) at (2.3+\xo,0.2+\yo);
+	\coordinate (br_anchor_\xo) at (2.8+\xo,0.2+\yo);
+	\coordinate (tr_anchor_\xo) at (2.8+\xo,0.7+\yo);
+	\coordinate (tl_anchor_\xo) at (2.3+\xo,0.7+\yo);
+	\node at (title) {\Large \bf \breakC{Virtual\\Machine}};
+
+	\def\xo{18}
+	\def\yo{-8}
+	
+	\draw[color=connection] (tl_anchor_17) -- (0+\xo,3+\yo);
+	\draw[color=connection] (tr_anchor_17) -- (3+\xo,3+\yo);
+	\draw[color=connection] (bl_anchor_17) -- (0+\xo,0+\yo);
+	\draw[color=connection] (br_anchor_17) -- (3+\xo,0+\yo);
+	
+	\path[draw, fill=processColor, line width=0.75pt] (0+\xo,0+\yo) -- ++(3,0) -- ++(0,3) -- ++(-3,0) -- cycle;
+	\path (0.2+\xo,1.6+\yo) -- coordinate(title) (2.8+\xo,2.8+\yo);
+	\foreach \i in {0,...,3} {
+		\path[draw, fill=threadColor] (\i * 0.7 + 0.2 + \xo,0.2+\yo) -- ++(0.5,0) -- ++(0,0.5) -- ++(-0.5,0) -- cycle;
+		\path[draw, fill=threadColor] (\i * 0.7 + 0.2 + \xo,0.9+\yo) -- ++(0.5,0) -- ++(0,0.5) -- ++(-0.5,0) -- cycle;
+	}
+	\coordinate (bl_anchor_\xo) at (2.3+\xo,0.9+\yo);
+	\coordinate (br_anchor_\xo) at (2.8+\xo,0.9+\yo);
+	\coordinate (tr_anchor_\xo) at (2.8+\xo,1.4+\yo);
+	\coordinate (tl_anchor_\xo) at (2.3+\xo,1.4+\yo);
+	\node at (title) {\Large \bf Process};
+	
+	\def\xo{22}
+	\def\yo{-8}
+	
+	\draw[color=connection] (tl_anchor_18) -- (0+\xo,3+\yo);
+	\path (tr_anchor_18) -- coordinate(tempA) (3+\xo,3+\yo);
+	\draw[color=connection] (tr_anchor_18) -- (tempA);
+	\draw[color=connection] (bl_anchor_18) -- (0+\xo,0+\yo);
+	\path (br_anchor_18) -- coordinate(tempB) (3+\xo,0+\yo);
+	\draw[color=connection] (br_anchor_18) -- (tempB);
+	
+	\path[draw, fill=threadColor, line width=0.75pt] (0+\xo,0+\yo) -- ++(1,0) -- ++(0,3) -- ++(-1,0) -- cycle;
+	\path (0.2+\xo,1.6+\yo) -- coordinate(title) (2.8+\xo,2.8+\yo);
+	\foreach \i in {0,...,0} {
+		\path[draw, fill=vmColor] (\i * 0.7 + 0.2 + \xo,0.2+\yo) -- ++(0.5,0) -- ++(0,0.5) -- ++(-0.5,0) -- cycle;
+		\path[draw, fill=vmColor] (\i * 0.7 + 0.2 + \xo,0.9+\yo) -- ++(0.5,0) -- ++(0,0.5) -- ++(-0.5,0) -- cycle;
+	}
+	\coordinate (bl_anchor_\xo) at (2.3+\xo,0.9+\yo);
+	\coordinate (br_anchor_\xo) at (2.8+\xo,0.9+\yo);
+	\coordinate (tr_anchor_\xo) at (2.8+\xo,1.4+\yo);
+	\coordinate (tl_anchor_\xo) at (2.3+\xo,1.4+\yo);
+	
+	\path[fill=white] (22.6,-8.1) \irregularlinev{0.08cm}{3.5} -- ++(0,3.2) -- ++(0.7,0) -- ++(0,-3.2) -- cycle;
+	
+	
+	\node[anchor=west] at (23,-6.7) {\huge \textbullet\,\textbullet\,\textbullet};
+	
+\end{tikzpicture}
+\end{scaletikzpicturetowidth}

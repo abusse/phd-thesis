@@ -1,0 +1,26 @@
+\begin{scaletikzpicturetowidth}{0.9\textwidth}
+	\begin{tikzpicture}[scale=\tikzscale, every node/.style={transform shape}]\Large 
+		\draw (0,0) -- ++(2.5,0) [rounded corners=8pt] -- ++(0,0.75) -- ++(-2.5,0) [rounded corners=0pt] -- cycle;
+		\node[align=center, anchor=center] at (1.25,0.3) {\texttt{noop}};
+		\draw[<-, line width=0.66pt] (0,0.25) -- node[anchor=south] {call} ++(-1.75,0);
+		
+		\draw[fill=gray!30, rounded corners=8pt] (0,0) -- ++(0,-2.5) -- ++(2.5,0) [rounded corners=0pt] -- ++(0,2.5) -- ++(-2.5,0); 
+		\node[align=center, anchor=center] at (1.25,-1) {\breakC{Original\\Function}};
+		
+		\draw[->, line width=0.66pt] (2.5,0.25) -- node[anchor=south] {call} ++(1.75,0);
+		\draw (5,0.25) circle (0.75) node {ftrace};
+		
+		\draw[->, line width=0.66pt] (5.75,0.35) -- ++(1.75,0);
+		\draw[<-, line width=0.66pt] (5.75,0.15) -- ++(1.75,0);
+		\draw (8.25,0.25) circle (0.75) node {kpatch};
+		
+		\draw (6.25,-2.5) -- ++(2.5,0) [rounded corners=8pt] -- ++(0,0.75) -- ++(-2.5,0) [rounded corners=0pt] -- cycle;
+		\node[align=center, anchor=center] at (7.5,-2.2) {\texttt{noop}};
+		\draw[->, line width=0.66pt] (5,-0.5) -- node[anchor=east] {return} ++(0,-1.75) -- ++(1.25,0);
+		
+		\draw[rounded corners=8pt] (6.25,-2.5) -- ++(0,-2.5) -- ++(2.5,0) [rounded corners=0pt] -- ++(0,2.5) -- ++(-2.5,0); 
+		\node[align=center, anchor=center] at (7.5,-3.5) {\breakC{Replacement\\Function}};
+		\draw[->, line width=0.66pt] (6.25,-4.4) -- node[anchor=south] {return} ++(-1.75,0) -- ++(-6.25,0);
+		
+	\end{tikzpicture}
+\end{scaletikzpicturetowidth}

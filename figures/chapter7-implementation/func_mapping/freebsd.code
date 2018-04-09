@@ -1,0 +1,9 @@
+/*****************
+* FreeBSD specific
+* implemenation
+*****************/
+
+os_malloc()
+{
+	malloc();
+}

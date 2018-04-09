@@ -1,0 +1,70 @@
+\chapter{Quantitative Evaluation Data}%
+\label{appendix:data}
+
+This appendix records the data gathered in the experiments in \cref{sec:studies:scale,sec:studies:overhead,sec:studies:nas,sec:studies:performance}. The columns designated as \emph{runtime} depict the average runtime of the particular experiment or function. The number of data points to create the average is either given in the tables themselves or in the tables' caption. All confidence intervals are given for a confidence level of \SI{95}{\percent} in a Student's t-distribution.
+
+\section{Scalability and Contention}%
+\label{appendix:data:scale}
+
+\begin{figure} \centering
+	\includetikz{figures/chapter8-studies/scalability/pipe-scale-16c}
+	\caption[Results of the scalability experiments with 16~PEs.]{Results of the scalability experiments with 16~\acp{PE} using the \emph{gem5} Simulator and four different workload emulations. The average runtime of each function is given in simulation ticks (left y-axis) and real time (right y-axis) as a subject to the number of scheduling Pipes (\cf~\cref{sec:studies:scale:results}).}%
+	\label{fig:eval:scale-gem5-16c}
+\end{figure}
+
+\begin{figure} \centering
+	\includetikz{figures/chapter8-studies/scalability/pipe-scale-32c}
+	\caption[Results of the scalability experiments with 32~PEs.]{Results of the scalability experiments with 32~\acp{PE} using the \emph{gem5} Simulator and four different workload emulations. The average runtime of each function is given in simulation ticks (left y-axis) and real time (right y-axis) as a subject to the number of scheduling Pipes (\cf~\cref{sec:studies:scale:results}).}%
+	\label{fig:eval:scale-gem5-32c}
+\end{figure}
+
+\begin{figure} \centering
+	\includetikz{figures/chapter8-studies/scalability/pipe-scale-128c}
+	\caption[Results of the scalability experiments with 128~PEs.]{Results of the scalability experiments with 128~\acp{PE} using the \emph{gem5} Simulator and four different workload emulations. The average runtime of each function is given in simulation ticks (left y-axis) and real time (right y-axis) as a subject to the number of scheduling Pipes (\cf~\cref{sec:studies:scale:results}).}%
+	\label{fig:eval:scale-gem5-128c}
+\end{figure}
+
+\begin{figure} \centering
+	\includetikz{figures/chapter8-studies/scalability/pipe-scale-254c}
+	\caption[Results of the scalability experiments with 254~PEs.]{Results of the scalability experiments with 254~\acp{PE} using the \emph{gem5} Simulator and three different workload emulations. The average runtime of each function is given in simulation ticks (left y-axis) and real time (right y-axis) as a subject to the number of scheduling Pipes (\cf~\cref{sec:studies:scale:results}).}%
+	\label{fig:eval:scale-gem5-254c}
+\end{figure}
+
+\input{figures/chapter8-studies/scalability/pipe-scale-tbl-16c-0b.tex}
+\input{figures/chapter8-studies/scalability/pipe-scale-tbl-16c-500b.tex}
+\input{figures/chapter8-studies/scalability/pipe-scale-tbl-16c-1000b.tex}
+\input{figures/chapter8-studies/scalability/pipe-scale-tbl-16c-2000b.tex}
+\input{figures/chapter8-studies/scalability/pipe-scale-tbl-32c-0b.tex}
+\input{figures/chapter8-studies/scalability/pipe-scale-tbl-32c-500b.tex}
+\input{figures/chapter8-studies/scalability/pipe-scale-tbl-32c-1000b.tex}
+\input{figures/chapter8-studies/scalability/pipe-scale-tbl-32c-2000b.tex}
+\input{figures/chapter8-studies/scalability/pipe-scale-tbl-64c-0b.tex}
+\input{figures/chapter8-studies/scalability/pipe-scale-tbl-64c-500b.tex}
+\input{figures/chapter8-studies/scalability/pipe-scale-tbl-64c-1000b.tex}
+\input{figures/chapter8-studies/scalability/pipe-scale-tbl-64c-2000b.tex}
+\input{figures/chapter8-studies/scalability/pipe-scale-tbl-128c-0b.tex}
+\input{figures/chapter8-studies/scalability/pipe-scale-tbl-128c-500b.tex}
+\input{figures/chapter8-studies/scalability/pipe-scale-tbl-128c-1000b.tex}
+\input{figures/chapter8-studies/scalability/pipe-scale-tbl-128c-2000b.tex}
+\input{figures/chapter8-studies/scalability/pipe-scale-tbl-254c-0b.tex}
+\input{figures/chapter8-studies/scalability/pipe-scale-tbl-254c-500b.tex}
+\input{figures/chapter8-studies/scalability/pipe-scale-tbl-254c-1000b.tex}
+
+\clearpage
+\section{Composition Overhead}
+
+\input{figures/chapter8-studies/overhead/pipe-overhead-tbl.tex}
+
+\clearpage
+\section{Scheduler Performance}
+
+\vspace{-6mm}
+\input{figures/chapter8-studies/performance/nas-tbl.tex}
+\vspace{-3mm}
+\input{figures/chapter8-studies/performance/hackbench-tbl.tex}
+
+\clearpage
+\section{Scheduler Adaptation}
+
+\input{figures/chapter8-studies/adaptation/adaptation-tbl.tex}
+

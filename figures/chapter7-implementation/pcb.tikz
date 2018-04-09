@@ -1,0 +1,74 @@
+\begin{scaletikzpicturetowidth}{\textwidth}
+\begin{tikzpicture}[scale=\tikzscale, every node/.style={transform shape}]
+	
+	% "kernel TCB"
+	\node[align=center] at (2.5,10.7) {\large Runtime System TCB \\ (\eg~\code{struct task_struct} for Linux)};
+
+	\path[draw] (0,9) rectangle ++(5,1) node[pos=0.5] {\large \cobas TCB};
+	\path[draw, fill=gray!33] (0,0) rectangle ++(5,9) node[pos=0.5, rotate=90] {\LARGE Legacy Process Information};
+	
+	\draw [->, line width=0.75pt, rounded corners=0.2cm] (4.5,9.5) -- ++ (1.5,0) -- ++(1,0.5) -- ++(0.95,0);
+	\draw[fill=black] (4.5,9.5) circle (.66ex);
+
+\draw [->, line width=0.75pt, rounded corners=0.2cm] (8.5,9.5) -- ++ (-1.5,0) -- ++(-1,0.5) -- ++(-0.95,0);
+	\draw[fill=black] (8.5,9.5) circle (.66ex);
+
+	% "CoBaS TCB"
+	\node[align=center] at (10.5,10.7) {\large \cobas TCB};
+	\path[draw] (8,5.6) \irregularlineh{0.08cm}{5} -- ++(5,0) -- ++(0,4.4) -- ++(-5,0) -- cycle;
+
+	\path[draw] (8,9) -- ++(5,0);
+	\node[align=center, anchor=center] at (10.5,9.5) {\large Legacy TCB};
+	
+
+	\node[align=center, anchor=center] at (10.5,8.3) {\cobas Task Information \\ \eg Name, State, ID};
+
+	\path[draw] (8,7.6) -- ++(5,0);
+	\node[align=center, anchor=center] at (10.5,7.2) {Pipe $0$ TCB};
+
+	\path[draw] (8,6.8) -- ++(5,0);
+	\node[align=center, anchor=center] at (10.5,6.4) {Pipe $1$ TCB};
+	\path[draw] (8,6) -- ++(5,0);
+	
+	\path[draw] (8,4) -- ++(0,-2.2) \irregularlineh{0.08cm}{5} -- ++(5,0) -- ++(0,2.2) ;
+	\path[draw] (8,4) -- ++(0,1) \irregularlineh{0.08cm}{5} -- ++(5,0) -- ++(0,-1) ;
+
+	\path[draw] (8,4.6) -- ++(5,0);
+	\node[align=center, anchor=center] at (10.5,4.2) {Pipe $n$ TCB};
+
+	\path[draw] (8,3.8) -- ++(5,0);
+	\node[align=center, anchor=center] at (10.5,3.4) {Comp. Instance 1 TCB};	
+	
+	\path[draw] (8,3) -- ++(5,0);
+	\node[align=center, anchor=center] at (10.5,2.6) {Comp. Instance 2 TCB};	
+	\path[draw] (8,2.2) -- ++(5,0);	
+
+	\path[draw] (8,0.8) -- ++(5,0);
+	\node[align=center, anchor=center] at (10.5,0.4) {Comp. Instance $n$ TCB};
+	
+	\path[draw] (8,0) -- ++(0,1.2) \irregularlineh{0.08cm}{5} -- ++(5,0) -- ++(0,-1.2) -- ++(-5,0) ;	
+	
+	% Compoment PCBs
+	
+	\draw[->, line width=0.75pt, rounded corners=0.2cm] (12.7,0.4) -- (14.9,0.4);
+	\draw[fill=black] (12.7,0.4) circle (.5ex);
+	\path[draw, fill=gray!33] (15,0.4) rectangle ++(5,-3) node[pos=0.5] {\breakC{Per Task Information \\ for the $n$\textsuperscript{th} \\ Comp. Instance}};
+
+	\draw[->, line width=0.75pt, rounded corners=0.2cm] (12.7,2.6) .. controls (17.4,2.3) and (13.7,4.8) .. (18.4,4.5);	
+	\draw[fill=black] (12.7,2.6) circle (.5ex);
+	\path[draw, fill=gray!33] (18.5,4.5) rectangle ++(5,-3) node[pos=0.5] {\breakC{Per Task Information \\ for the $2$\textsuperscript{nd} \\ Comp. Instance}};	
+
+	\draw [->, line width=0.75pt, rounded corners=0.3cm] (12.7,3.4) .. controls (15.9,3.4) and (13.7,9) .. (16.9,9);	
+	\draw[fill=black] (12.7,3.4) circle (.5ex);
+	\path[draw, fill=gray!33] (17,9) rectangle ++(5,-3) node[pos=0.5] {\breakC{Per Task Information \\ for the $1$\textsuperscript{st} \\ Comp. Instance}};
+	
+	
+	% realms
+	
+	\draw [line width=0.75pt, style=dashed] (6.5,13) -- (6.5,-2.5);
+	
+	\node[align=center, anchor=center] at (2.5,12.5) {\huge \textsf{Runtime System}};
+	\node[align=center, anchor=center] at (16.5,12.5) {\huge \textsf{\cobas Framework}};
+	
+\end{tikzpicture}
+\end{scaletikzpicturetowidth}

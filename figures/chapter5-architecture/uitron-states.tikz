@@ -1,0 +1,35 @@
+\begin{scaletikzpicturetowidth}{0.7\textwidth}
+\begin{tikzpicture}[scale=\tikzscale, every node/.style={transform shape}]
+	\node[draw, thick, align=center, text width=2.25cm, minimum height=1cm] (ready)   at (0,0)   {\Large \sffamily ready};
+	\node[draw, thick, align=center, text width=2.25cm, minimum height=1cm] (running) at (10,0)   {\Large \sffamily running};
+	\node[draw, thick, align=center, text width=2.25cm, minimum height=1cm] (waiting) at (5,2.5) {\Large \sffamily waiting};
+	\node[draw, thick, align=center, text width=2.25cm, minimum height=1cm] (waitsus) at (5,5)   {\Large \sffamily waiting suspended};
+	\node[draw, thick, align=center, text width=2.25cm, minimum height=1cm] (suspend) at (5,7.5) {\Large \sffamily suspended};
+	\node[draw, thick, align=center, text width=2.25cm, minimum height=1cm] (dormant) at (5,10)  {\Large \sffamily dormant};
+	\node[draw, thick, align=center, text width=2.25cm, minimum height=1cm, densely dashed] (nonexist)at (5,12.5){\Large \sffamily non-existent};
+	
+	\draw[thick] (ready.345) edge[statea, ->]  node[anchor=north] {dispatch}  (running.195);
+	\draw[thick] (ready)     edge[statea, <-]  node[anchor=south] {preempted} (running);
+	\draw[thick, ->, shorten <=2pt, shorten >=2pt] (waiting.180) -- ($(waiting.180)!0.5!(waiting.180 -| ready.15)$)    -- ++(0,-1.25) node[anchor=west] {\breakC{release\\from waiting}} |- (ready.15) ;
+	\draw[thick, <-, shorten <=2pt, shorten >=2pt] (waiting.350) -- ($(waiting.350)!0.5!(waiting.350 -| running.165)$) -- ++(0,-1) node[anchor=east] {wait} |- (running.165) ;
+	\draw[thick,     shorten <=2pt, shorten >=2pt] (waiting.10) -- ++(2.5,0)                           |- (waitsus.east) ;
+	\draw[thick,                    shorten >=2pt] (waitsus.east)  ++(2.5,0) |- (suspend.10);
+	\draw[thick, ->,                shorten >=2pt] (suspend.10)    ++(2.5,0) |- (dormant.350) node[anchor=north, xshift=14mm] {\breakC{forcibly\\terminate}} ;
+	\draw[thick, ->, shorten <=2pt, shorten >=2pt] (running.90) |- (dormant.10) node[anchor=south, xshift=14mm] {exit} ;
+	\draw[thick, ->, shorten <=2pt, shorten >=2pt] (running.40) |- (nonexist.east) node[anchor=south, xshift=22mm] {exit and delete} ;;
+	\draw[thick, ->, shorten <=2pt, shorten >=2pt, densely dashed] (running.140) |- (suspend.350) node[anchor=north, xshift=14mm] {suspend} ;
+	\draw[thick] (waiting.50)    edge[statea, <-]  node[anchor=west] {resume} (waitsus.310);
+	\draw[thick] (waiting.130)   edge[statea, ->]  node[anchor=east] {suspend} (waitsus.230);
+	\draw[thick] (waitsus.north) edge[statea, ->]  node[anchor=east] {\breakC{release\\from waiting}} (suspend.south);
+	\draw[thick, ->, shorten <=2pt, shorten >=2pt] (suspend.120) to [out=120,in=60,looseness=6] (suspend.60);
+	\draw[thick] (dormant.50)    edge[statea, ->]  node[anchor=west] {delete} (nonexist.310);
+	\draw[thick] (dormant.130)   edge[statea, <-]  node[anchor=east] {create} (nonexist.230);
+
+	\draw[thick, ->, shorten <=2pt, shorten >=2pt] (ready.35) |- (suspend.190) node[anchor=north, xshift=-14mm] {suspend} ;	
+	\draw[thick, <-, shorten <=2pt, shorten >=2pt] (ready.67) |- (suspend.170) node[anchor=south, xshift=-14mm] {resume} ;	
+	\draw[thick, <-, shorten <=2pt, shorten >=2pt] (ready.113) |- (dormant.190) node[anchor=north east,xshift=-4mm] {activate} ;	
+	\draw[thick, ->, shorten <=2pt, shorten >=2pt] (ready.145) |- (dormant.170) node[anchor=south east,xshift=-4mm] {forcibly terminate} ;	
+	
+	\draw[thick, ->, shorten <=2pt, shorten >=2pt] (waitsus.190) to [out=190,in=170,looseness=7] (waitsus.170);
+\end{tikzpicture}
+\end{scaletikzpicturetowidth}

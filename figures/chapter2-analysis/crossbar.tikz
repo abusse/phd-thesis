@@ -1,0 +1,20 @@
+\begin{scaletikzpicturetowidth}{0.8\textwidth}
+\begin{tikzpicture}[scale=\tikzscale, every node/.style={transform shape}]
+	\node[draw, minimum width=1cm, minimum height=1cm, anchor=east] (pe1) at (0,1) {PE};
+	\node[draw, minimum width=1cm, minimum height=1cm, anchor=east] (pe2) at (0,-1) {PE};
+	\node[draw, minimum width=1cm, minimum height=1cm, anchor=west] (pe3) at (4,1) {PE};
+	\node[draw, minimum width=1cm, minimum height=1cm, anchor=west] (pe4) at (4,-1) {PE};
+	
+	\draw (0.75,2) -- ++(2.5,0) -- ++(0,-4) -- ++(-2.5,0) -- cycle;
+	
+	\draw[line width=1pt] (pe1.east) -- ++(0.75,0) coordinate(in1);
+	\draw[line width=1pt] (pe2.east) -- ++(0.75,0) coordinate(in2);
+	\draw[line width=1pt] (pe3.west) -- ++(-0.75,0) coordinate(in3);
+	\draw[line width=1pt] (pe4.west) -- ++(-0.75,0) coordinate(in4);
+	
+	\draw[line width=1pt, dashed] (in1) -- (in3);
+	\draw[line width=1pt, dashed] (in1) -- (in4);
+	\draw[line width=1pt, dashed] (in2) -- (in3);
+	\draw[line width=1pt, dashed] (in2) -- (in4);
+\end{tikzpicture}
+\end{scaletikzpicturetowidth}

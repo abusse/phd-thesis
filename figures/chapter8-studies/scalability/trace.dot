@@ -1,0 +1,46 @@
+digraph G {
+{ rank = same; "__schedule";"activate_task";}
+	ratio=0.85
+__fw_release [label="__fw_release\nCalls: 4004\nTotal: 82082.00\nAvg: 20500.00", style=filled, fillcolor="#00FE00"];
+lb_pipe_update -> term_pipe_update [label="[7.15%]\n5998913.00\n71295\nXXXXXXX"];
+fw_notify -> __fw_admit [label="[6.54%]\n19209415.50\n4003\nXXXXXXX"];
+__schedule -> fw_schedule [label="[2.33%]\n4605883.00\n41616\nXXXXXXX"];
+fw_task_destroy -> af_task_destroy [label="[20.63%]\n667402.50\n4004\nXXXXXXX"];
+__fw_admit -> burn_pipe_update [label="[96.72%]\n18578931.50\n4003\nXXXXXXX"];
+__schedule -> fw_notify [label="[81.97%]\n162253017.50\n71302\nXXXXXXX"];
+__fw_unblock -> burn_pipe_update [label="[96.94%]\n107583013.00\n22988\nXXXXXXX"];
+burn_pipe_update [label="burn_pipe_update\nCalls: 71302\nTotal: 278402916.50\nAvg: 3904559.71", style=filled, fillcolor="#B0004E"];
+fw_schedule [label="fw_schedule\nCalls: 41616\nTotal: 4605883.00\nAvg: 110675.77", style=filled, fillcolor="#00F707"];
+fw_notify -> __fw_unblock [label="[37.78%]\n110980921.00\n22988\nXXXXXXX"];
+fw_task_destroy [label="fw_task_destroy\nCalls: 4004\nTotal: 3235431.50\nAvg: 808049.83", style=filled, fillcolor="#00F905"];
+__fw_relinquish [label="__fw_relinquish\nCalls: 8660\nTotal: 41812413.50\nAvg: 4828223.27", style=filled, fillcolor="#00BE40"];
+lb_pipe_update -> fw_request [label="[1.87%]\n1568644.00\n35651\nXXXXXXX"];
+fw_notify [label="fw_notify\nCalls: 106301\nTotal: 293761666.00\nAvg: 2763489.21", style=filled, fillcolor="#C70037"];
+fw_task_free [label="fw_task_free\nCalls: 4004\nTotal: 10333032.50\nAvg: 2580677.45", style=filled, fillcolor="#00EF0F"];
+__fw_block [label="__fw_block\nCalls: 22987\nTotal: 471233.50\nAvg: 20500.00", style=filled, fillcolor="#00FE00"];
+__fw_admit [label="__fw_admit\nCalls: 4003\nTotal: 19209415.50\nAvg: 4798754.81", style=filled, fillcolor="#00E11D"];
+__fw_relinquish -> burn_pipe_update [label="[97.07%]\n40585896.00\n8660\nXXXXXXX"];
+__schedule [label="__schedule\nCalls: 41616\nTotal: 197934543.50\nAvg: 4756212.60", style=filled, fillcolor="#3300CB"];
+af_set_affinity [label="af_set_affinity\nCalls: 8006\nTotal: 260195.00\nAvg: 32500.00", style=filled, fillcolor="#00FE00"];
+__fw_dispatch [label="__fw_dispatch\nCalls: 35651\nTotal: 117777547.50\nAvg: 3303625.35", style=filled, fillcolor="#0048B6"];
+af_get_affinity [label="af_get_affinity\nCalls: 35651\nTotal: 1123006.50\nAvg: 31500.00", style=filled, fillcolor="#00FD01"];
+fw_task_free -> fw_task_destroy [label="[31.31%]\n3235431.50\n4004\nXXXXXXX"];
+fw_notify -> __fw_dispatch [label="[40.09%]\n117777547.50\n35651\nXXXXXXX"];
+fw_request -> af_get_affinity [label="[49.15%]\n1123006.50\n35651\nXXXXXXX"];
+lb_task_destroy [label="lb_task_destroy\nCalls: 4004\nTotal: 660123.00\nAvg: 164865.88", style=filled, fillcolor="#00FD01"];
+af_task_destroy [label="af_task_destroy\nCalls: 4004\nTotal: 667402.50\nAvg: 166683.94", style=filled, fillcolor="#00FD01"];
+fw_notify -> __fw_release [label="[0.03%]\n82082.00\n4004\nXXXXXXX"];
+fw_notify -> __fw_block [label="[0.16%]\n471233.50\n22987\nXXXXXXX"];
+fw_notify -> __fw_relinquish [label="[14.23%]\n41812413.50\n8660\nXXXXXXX"];
+term_pipe_update [label="term_pipe_update\nCalls: 71295\nTotal: 5998913.00\nAvg: 84142.13", style=filled, fillcolor="#00F509"];
+__fw_unblock [label="__fw_unblock\nCalls: 22988\nTotal: 110980921.00\nAvg: 4827776.27", style=filled, fillcolor="#0053AB"];
+lb_pipe_update [label="lb_pipe_update\nCalls: 71302\nTotal: 83870738.00\nAvg: 1176274.69", style=filled, fillcolor="#007D81"];
+burn_pipe_update -> lb_pipe_update [label="[30.13%]\n83870738.00\n71302\nXXXXXXX"];
+activate_task [label="activate_task\nCalls: 26991\nTotal: 131445418.00\nAvg: 4869972.14", style=filled, fillcolor="#0033CB"];
+activate_task -> fw_notify [label="[99.65%]\n130986571.00\n26991\nXXXXXXX"];
+__fw_dispatch -> burn_pipe_update [label="[94.80%]\n111655076.00\n35651\nXXXXXXX"];
+fw_task_destroy -> lb_task_destroy [label="[20.40%]\n660123.00\n4004\nXXXXXXX"];
+fw_request [label="fw_request\nCalls: 50733\nTotal: 2285039.00\nAvg: 45040.49", style=filled, fillcolor="#00FB03"];
+__schedule -> fw_task_free [label="[5.22%]\n10333032.50\n4004\nXXXXXXX"];
+fw_notify -> af_set_affinity [label="[0.09%]\n260195.00\n8006\nXXXXXXX"];
+}

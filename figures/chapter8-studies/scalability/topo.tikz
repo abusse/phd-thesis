@@ -1,0 +1,32 @@
+\begin{scaletikzpicturetowidth}{0.66\textwidth}
+	\begin{tikzpicture}[scale=\tikzscale, every node/.style={transform shape}]
+		
+		\node[rectangle, draw, anchor=west, minimum height=2.5cm, minimum width=1.8cm, inner sep=0, fill=Component] at (6,0) (load) {\breakC{Load-\\Balancing}};
+		\node[rectangle, draw, anchor=west, minimum height=1cm,   minimum width=1.8cm, inner sep=0, fill=Component] at (2,3) (rr1) {\breakC{Burn}};
+		\node[rectangle, draw, anchor=west, minimum height=1cm,   minimum width=1.8cm, inner sep=0, fill=Component] at (2,1.66) (rr2) {\breakC{Burn}};
+		\node[rectangle, draw, anchor=west, minimum height=1cm,   minimum width=1.8cm, inner sep=0, fill=Component] at (2,-1.66) (rr3) {\breakC{Burn}};
+		\node[rectangle, draw, anchor=west, minimum height=1cm,   minimum width=1.8cm, inner sep=0, fill=Component] at (2,-3) (rr4) {\breakC{Burn}};
+		
+		\path [->, draw] (load.40)  -- ++(2,0) node[anchor=west, align=center] {PE~0} ;
+		\path [->, draw] (load.20)  -- ++(2,0) node[anchor=west, align=center] {PE~1} ;
+		\path [->, draw] (load.340) -- ++(2,0) node[anchor=west, align=center] {PE~$n$-1} ;
+		\path [->, draw] (load.320) -- ++(2,0) node[anchor=west, align=center] {PE~$n$} ;
+		\path [<-, draw] (load.140) -- (rr1.0);
+		\path [<-, draw] (load.160) -- (rr2.0);
+		\path [<-, draw] (load.200)  -- (rr3.0);
+		\path [<-, draw] (load.220)  -- (rr4.0);
+		
+		\path (load.0) -- node[anchor=center, align=center] {\textbullet~\textbullet~\textbullet} ++(2,0);
+	
+		\path [<-, draw] (rr1.180) -- node[anchor=south, align=center]{Pipe~1}     ++(-2.5,0);
+		\path [<-, draw] (rr2.180) -- node[anchor=south, align=center]{Pipe~2}     ++(-2.5,0);
+		\path [<-, draw] (rr3.180) -- node[anchor=south, align=center]{Pipe~$p$-1} ++(-2.5,0);
+		\path [<-, draw] (rr4.180) -- node[anchor=south, align=center]{Pipe~$p$}   ++(-2.5,0);
+		
+		\node[anchor=west, minimum height=1cm, minimum width=1.8cm, inner sep=0] at (2,0) (dots) {\breakC{\textbullet \\ \textbullet \\ \textbullet}};
+		
+		\node[rectangle, draw, anchor=west, minimum height=1cm, minimum width=1.8cm, inner sep=0, fill=Component] at (6.25,2.75) (affinity) {Affinity};
+		\node[rectangle, draw, anchor=west, minimum height=1cm, minimum width=1.8cm, inner sep=0, fill=Component] at (8.5,2.75) (marker) {Marker};
+	
+	\end{tikzpicture}
+\end{scaletikzpicturetowidth}

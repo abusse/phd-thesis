@@ -1,0 +1,28 @@
+digraph G {
+{ rank = same; "__schedule";"activate_task";}depth_pipe_update_stage_0 [label="depth_pipe_update_stage_0\nCalls: 17631\nTotal: 16586379.00\nAvg: 940750.89", style=filled, fillcolor="#3500C9"];
+depth_pipe_update_stage_3 [label="depth_pipe_update_stage_3\nCalls: 17631\nTotal: 5262857.50\nAvg: 298500.23", style=filled, fillcolor="#009C62"];
+fw_notify [label="fw_notify\nCalls: 26226\nTotal: 20051510.00\nAvg: 764566.08", style=filled, fillcolor="#760088"];
+__fw_admit [label="__fw_admit\nCalls: 1001\nTotal: 1044043.00\nAvg: 1043000.00", style=filled, fillcolor="#00EB13"];
+__fw_relinquish [label="__fw_relinquish\nCalls: 2223\nTotal: 2319700.50\nAvg: 1043500.00", style=filled, fillcolor="#00D32B"];
+term_pipe_update [label="term_pipe_update\nCalls: 17631\nTotal: 1489819.50\nAvg: 84500.00", style=filled, fillcolor="#00E31B"];
+depth_pipe_update_stage_2 -> depth_pipe_update_stage_3 [label="[58.24%]\n5262857.50\n17631"];
+depth_pipe_update_stage_0 -> depth_pipe_update_stage_1 [label="[77.23%]\n12808933.50\n17631"];
+__fw_unblock -> depth_pipe_update_stage_0 [label="[88.64%]\n5171675.00\n5591"];
+fw_notify -> __fw_unblock [label="[29.10%]\n5834208.50\n5591"];
+__fw_admit -> depth_pipe_update_stage_0 [label="[88.69%]\n925925.00\n1001"];
+depth_pipe_update_stage_1 -> depth_pipe_update_stage_2 [label="[70.54%]\n9035895.50\n17631"];
+depth_pipe_update_stage_3 -> term_pipe_update [label="[28.31%]\n1489819.50\n17631"];
+__fw_relinquish -> depth_pipe_update_stage_0 [label="[88.64%]\n2056275.00\n2223"];
+fw_notify -> __fw_dispatch [label="[47.00%]\n9424304.00\n8816"];
+__fw_dispatch -> depth_pipe_update_stage_0 [label="[89.48%]\n8432504.00\n8816"];
+activate_task -> fw_notify [label="[98.46%]\n7178187.50\n6592"];
+__fw_unblock [label="__fw_unblock\nCalls: 5591\nTotal: 5834208.50\nAvg: 1043500.00", style=filled, fillcolor="#00926C"];
+fw_notify -> __fw_relinquish [label="[11.57%]\n2319700.50\n2223"];
+depth_pipe_update_stage_1 [label="depth_pipe_update_stage_1\nCalls: 17631\nTotal: 12808933.50\nAvg: 726500.68", style=filled, fillcolor="#0010EE"];
+depth_pipe_update_stage_2 [label="depth_pipe_update_stage_2\nCalls: 17631\nTotal: 9035895.50\nAvg: 512500.45", style=filled, fillcolor="#0056A8"];
+__fw_dispatch [label="__fw_dispatch\nCalls: 8816\nTotal: 9424304.00\nAvg: 1069000.00", style=filled, fillcolor="#004FAF"];
+fw_notify -> __fw_admit [label="[5.21%]\n1044043.00\n1001"];
+__schedule -> fw_notify [label="[63.18%]\n12693529.50\n17632"];
+__schedule [label="__schedule\nCalls: 8816\nTotal: 20090285.50\nAvg: 2278843.64", style=filled, fillcolor="#770087"];
+activate_task [label="activate_task\nCalls: 6592\nTotal: 7290251.00\nAvg: 1105924.00", style=filled, fillcolor="#007787"];
+}

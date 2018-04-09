@@ -1,0 +1,122 @@
+%BEGIN-SIDEWAY
+\begin{scaletikzpicturetoheight}{0.67\textheight}
+\begin{tikzpicture}[>={Stealth[scale=1]},line join=bevel,scale=\tikzscale, every node/.style={transform shape}]
+\setlength\tabcolsep{2pt}
+%%
+\begin{scope}
+\pgfsetstrokecolor{black}
+\definecolor{strokecol}{rgb}{1.0,1.0,1.0};
+\pgfsetstrokecolor{strokecol}
+\definecolor{fillcol}{rgb}{1.0,1.0,1.0};
+\pgfsetfillcolor{fillcol}
+\end{scope}
+\definecolor{fillcolor}{rgb}{.15000,.65,.81300};
+\node (__switch_to) at (838.05bp,868.0bp) [draw,fill=fillcolor,ellipse] {\small \begin{tabular}{c} \code{__switch_to} \\ \begin{tabular}{rr}Calls: & \multicolumn{1}{c}{1} \\ Time: & $105.50 \cdot 10^3$ \\ Avg.: & $105.50 \cdot 10^3$ \end{tabular}\end{tabular}};
+\definecolor{fillcolor}{rgb}{.15000,.65,.98300};
+\node (topo_get_termination) at (1283.0bp,199.0bp) [draw,fill=fillcolor,ellipse] {\small \begin{tabular}{c} \code{topo_get_termination} \\ \begin{tabular}{rr}Calls: & \multicolumn{1}{c}{1} \\ Time: & $9.00 \cdot 10^3$ \\ Avg.: & $9.00 \cdot 10^3$ \end{tabular}\end{tabular}};
+\definecolor{fillcolor}{rgb}{.15000,.65,.73650};
+\node (fw_pipe_clean) at (905.05bp,199.0bp) [draw,fill=fillcolor,ellipse] {\small \begin{tabular}{c} \code{fw_pipe_clean} \\ \begin{tabular}{rr}Calls: & \multicolumn{1}{c}{3} \\ Time: & $152.50 \cdot 10^3$ \\ Avg.: & $50.83 \cdot 10^3$ \end{tabular}\end{tabular}};
+\definecolor{fillcolor}{rgb}{.15000,.65,.96600};
+\node (fw_list_add_tail) at (200.0bp,117.0bp) [draw,fill=fillcolor,ellipse] {\small \begin{tabular}{c} \code{fw_list_add_tail} \\ \begin{tabular}{rr}Calls: & \multicolumn{1}{c}{2} \\ Time: & $17.00 \cdot 10^3$ \\ Avg.: & $8.50 \cdot 10^3$ \end{tabular}\end{tabular}};
+\definecolor{fillcolor}{rgb}{.15000,.65,.96600};
+\node (_raw_read_lock) at (1076.0bp,705.0bp) [draw,fill=fillcolor,ellipse] {\small \begin{tabular}{c} \code{_raw_read_lock} \\ \begin{tabular}{rr}Calls: & \multicolumn{1}{c}{2} \\ Time: & $16.00 \cdot 10^3$ \\ Avg.: & $8.00 \cdot 10^3$ \end{tabular}\end{tabular}};
+\definecolor{fillcolor}{rgb}{.15000,.65,.98300};
+\node (_raw_spin_lock_irq) at (1333.0bp,668.0bp) [draw,fill=fillcolor,ellipse] {\small \begin{tabular}{c} \code{_raw_spin_lock_irq} \\ \begin{tabular}{rr}Calls: & \multicolumn{1}{c}{1} \\ Time: & $9.00 \cdot 10^3$ \\ Avg.: & $9.00 \cdot 10^3$ \end{tabular}\end{tabular}};
+\definecolor{fillcolor}{rgb}{.20950,.94050,.15000};
+\node (fw_notify) at (1074.0bp,868.0bp) [draw,fill=fillcolor,ellipse] {\small \begin{tabular}{c} \code{fw_notify} \\ \begin{tabular}{rr}Calls: & \multicolumn{1}{c}{2} \\ Time: & $528.00 \cdot 10^3$ \\ Avg.: & $264.00 \cdot 10^3$ \end{tabular}\end{tabular}};
+\definecolor{fillcolor}{rgb}{.15000,.65,.97450};
+\node (rcu_note_context_switch) at (1449.0bp,868.0bp) [draw,fill=fillcolor,ellipse] {\small \begin{tabular}{c} \code{rcu_note_context_switch} \\ \begin{tabular}{rr}Calls: & \multicolumn{1}{c}{1} \\ Time: & $12.50 \cdot 10^3$ \\ Avg.: & $12.50 \cdot 10^3$ \end{tabular}\end{tabular}};
+\definecolor{fillcolor}{rgb}{.15000,.65,.85550};
+\node (term_pipe_update) at (771.05bp,362.0bp) [draw,fill=fillcolor,ellipse] {\small \begin{tabular}{c} \code{term_pipe_update} \\ \begin{tabular}{rr}Calls: & \multicolumn{1}{c}{1} \\ Time: & $84.50 \cdot 10^3$ \\ Avg.: & $84.50 \cdot 10^3$ \end{tabular}\end{tabular}};
+\definecolor{fillcolor}{rgb}{.15000,.65,.92350};
+\node (finish_task_switch) at (606.05bp,868.0bp) [draw,fill=fillcolor,ellipse] {\small \begin{tabular}{c} \code{finish_task_switch} \\ \begin{tabular}{rr}Calls: & \multicolumn{1}{c}{1} \\ Time: & $44.00 \cdot 10^3$ \\ Avg.: & $44.00 \cdot 10^3$ \end{tabular}\end{tabular}};
+\definecolor{fillcolor}{rgb}{.15000,.65,.95750};
+\node (__fw_block) at (911.05bp,615.0bp) [draw,fill=fillcolor,ellipse] {\small \begin{tabular}{c} \code{__fw_block} \\ \begin{tabular}{rr}Calls: & \multicolumn{1}{c}{1} \\ Time: & $21.50 \cdot 10^3$ \\ Avg.: & $21.50 \cdot 10^3$ \end{tabular}\end{tabular}};
+\definecolor{fillcolor}{rgb}{.15000,.65,.79600};
+\node (fw_schedule) at (1237.0bp,362.0bp) [draw,fill=fillcolor,ellipse] {\small \begin{tabular}{c} \code{fw_schedule} \\ \begin{tabular}{rr}Calls: & \multicolumn{1}{c}{1} \\ Time: & $116.50 \cdot 10^3$ \\ Avg.: & $116.50 \cdot 10^3$ \end{tabular}\end{tabular}};
+\definecolor{fillcolor}{rgb}{.15000,.65,.28600};
+\node (__fw_dispatch) at (513.05bp,705.0bp) [draw,fill=fillcolor,ellipse] {\small \begin{tabular}{c} \code{__fw_dispatch} \\ \begin{tabular}{rr}Calls: & \multicolumn{1}{c}{1} \\ Time: & $415.00 \cdot 10^3$ \\ Avg.: & $415.00 \cdot 10^3$ \end{tabular}\end{tabular}};
+\definecolor{fillcolor}{rgb}{.15000,.65,.88950};
+\node (_raw_spin_lock) at (540.05bp,199.0bp) [draw,fill=fillcolor,ellipse] {\small \begin{tabular}{c} \code{_raw_spin_lock} \\ \begin{tabular}{rr}Calls: & \multicolumn{1}{c}{8} \\ Time: & $62.00 \cdot 10^3$ \\ Avg.: & $7.75 \cdot 10^3$ \end{tabular}\end{tabular}};
+\definecolor{fillcolor}{rgb}{.15000,.65,.47300};
+\node (depth_pipe_update_stage_0) at (639.05bp,525.0bp) [draw,fill=fillcolor,ellipse] {\small \begin{tabular}{c} \code{depth_pipe_update_stage_0} \\ \begin{tabular}{rr}Calls: & \multicolumn{1}{c}{1} \\ Time: & $302.50 \cdot 10^3$ \\ Avg.: & $302.50 \cdot 10^3$ \end{tabular}\end{tabular}};
+\definecolor{fillcolor}{rgb}{.15000,.65,.98300};
+\node (fw_list_empty) at (1518.0bp,199.0bp) [draw,fill=fillcolor,ellipse] {\small \begin{tabular}{c} \code{fw_list_empty} \\ \begin{tabular}{rr}Calls: & \multicolumn{1}{c}{1} \\ Time: & $7.50 \cdot 10^3$ \\ Avg.: & $7.50 \cdot 10^3$ \end{tabular}\end{tabular}};
+\definecolor{fillcolor}{rgb}{1.00000,.15000,.15000};
+\node (__schedule) at (1152.0bp,1031.0bp) [draw,fill=fillcolor,ellipse] {\small \begin{tabular}{c} \code{__schedule} \\ \begin{tabular}{rr}Calls: & \multicolumn{1}{c}{1} \\ Time: & $988.00 \cdot 10^3$ \\ Avg.: & $988.00 \cdot 10^3$ \end{tabular}\end{tabular}};
+\definecolor{fillcolor}{rgb}{.15000,.65,.71100};
+\node (fw_pipe_remove) at (256.05bp,362.0bp) [draw,fill=fillcolor,ellipse] {\small \begin{tabular}{c} \code{fw_pipe_remove} \\ \begin{tabular}{rr}Calls: & \multicolumn{1}{c}{2} \\ Time: & $166.50 \cdot 10^3$ \\ Avg.: & $83.25 \cdot 10^3$ \end{tabular}\end{tabular}};
+\definecolor{fillcolor}{rgb}{.15000,.65,.88950};
+\node (fw_list_del) at (430.05bp,36.0bp) [draw,fill=fillcolor,ellipse] {\small \begin{tabular}{c} \code{fw_list_del} \\ \begin{tabular}{rr}Calls: & \multicolumn{1}{c}{4} \\ Time: & $64.00 \cdot 10^3$ \\ Avg.: & $16.00 \cdot 10^3$ \end{tabular}\end{tabular}};
+\draw [->] (fw_schedule) ..controls (1253.9bp,302.32bp) and (1262.8bp,270.65bp)  .. (topo_get_termination);
+\definecolor{strokecol}{rgb}{0.0,0.0,0.0};
+\pgfsetstrokecolor{strokecol}
+\draw (1314.5bp,281.0bp) node[xshift=-4.5mm] {\small \begin{tabular}{rr}\multicolumn{2}{c}{\normalsize [7.73\%]} \\ Calls: & \multicolumn{1}{c}{1} \\ Time: & $9.00 \cdot 10^3$ \\ Avg.: & $9.00 \cdot 10^3$ \end{tabular}};
+\draw [->] (__fw_dispatch) ..controls (411.34bp,636.13bp) and (320.0bp,561.74bp)  .. (281.05bp,471.5bp) .. controls (272.39bp,451.44bp) and (266.52bp,427.96bp)  .. (fw_pipe_remove);
+\draw (387.05bp,525.0bp) node[xshift=-4.5mm] {\small \begin{tabular}{rr}\multicolumn{2}{c}{\normalsize [20.12\%]} \\ Calls: & \multicolumn{1}{c}{1} \\ Time: & $83.50 \cdot 10^3$ \\ Avg.: & $83.50 \cdot 10^3$ \end{tabular}};
+\draw [->] (fw_schedule) ..controls (1320.8bp,330.95bp) and (1345.0bp,320.25bp)  .. (1366.0bp,308.5bp) .. controls (1403.7bp,287.51bp) and (1443.1bp,258.9bp)  .. (fw_list_empty);
+\draw (1495.5bp,281.0bp) node[xshift=-4.5mm] {\small \begin{tabular}{rr}\multicolumn{2}{c}{\normalsize [6.44\%]} \\ Calls: & \multicolumn{1}{c}{1} \\ Time: & $7.50 \cdot 10^3$ \\ Avg.: & $7.50 \cdot 10^3$ \end{tabular}};
+\draw [->] (term_pipe_update) ..controls (774.48bp,303.06bp) and (780.82bp,274.01bp)  .. (797.05bp,253.5bp) .. controls (806.26bp,241.86bp) and (818.62bp,232.49bp)  .. (fw_pipe_clean);
+\draw (847.05bp,281.0bp) node[xshift=-4.5mm] {\small \begin{tabular}{rr}\multicolumn{2}{c}{\normalsize [72.78\%]} \\ Calls: & \multicolumn{1}{c}{1} \\ Time: & $61.50 \cdot 10^3$ \\ Avg.: & $61.50 \cdot 10^3$ \end{tabular}};
+\draw [->] (fw_schedule) ..controls (1138.2bp,339.28bp) and (1105.6bp,332.09bp)  .. (1076.0bp,326.0bp) .. controls (1034.9bp,317.52bp) and (1022.5bp,323.13bp)  .. (983.05bp,308.5bp) .. controls (937.31bp,291.52bp) and (934.04bp,269.77bp)  .. (888.05bp,253.5bp) .. controls (840.77bp,236.77bp) and (711.24bp,219.11bp)  .. (_raw_spin_lock);
+\draw (1033.0bp,281.0bp) node[xshift=-4.5mm] {\small \begin{tabular}{rr}\multicolumn{2}{c}{\normalsize [13.73\%]} \\ Calls: & \multicolumn{1}{c}{2} \\ Time: & $16.00 \cdot 10^3$ \\ Avg.: & $8.00 \cdot 10^3$ \end{tabular}};
+\draw [->] (__fw_dispatch) ..controls (501.16bp,614.26bp) and (490.58bp,507.12bp)  .. (499.05bp,416.5bp) .. controls (504.65bp,356.52bp) and (518.77bp,288.42bp)  .. (_raw_spin_lock);
+\draw (546.55bp,444.0bp) node[xshift=-4.5mm] {\small \begin{tabular}{rr}\multicolumn{2}{c}{\normalsize [1.93\%]} \\ Calls: & \multicolumn{1}{c}{1} \\ Time: & $8.00 \cdot 10^3$ \\ Avg.: & $8.00 \cdot 10^3$ \end{tabular}};
+\draw [->] (fw_pipe_clean) ..controls (753.09bp,146.86bp) and (593.57bp,92.113bp)  .. (fw_list_del);
+\draw (788.05bp,118.0bp) node[xshift=-4.5mm] {\small \begin{tabular}{rr}\multicolumn{2}{c}{\normalsize [20.98\%]} \\ Calls: & \multicolumn{1}{c}{2} \\ Time: & $32.00 \cdot 10^3$ \\ Avg.: & $16.00 \cdot 10^3$ \end{tabular}};
+\draw [->] (__schedule) ..controls (1121.5bp,990.52bp) and (1117.4bp,983.95bp)  .. (1114.0bp,977.5bp) .. controls (1103.4bp,957.25bp) and (1094.4bp,933.55bp)  .. (fw_notify);
+\draw (1166.5bp,950.0bp) node[xshift=-4.5mm] {\small \begin{tabular}{rr}\multicolumn{2}{c}{\normalsize [53.44\%]} \\ Calls: & \multicolumn{1}{c}{2} \\ Time: & $528.00 \cdot 10^3$ \\ Avg.: & $264.00 \cdot 10^3$ \end{tabular}};
+\draw [->] (depth_pipe_update_stage_0) ..controls (765.7bp,499.27bp) and (800.01bp,487.68bp)  .. (829.05bp,471.5bp) .. controls (860.65bp,453.9bp) and (860.34bp,438.51bp)  .. (889.05bp,416.5bp) .. controls (960.09bp,362.05bp) and (1015.9bp,386.95bp)  .. (1059.0bp,308.5bp) .. controls (1070.8bp,287.08bp) and (1073.2bp,273.46bp)  .. (1059.0bp,253.5bp) .. controls (1049.7bp,240.23bp) and (1017.8bp,227.91bp)  .. (fw_pipe_clean);
+\draw (1098.0bp,362.0bp) node[xshift=-4.5mm] {\small \begin{tabular}{rr}\multicolumn{2}{c}{\normalsize [20.50\%]} \\ Calls: & \multicolumn{1}{c}{1} \\ Time: & $62.00 \cdot 10^3$ \\ Avg.: & $62.00 \cdot 10^3$ \end{tabular}};
+\draw [->] (__fw_block) ..controls (910.58bp,496.47bp) and (904.5bp,299.24bp)  .. (860.05bp,253.5bp) .. controls (843.71bp,236.69bp) and (713.51bp,218.72bp)  .. (_raw_spin_lock);
+\draw (955.55bp,444.0bp) node[xshift=-4.5mm] {\small \begin{tabular}{rr}\multicolumn{2}{c}{\normalsize [37.21\%]} \\ Calls: & \multicolumn{1}{c}{1} \\ Time: & $8.00 \cdot 10^3$ \\ Avg.: & $8.00 \cdot 10^3$ \end{tabular}};
+\draw [->] (depth_pipe_update_stage_0) ..controls (614.22bp,464.0bp) and (600.92bp,429.24bp)  .. (591.05bp,398.0bp) .. controls (574.65bp,346.12bp) and (559.68bp,285.39bp)  .. (_raw_spin_lock);
+\draw (638.55bp,362.0bp) node[xshift=-4.5mm] {\small \begin{tabular}{rr}\multicolumn{2}{c}{\normalsize [2.48\%]} \\ Calls: & \multicolumn{1}{c}{1} \\ Time: & $7.50 \cdot 10^3$ \\ Avg.: & $7.50 \cdot 10^3$ \end{tabular}};
+\draw [->] (fw_schedule) ..controls (1175.2bp,325.92bp) and (1161.9bp,317.22bp)  .. (1150.0bp,308.5bp) .. controls (1120.1bp,286.47bp) and (1119.6bp,271.46bp)  .. (1087.0bp,253.5bp) .. controls (1056.4bp,236.6bp) and (1020.0bp,224.35bp)  .. (fw_pipe_clean);
+\draw (1200.0bp,281.0bp) node[xshift=-4.5mm] {\small \begin{tabular}{rr}\multicolumn{2}{c}{\normalsize [24.89\%]} \\ Calls: & \multicolumn{1}{c}{1} \\ Time: & $29.00 \cdot 10^3$ \\ Avg.: & $29.00 \cdot 10^3$ \end{tabular}};
+\draw [->] (term_pipe_update) ..controls (705.37bp,327.08bp) and (689.84bp,317.84bp)  .. (676.05bp,308.5bp) .. controls (643.98bp,286.78bp) and (610.04bp,259.46bp)  .. (_raw_spin_lock);
+\draw (723.55bp,281.0bp) node[xshift=-4.5mm] {\small \begin{tabular}{rr}\multicolumn{2}{c}{\normalsize [8.88\%]} \\ Calls: & \multicolumn{1}{c}{1} \\ Time: & $7.50 \cdot 10^3$ \\ Avg.: & $7.50 \cdot 10^3$ \end{tabular}};
+\draw [->] (__schedule) ..controls (1218.4bp,995.66bp) and (1233.6bp,986.63bp)  .. (1247.0bp,977.5bp) .. controls (1278.9bp,955.93bp) and (1312.6bp,928.85bp)  .. (_raw_spin_lock_irq);
+\draw (1380.5bp,770.0bp) node[xshift=-4.5mm] {\small \begin{tabular}{rr}\multicolumn{2}{c}{\normalsize [0.91\%]} \\ Calls: & \multicolumn{1}{c}{1} \\ Time: & $9.00 \cdot 10^3$ \\ Avg.: & $9.00 \cdot 10^3$ \end{tabular}};
+\draw [->] (__schedule) ..controls (1206.6bp,994.7bp) and (1213.9bp,986.58bp)  .. (1219.0bp,977.5bp) .. controls (1243.1bp,934.73bp) and (1233.0bp,917.06bp)  .. (1233.0bp,868.0bp) .. controls (1233.0bp,868.0bp) and (1233.0bp,868.0bp)  .. (1233.0bp,525.0bp) .. controls (1233.0bp,485.66bp) and (1234.2bp,441.0bp)  .. (fw_schedule);
+\draw (1285.5bp,505.0bp) node[xshift=-4.5mm] {\small \begin{tabular}{rr}\multicolumn{2}{c}{\normalsize [11.79\%]} \\ Calls: & \multicolumn{1}{c}{1} \\ Time: & $116.50 \cdot 10^3$ \\ Avg.: & $116.50 \cdot 10^3$ \end{tabular}};
+\draw [->] (depth_pipe_update_stage_0) ..controls (459.2bp,506.73bp) and (365.95bp,492.38bp)  .. (333.05bp,471.5bp) .. controls (308.54bp,455.94bp) and (289.61bp,429.5bp)  .. (fw_pipe_remove);
+\draw (383.05bp,444.0bp) node[xshift=-4.5mm] {\small \begin{tabular}{rr}\multicolumn{2}{c}{\normalsize [27.44\%]} \\ Calls: & \multicolumn{1}{c}{1} \\ Time: & $83.00 \cdot 10^3$ \\ Avg.: & $83.00 \cdot 10^3$ \end{tabular}};
+\draw [->] (fw_pipe_remove) ..controls (267.95bp,304.24bp) and (275.52bp,276.62bp)  .. (286.05bp,253.5bp) .. controls (315.87bp,188.01bp) and (364.15bp,120.02bp)  .. (fw_list_del);
+\draw (387.05bp,199.0bp) node[xshift=-4.5mm] {\small \begin{tabular}{rr}\multicolumn{2}{c}{\normalsize [19.22\%]} \\ Calls: & \multicolumn{1}{c}{2} \\ Time: & $32.00 \cdot 10^3$ \\ Avg.: & $16.00 \cdot 10^3$ \end{tabular}};
+\draw [->] (fw_pipe_remove) ..controls (290.18bp,302.98bp) and (313.05bp,272.11bp)  .. (341.05bp,253.5bp) .. controls (375.14bp,230.83bp) and (418.45bp,217.54bp)  .. (_raw_spin_lock);
+\draw (391.05bp,281.0bp) node[xshift=-4.5mm] {\small \begin{tabular}{rr}\multicolumn{2}{c}{\normalsize [9.01\%]} \\ Calls: & \multicolumn{1}{c}{2} \\ Time: & $15.00 \cdot 10^3$ \\ Avg.: & $7.50 \cdot 10^3$ \end{tabular}};
+\draw [->] (fw_notify) ..controls (980.9bp,843.41bp) and (952.32bp,836.8bp)  .. (926.05bp,832.0bp) .. controls (863.49bp,820.58bp) and (845.61bp,830.44bp)  .. (784.05bp,814.5bp) .. controls (710.21bp,795.39bp) and (629.66bp,760.97bp)  .. (__fw_dispatch);
+\draw (836.55bp,787.0bp) node[xshift=-4.5mm] {\small \begin{tabular}{rr}\multicolumn{2}{c}{\normalsize [78.60\%]} \\ Calls: & \multicolumn{1}{c}{1} \\ Time: & $415.00 \cdot 10^3$ \\ Avg.: & $415.00 \cdot 10^3$ \end{tabular}};
+\draw [->] (fw_pipe_remove) edge[bend right=20] (fw_list_add_tail);
+\draw (245.05bp,220.0bp) node[xshift=-4.5mm] {\small \begin{tabular}{rr}\multicolumn{2}{c}{\normalsize [10.21\%]} \\ Calls: & \multicolumn{1}{c}{2} \\ Time: & $17.00 \cdot 10^3$ \\ Avg.: & $8.50 \cdot 10^3$ \end{tabular}};
+\draw [->] (__fw_dispatch) ..controls (557.61bp,641.35bp) and (586.59bp,599.94bp)  .. (depth_pipe_update_stage_0);
+\draw (651.55bp,615.0bp) node[xshift=-4.5mm] {\small \begin{tabular}{rr}\multicolumn{2}{c}{\normalsize [72.89\%]} \\ Calls: & \multicolumn{1}{c}{1} \\ Time: & $302.50 \cdot 10^3$ \\ Avg.: & $302.50 \cdot 10^3$ \end{tabular}};
+\draw [->] (__schedule) ..controls (1050.5bp,1005.8bp) and (1013.9bp,993.46bp)  .. (983.05bp,977.5bp) .. controls (946.19bp,958.46bp) and (908.93bp,930.09bp)  .. (__switch_to);
+\draw (1035.5bp,950.0bp) node[xshift=-4.5mm] {\small \begin{tabular}{rr}\multicolumn{2}{c}{\normalsize [10.68\%]} \\ Calls: & \multicolumn{1}{c}{1} \\ Time: & $105.50 \cdot 10^3$ \\ Avg.: & $105.50 \cdot 10^3$ \end{tabular}};
+\draw [->] (fw_notify) ..controls (1074.8bp,808.08bp) and (1075.2bp,776.82bp)  .. (_raw_read_lock);
+\draw (1126.0bp,787.0bp) node[xshift=-4.5mm] {\small \begin{tabular}{rr}\multicolumn{2}{c}{\normalsize [3.03\%]} \\ Calls: & \multicolumn{1}{c}{2} \\ Time: & $16.00 \cdot 10^3$ \\ Avg.: & $8.00 \cdot 10^3$ \end{tabular}};
+\draw [->] (fw_notify) ..controls (996.65bp,837.77bp) and (981.85bp,827.53bp)  .. (971.05bp,814.5bp) .. controls (934.62bp,770.54bp) and (920.31bp,704.95bp)  .. (__fw_block);
+\draw (1021.0bp,787.0bp) node[xshift=-4.5mm] {\small \begin{tabular}{rr}\multicolumn{2}{c}{\normalsize [4.07\%]} \\ Calls: & \multicolumn{1}{c}{1} \\ Time: & $21.50 \cdot 10^3$ \\ Avg.: & $21.50 \cdot 10^3$ \end{tabular}};
+\draw [->] (__schedule) ..controls (999.89bp,1022.3bp) and (888.58bp,1009.4bp)  .. (797.05bp,977.5bp) .. controls (746.25bp,959.81bp) and (693.59bp,928.49bp)  .. (finish_task_switch);
+\draw (847.05bp,950.0bp) node[xshift=-4.5mm] {\small \begin{tabular}{rr}\multicolumn{2}{c}{\normalsize [4.45\%]} \\ Calls: & \multicolumn{1}{c}{1} \\ Time: & $44.00 \cdot 10^3$ \\ Avg.: & $44.00 \cdot 10^3$ \end{tabular}};
+\draw [->] (__schedule) edge[bend left=20] (rcu_note_context_switch);
+\draw (1447.0bp,950.0bp) node[xshift=-4.5mm] {\small \begin{tabular}{rr}\multicolumn{2}{c}{\normalsize [1.27\%]} \\ Calls: & \multicolumn{1}{c}{1} \\ Time: & $12.50 \cdot 10^3$ \\ Avg.: & $12.50 \cdot 10^3$ \end{tabular}};
+\draw [->] (depth_pipe_update_stage_0) ..controls (687.82bp,464.77bp) and (715.55bp,430.54bp)  .. (term_pipe_update);
+\draw (775.05bp,444.0bp) node[xshift=-4.5mm] {\small \begin{tabular}{rr}\multicolumn{2}{c}{\normalsize [27.93\%]} \\ Calls: & \multicolumn{1}{c}{1} \\ Time: & $84.50 \cdot 10^3$ \\ Avg.: & $84.50 \cdot 10^3$ \end{tabular}};
+%
+
+\begin{scope}[shift={(7.5,35)}]
+\shade[left color=hot, right color=warm]  (0,0) rectangle ++(6,1);
+\shade[left color=warm, right color=cold] (6,0) rectangle ++(6,1);
+\draw (0,0) rectangle ++(12,1);
+\draw (0,0) -- ++(0,-0.3) node[align=center, anchor=north] {\Large High Load};
+\draw (6,0) -- ++(0,-0.3) node[align=center, anchor=north] {\Large Medium Load};
+\draw (12,0) -- ++(0,-0.3) node[align=center, anchor=north] {\Large Low Load};
+\end{scope}
+
+\end{tikzpicture}
+% End of code
+
+\end{scaletikzpicturetoheight}
+%END-SIDEWAY

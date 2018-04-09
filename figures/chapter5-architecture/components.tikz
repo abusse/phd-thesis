@@ -1,0 +1,9 @@
+\begin{scaletikzpicturetowidth}{0.95\textwidth}
+\begin{tikzpicture}[scale=\tikzscale, every node/.style={transform shape}]
+	\path[draw, fill=Component, thick, rounded corners=0.25cm] (0,-0.75) rectangle ++(4.5,1.5) node[pos=0.5] {\sffamily \breakC{\Large Component A\\(\eg Round-Robin)}};
+	\path[draw, fill=Component, thick, rounded corners=0.25cm] (7,-0.75) rectangle ++(4.5,1.5) node[pos=0.5] {\sffamily \breakC{\Large Component B\\(\eg Energy Supervisor)}};
+	\path[draw, fill=Component, thick, <-] (0,0) -- node [above] {$\left\langle \tau_A,\tau_B,\tau_c,\tau_d \right\rangle $} ++(-2.5,0);
+	\path[draw, fill=Component, thick, ->] (4.5,0) -- node [above] {$\left\langle \tau_c,\tau_A,\tau_d,\tau_B \right\rangle $} ++(2.5,0);
+	\path[draw, fill=Component, thick, ->] (11.5,0) -- node [above] {$\left\langle \tau_c,\tau_d \right\rangle $} ++(2.5,0);
+\end{tikzpicture}
+\end{scaletikzpicturetowidth}

@@ -1,0 +1,57 @@
+\begin{scaletikzpicturetowidth}{\textwidth}
+	\begin{tikzpicture}[scale=\tikzscale, every node/.style={transform shape}]
+		\draw[fill=Component!60, thick] (0,0) rectangle ++(9,6.5);
+		\node[anchor=north west] at (0,6.5) {\Large Simulation Host};
+		\begin{scope}[shift={(0.25,0.25)}]
+			\draw[fill=white, thick] (0,0) rectangle ++(4,5.5);
+			\node[anchor=north west] at (0,5.5) {gem5 Simulator};
+			\draw[fill=gray!30] (0.25,0.25) rectangle ++(3.5,3) node[pos=0.5] {\Large \breakC{Traced\\Kernel}};
+			
+			\draw[fill=CPU]    (1.55,3.95) rectangle ++(0.9,0.9) node[pos=0.5] {\scriptsize CPU};
+			\draw[fill=Memory] (2.9,4) rectangle ++(0.75,0.75) node[pos=0.5] {\scriptsize Mem.};
+			\draw[fill=IO]     (1.1,4) rectangle ++(-0.75,0.75) node[pos=0.5] {\scriptsize I/O};
+			
+			\draw[<->, thin] (1.55,4.375) -- ++(-0.45,0);
+			\draw[<->, thin] (2.9,4.375) -- ++(-0.45,0);
+			\draw[<->, densely dotted, semithick] (2,3.25) -- ++(0,0.675);
+			\draw[<->, densely dotted, semithick] (0.725,3.25) -- ++(0,0.75);
+			\draw[<->, densely dotted, semithick] (3.275,3.25) -- ++(0,0.75);
+		\end{scope}
+		
+
+		\node[fill=white, shape=document, draw, minimum height=1.7cm, minimum width=1.2cm, inner sep=0pt, anchor=south west] (TC1) at (5.25,3 + 0.66) {\breakC{Trace\\Core~1}};
+		\node[fill=white, shape=document, draw, minimum height=1.7cm, minimum width=1.2cm, inner sep=0pt, anchor=south west] (TC2) at (7.25,3 + 0.25) {\breakC{Trace\\Core~2}};
+		\node[fill=white, shape=document, draw, minimum height=1.7cm, minimum width=1.2cm, inner sep=0pt, anchor=north west] (TC3) at (7.25,3 - 0.25) {\breakC{Trace\\Core~4}};
+		\node[fill=white, shape=document, draw, minimum height=1.7cm, minimum width=1.2cm, inner sep=0pt, anchor=north west] (TC4) at (5.25,3 - 0.66) {\breakC{Trace\\Core~3}};
+		
+		\draw[<-, thick] (TC1.west) -- ++(-1,0);
+		\draw[<-, thick] (TC2.220) -- ++(-3,0);
+		\draw[<-, thick] (TC3.140) -- ++(-3,0);
+		\draw[<-, thick] (TC4.west) -- ++(-1,0);
+		
+		\node[shape=document, 
+			  document_fold=15pt,
+			  draw, 
+			  minimum height=8.64cm,
+			  text width=6cm,
+			  inner sep=2pt,
+			  anchor=west,
+			  thick] (trace) at (10.5,3.25) { \begin{center} Trace Core~1\end{center}
+													\inputminted[lastline=25, 
+																frame=none,
+																linenos=false,
+																breaklines=false,
+																fontsize=\scriptsize]{text}{figures/chapter8-studies/tracing/example.trace}
+													\begin{center}\textbullet~\textbullet~\textbullet\end{center}};
+		
+		\draw[->, very thick] (9,3.25) -- (trace.west);
+		\draw[->, very thick] (trace.east) -- ++(1,0);
+		
+		\draw[thick, color=gray] (-0.5,-2) -- ++(18,0);
+		
+		\node[anchor=north] (graph) at (8,-3) {\includetikz{figures/chapter8-studies/tracing/trace_simple}};
+		
+		\draw[->, very thick] (graph.east -| trace.east) ++(1,0) -- ++(-1.75,0);
+		
+	\end{tikzpicture}
+\end{scaletikzpicturetowidth}

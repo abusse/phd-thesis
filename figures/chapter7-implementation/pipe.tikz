@@ -1,0 +1,202 @@
+\begin{scaletikzpicturetowidth}{\textwidth}
+\begin{tikzpicture}[scale=\tikzscale, every node/.style={transform shape}]
+	\colorlet{outerpipe}{gray!80}
+	\colorlet{innerpipe}{gray!25}
+	\colorlet{shadow}{yellow!40}
+	\colorlet{main}{yellow!20}
+
+	\def\side{2}
+
+	% pipe fw
+	\path [top color=outerpipe, bottom color=outerpipe, middle color=innerpipe]
+			(-\side -3 -2.5 ,1.2,-1) -- ++(2.5,0) arc (90:-90:-0.1 and 0.2) -- ++(-2.5,0) arc (-90:90:-0.1 and 0.2);
+	\path (-\side -3 -1.5,0.8,-1) node [align=center, anchor=north] {Pipe $0$};
+
+	\shade[ball color=blue!80!white] (-\side -3 -2 ,1,-1) circle (0.125);
+	\shade[ball color=blue!80!white] (-\side -3 -2 ,1,-1) circle (0.125);
+	\shade[ball color=orange!80!white] (-\side -3 -2 ,1,-1) circle (0.125);
+	\shade[ball color=blue!80!white] (-\side -3 -2 ,1,-1) circle (0.125);
+	\shade[ball color=red!80!white] (-\side -3 -1.6 ,1,-1) circle (0.125);
+	\shade[ball color=green!80!white] (-\side -3 -1.2 ,1,-1) circle (0.125);
+	\shade[ball color=yellow!80!white] (-\side -3 -0.8 ,1,-1) circle (0.125);
+	
+	% left cube
+	\def\xoffset{-\side - 3}
+	\def\yoffset{0}
+	\draw[top color=main,   bottom color=main] (0+\xoffset,0+\yoffset,0) -- ++(\side,0,0) -- ++(0,\side,0) -- ++(-\side,0,0) -- cycle;
+	\draw[top color=shadow, bottom color=main] (\side+\xoffset,0+\yoffset,0) -- ++(0,0,-\side) -- ++(0,\side,0) -- ++(0,0,\side);
+	\draw[top color=shadow, bottom color=main] (\side+\xoffset,\side+\yoffset,-\side) -- ++(-\side,0,0) -- ++(0,0,\side) -- ++(\side,0,0);
+
+	% pipe fw
+	\path [top color=outerpipe, bottom color=outerpipe, middle color=innerpipe]
+			(\side+\xoffset,1.2,-1) -- ++(3,0) arc (90:-90:-0.1 and 0.2) -- ++(-3,0) arc (-90:90:-0.1 and 0.2);
+	\path (\side+\xoffset+1.5,0.8,-1) node [align=center, anchor=north] {Pipe $1$};
+
+
+	\shade[ball color=blue!80!white] (- 1.1 ,1,-1) circle (0.125);
+	\shade[ball color=green!80!white] (- 1.5 ,1,-1) circle (0.125);
+	\shade[ball color=yellow!80!white] (- 1.9,1,-1) circle (0.125);
+	\shade[ball color=red!80!white] (- 2.3 ,1,-1) circle (0.125);
+
+	% left cube
+	\def\xoffset{0}
+	\def\yoffset{0}
+	\draw[top color=main,   bottom color=main] (0+\xoffset,0+\yoffset,0) -- ++(\side,0,0) -- ++(0,\side,0) -- ++(-\side,0,0) -- cycle;
+	\draw[top color=shadow, bottom color=main] (\side+\xoffset,0+\yoffset,0) -- ++(0,0,-\side) -- ++(0,\side,0) -- ++(0,0,\side);
+	\draw[top color=shadow, bottom color=main] (\side+\xoffset,\side+\yoffset,-\side) -- ++(-\side,0,0) -- ++(0,0,\side) -- ++(\side,0,0);
+
+	% pipe right
+	\path [top color=outerpipe, bottom color=outerpipe, middle color=innerpipe]
+			(\side,1.2,-1) arc (-90:90:-0.1 and 0.2) -- ++(1.3,0) -- ++(0.4,-0.4) -- ++(-1.7,0) ;
+	\path [left color=outerpipe, right color=outerpipe, middle color=innerpipe]
+			(\side+1.7,1.2,-1) -- ++(0,1.5) -- ++(-0.4,0.4) -- ++(0,-1.5) ;
+	\path [top color=outerpipe, bottom color=outerpipe, middle color=innerpipe]
+			(\side+1.7,2.7,-1) -- ++(1.3,0) arc (-90:90:-0.1 and 0.2) -- ++(-1.7,0) -- ++(0.4,-0.4);
+	\path (\side+1.5,3.1,-1) node [align=center, anchor=south] {Pipe $2$};
+
+	\shade[ball color=blue!80!white] (\side+1.5,2.6,-1) circle (0.125);
+	\shade[ball color=green!80!white] (\side+1.5,2.2,-1) circle (0.125);
+	\shade[ball color=red!80!white] (\side+1.5,1.8,-1) circle (0.125);
+
+	\path [top color=outerpipe, bottom color=outerpipe, middle color=innerpipe]
+			(\side,0.4,-1) arc (-90:90:-0.1 and 0.2) -- ++(1.7,0) -- ++(-0.4,-0.4) -- ++(-1.3,0) ;
+	\path [left color=outerpipe, right color=outerpipe, middle color=innerpipe]
+			(\side+1.7,0.8,-1) -- ++(0,-1.5) -- ++(-0.4,-0.4) -- ++(0,1.5) ;
+	\path [top color=outerpipe, bottom color=outerpipe, middle color=innerpipe]
+			(\side+2.1,-1.1,-1) -- ++(1.3,0) arc (-90:90:-0.1 and 0.2) -- ++(-1.7,0) -- ++(-0.4,-0.4);
+	\path (\side+1.5,-1.1,-1) node [align=center, anchor=north] {Pipe $3$};
+
+	\shade[ball color=yellow!80!white] (\side+1.5,-0.1,-1) circle (0.125);
+
+	% left cube
+	\def\xoffset{\side+3}
+	\def\yoffset{1.9}
+	\draw[top color=main,   bottom color=main] (0+\xoffset,0+\yoffset,0) -- ++(\side,0,0) -- ++(0,\side,0) -- ++(-\side,0,0) -- cycle;
+	\draw[top color=shadow, bottom color=main] (\side+\xoffset,0+\yoffset,0) -- ++(0,0,-\side) -- ++(0,\side,0) -- ++(0,0,\side);
+	\draw[top color=shadow, bottom color=main] (\side+\xoffset,\side+\yoffset,-\side) -- ++(-\side,0,0) -- ++(0,0,\side) -- ++(\side,0,0);
+
+	\path [top color=outerpipe, bottom color=outerpipe, middle color=innerpipe]
+			(\side+\xoffset,3.1,-1) -- ++(3,0) arc (90:-90:-0.1 and 0.2) -- ++(-3,0) arc (-90:90:-0.1 and 0.2);
+	\path (\side+\xoffset+1.5,2.7,-1) node [align=center, anchor=north] {Pipe $4$};
+
+	\shade[ball color=green!80!white] (\side+\xoffset+1.7,2.9,-1) circle (0.125);
+	\shade[ball color=red!80!white] (\side+\xoffset+1.3,2.9,-1) circle (0.125);
+
+	\def\yoffset{-1.9}
+	\draw[top color=main,   bottom color=main] (0+\xoffset,0+\yoffset,0) -- ++(\side,0,0) -- ++(0,\side,0) -- ++(-\side,0,0) -- cycle;
+	\draw[top color=shadow, bottom color=main] (\side+\xoffset,0+\yoffset,0) -- ++(0,0,-\side) -- ++(0,\side,0) -- ++(0,0,\side);
+	\draw[top color=shadow, bottom color=main] (\side+\xoffset,\side+\yoffset,-\side) -- ++(-\side,0,0) -- ++(0,0,\side) -- ++(\side,0,0);
+
+	\path [top color=outerpipe, bottom color=outerpipe, middle color=innerpipe]
+			(\side+\xoffset,-0.7,-1) -- ++(3,0) arc (90:-90:-0.1 and 0.2) -- ++(-3,0) arc (-90:90:-0.1 and 0.2);
+	\path (\side+\xoffset+1.5,-1.1,-1) node [align=center, anchor=north] {Pipe $5$};
+
+	\shade[ball color=yellow!80!white] (\side+\xoffset+1.5,-0.9,-1) circle (0.125);
+	
+	% left cube
+	\def\xoffset{\side + \side + 6}
+	\def\yoffset{1.9}
+	\draw[top color=main,   bottom color=main] (0+\xoffset,0+\yoffset,0) -- ++(\side,0,0) -- ++(0,\side,0) -- ++(-\side,0,0) -- cycle;
+	\draw[top color=shadow, bottom color=main] (\side+\xoffset,0+\yoffset,0) -- ++(0,0,-\side) -- ++(0,\side,0) -- ++(0,0,\side);
+	\draw[top color=shadow, bottom color=main] (\side+\xoffset,\side+\yoffset,-\side) -- ++(-\side,0,0) -- ++(0,0,\side) -- ++(\side,0,0);
+
+	\def\yoffset{-1.9}
+	\draw[top color=main,   bottom color=main] (0+\xoffset,0+\yoffset,0) -- ++(\side,0,0) -- ++(0,\side,0) -- ++(-\side,0,0) -- cycle;
+	\draw[top color=shadow, bottom color=main] (\side+\xoffset,0+\yoffset,0) -- ++(0,0,-\side) -- ++(0,\side,0) -- ++(0,0,\side);
+	\draw[top color=shadow, bottom color=main] (\side+\xoffset,\side+\yoffset,-\side) -- ++(-\side,0,0) -- ++(0,0,\side) -- ++(\side,0,0);
+
+	% left cube
+	\def\xoffset{\side + \side + 6}
+	\def\yoffset{1.9}
+	\draw[top color=main,   bottom color=main] (0+\xoffset,0+\yoffset,0) -- ++(\side,0,0) -- ++(0,\side,0) -- ++(-\side,0,0) -- cycle;
+	\draw[top color=shadow, bottom color=main] (\side+\xoffset,0+\yoffset,0) -- ++(0,0,-\side) -- ++(0,\side,0) -- ++(0,0,\side);
+	\draw[top color=shadow, bottom color=main] (\side+\xoffset,\side+\yoffset,-\side) -- ++(-\side,0,0) -- ++(0,0,\side) -- ++(\side,0,0);
+
+	\path [top color=outerpipe, bottom color=outerpipe, middle color=innerpipe]
+			(\side+\xoffset,3.1,-1) -- ++(3,0) arc (90:-90:-0.1 and 0.2) -- ++(-3,0) arc (-90:90:-0.1 and 0.2);
+	\path (\side+\xoffset+1.5,2.7,-1) node [align=center, anchor=north] {Pipe $6$};
+
+	\shade[ball color=green!80!white] (\side+\xoffset+1.5,2.9,-1) circle (0.125);
+
+	\def\yoffset{-1.9}
+	\draw[top color=main,   bottom color=main] (0+\xoffset,0+\yoffset,0) -- ++(\side,0,0) -- ++(0,\side,0) -- ++(-\side,0,0) -- cycle;
+	\draw[top color=shadow, bottom color=main] (\side+\xoffset,0+\yoffset,0) -- ++(0,0,-\side) -- ++(0,\side,0) -- ++(0,0,\side);
+	\draw[top color=shadow, bottom color=main] (\side+\xoffset,\side+\yoffset,-\side) -- ++(-\side,0,0) -- ++(0,0,\side) -- ++(\side,0,0);
+
+	\path [top color=outerpipe, bottom color=outerpipe, middle color=innerpipe]
+			(\side+\xoffset,-0.7,-1) -- ++(3,0) arc (90:-90:-0.1 and 0.2) -- ++(-3,0) arc (-90:90:-0.1 and 0.2);
+	\path (\side+\xoffset+1.5,-1.1,-1) node [align=center, anchor=north] {Pipe $7$};
+
+	\shade[ball color=yellow!80!white] (\side+\xoffset+1.5,-0.9,-1) circle (0.125);
+
+			
+	% left cube
+	\def\xoffset{\side + \side + \side + 9}
+	\def\yoffset{1.9}
+	\draw[top color=main,   bottom color=main] (0+\xoffset,0+\yoffset,0) -- ++(\side,0,0) -- ++(0,\side,0) -- ++(-\side,0,0) -- cycle;
+	\draw[top color=shadow, bottom color=main] (\side+\xoffset,0+\yoffset,0) -- ++(0,0,-\side) -- ++(0,\side,0) -- ++(0,0,\side);
+	\draw[top color=shadow, bottom color=main] (\side+\xoffset,\side+\yoffset,-\side) -- ++(-\side,0,0) -- ++(0,0,\side) -- ++(\side,0,0);
+
+	\path [top color=outerpipe, bottom color=outerpipe, middle color=innerpipe]
+			(\side+\xoffset,3.1,-1) -- ++(2,0) arc (90:-90:-0.1 and 0.2) -- ++(-2,0) arc (-90:90:-0.1 and 0.2);
+	\path (\side+\xoffset+1.2,2.7,-1) node [align=center, anchor=north] {Pipe $8$};
+	
+	\shade[ball color=green!80!white] (\side+\xoffset+1.1,2.9,-1) circle (0.125);
+
+	\def\yoffset{-1.9}
+	\draw[top color=main,   bottom color=main] (0+\xoffset,0+\yoffset,0) -- ++(\side,0,0) -- ++(0,\side,0) -- ++(-\side,0,0) -- cycle;
+	\draw[top color=shadow, bottom color=main] (\side+\xoffset,0+\yoffset,0) -- ++(0,0,-\side) -- ++(0,\side,0) -- ++(0,0,\side);
+	\draw[top color=shadow, bottom color=main] (\side+\xoffset,\side+\yoffset,-\side) -- ++(-\side,0,0) -- ++(0,0,\side) -- ++(\side,0,0);
+
+	\path [top color=outerpipe, bottom color=outerpipe, middle color=innerpipe]
+			(\side+\xoffset,-0.7,-1) -- ++(2,0) arc (90:-90:-0.1 and 0.2) -- ++(-2,0) arc (-90:90:-0.1 and 0.2);
+	\path (\side+\xoffset+1.2,-1.1,-1) node [align=center, anchor=north] {Pipe $9$};
+
+	\shade[ball color=yellow!80!white] (\side+\xoffset+1.1,-0.9,-1) circle (0.125);
+	
+	% pipe background
+	\path [top color=innerpipe, bottom color=innerpipe, middle color=outerpipe]
+			(\side+\xoffset+2,3.1,-1) -- ++(0,0) arc (90:-90:-0.1 and 0.2) -- ++(0,0) arc (-90:90:0.1 and 0.2);
+	\path [top color=innerpipe, bottom color=innerpipe, middle color=outerpipe]
+			(\side+\xoffset+2,-0.7,-1) -- ++(0,0) arc (90:-90:-0.1 and 0.2) -- ++(0,0) arc (-90:90:0.1 and 0.2);
+
+	\draw (-1,10.5) node [align=center, anchor=center] {Excerpt of Red Task's TCB};
+	\path[draw] (-3,7) -- ++(0,3) \irregularlineh{0.08cm}{4} -- ++(4,0) -- ++(0,-3) ;
+	\path[draw] (-3,7) -- ++(0,-3) \irregularlineh{0.08cm}{4} -- ++(4,0) -- ++(0,3) ;
+	
+	
+	\path[draw] (-3,9.5) -- ++(4,0);
+	\draw (-1,9.25) node [align=center, anchor=center] {Pipe $0$ TCB};
+	\path[draw] (-3,9) -- ++(4,0);
+	\draw (-1,8.75) node [align=center, anchor=center] {Pipe $1$ TCB};
+	\path[draw] (-3,8.5) -- ++(4,0);
+	\draw (-1,8.25) node [align=center, anchor=center] {Pipe $2$ TCB};
+	\path[draw] (-3,8) -- ++(4,0);
+	\draw (-1,7.75) node [align=center, anchor=center] {Pipe $3$ TCB};
+	\path[draw] (-3,7.5) -- ++(4,0);
+	\draw (-1,7.25) node [align=center, anchor=center] {Pipe $4$ TCB};
+	\path[draw] (-3,7) -- ++(4,0);
+	\draw (-1,6.75) node [align=center, anchor=center] {Pipe $5$ TCB};
+	\path[draw] (-3,6.5) -- ++(4,0);
+	\draw (-1,6.25) node [align=center, anchor=center] {Pipe $6$ TCB};
+	\path[draw] (-3,6) -- ++(4,0);
+	\draw (-1,5.75) node [align=center, anchor=center] {Pipe $7$ TCB};
+	\path[draw] (-3,5.5) -- ++(4,0);
+	\draw (-1,5.25) node [align=center, anchor=center] {Pipe $8$ TCB};
+	\path[draw] (-3,5) -- ++(4,0);
+	\draw (-1,4.75) node [align=center, anchor=center] {Pipe $9$ TCB};
+	\path[draw] (-3,4.5) -- ++(4,0);
+	
+	\draw[->, line width=0.5pt] (-2.8,9.25) .. controls (-6,9) and (-6,6) .. (-\side -3 -1.6 ,1.2,-1);	
+	\draw[->, line width=0.5pt, rounded corners=0.4cm] (-2.8,8.75) .. controls (-5,8.5) and (-6,4) .. (- 2.3 ,3,-1) -- (- 2.3 ,1.2,-1);
+	\draw[->, line width=0.5pt, rounded corners=0.4cm] (0.8,8.25) .. controls (4,8.25) and (1,4) ..  (\side+1.3,1.95,-1);
+	\draw (0.8,7.75) node[cross out, draw]{};
+	\draw[->, line width=0.5pt, rounded corners=0.4cm] (0.8,7.25) .. controls (6,7.25) and (8,7.25) ..  (\side+5+1.3,3.1,-1);
+	\draw (0.8,6.75) node[cross out, draw]{};
+	\draw (0.8,6.25) node[cross out, draw]{};
+	\draw (0.8,5.75) node[cross out, draw]{};
+	\draw (0.8,5.25) node[cross out, draw]{};
+	\draw (0.8,4.75) node[cross out, draw]{};
+
+\end{tikzpicture}
+\end{scaletikzpicturetowidth}

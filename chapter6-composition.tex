@@ -1,0 +1,148 @@
+\chapter{Qualitative Evaluation}%%
+\label{chap:prop}
+
+The previous chapter described the \cobas{} framework and gave an example how the different parts of the framework interact with each other. Furthermore, it discussed the component and framework approaches themselves. This chapter is dedicated to a qualitative evaluation of the features and resulting properties of the \cobas{} architecture regarding the challenges researched by this dissertation. This discussion will demonstrate how the design decisions of the architecture support the development and prototyping for various scheduling policies for heterogeneous many-core systems. The initial qualitative considerations in this chapter will be completed by quantitative evaluation in the further course of this dissertation in \cref{chap:study}.
+
+\section{Schedule Computation and Scalability}%
+\label{sec:prop:computation}
+
+Even though the scheduler does not contribute to the progress of the computational tasks, it requires processing time to come to a scheduling decision. On a single-core system, it is evident where this computation is performed. However, on a multi- or even many-core system this decision is not so obvious. As a prototyping and research facility, the \cobas{} framework supports as many of the suitable solutions as possible, which is discussed in the following sections.
+
+\subsection{Decentralized Scheduling}%
+\label{sec:prop:computation:decentralizied}
+
+In decentralized scheduling, each \ac{PE} manages its task set individually with a given policy. This allows a high scalability as every \ac{PE} is mostly independent of the others and potential bottlenecks are avoided. Yet, load balancing has to be employed to distribute the tasks to the cores, which might result in wasted performance as recently shown by, \eg{}, \textcite{Lozi-2016-WastedCores}. Such a scheduling scheme can be employed with \cobas{} in two ways as described subsequently.
+
+\subsubsection{Multiple Pipes}
+
+\begin{figure*}[b!]
+	\centering
+	\begin{subfigure}[t]{0.48\textwidth}\centering
+		\includetikz{figures/chapter6-composition/multi-pipe-no-contention}
+		\caption[No contention inside the Component.]{No contention inside the Component as both PE~1 and~2 can execute the Component code concurrently.}%
+		\label{fig:feature:multi1}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[t]{0.48\textwidth}\centering
+		\includetikz{figures/chapter6-composition/multi-pipe-contention}
+		\caption[Contention inside the Component.]{Contention inside the Component during, \eg{}, task migration between the outgoing Pipes. PE~1 has to wait for PE~2 to finish accessing both the upper and lower outgoing Pipe.}%
+		\label{fig:feature:multi2}
+	\end{subfigure}%
+	\caption[Component with multiple incoming and outgoing Pipes.]{Component with multiple incoming and outgoing Pipes. The PE~1 and~2 are executing the Component's code path at the same time.}%
+	\label{fig:feature:multi}
+\end{figure*}
+
+As a \cobas{} Component is, in general, not limited by the number of incoming pipes, it can be designed in a way that it has as many incoming pipes as the system has \acp{PE}. These pipes can be accessed in parallel without blocking one of the \acp{PE}. Depending on the inner workings of the Component, several \acp{PE} can execute the code path of the Component without being blocked as well letting them pass the Component quickly (\cf{} \cref{fig:feature:multi1}). For, \eg{}, the load balancing Component, that might be the usual case when there are no significant changes to the load and the re-admitted task gets assigned to its previous \ac{PE}. However, especially during task migration between different output Pipes, this approach might result in contention (\cf{} \cref{fig:feature:multi2}).
+
+\subsubsection{Postponed Pipe Updates}
+
+Instead of having multiple incoming queues, lock contention can be reduced by decreasing the locking time. This can be achieved by postponing the update of outgoing pipes. As the changes to a \emph{Pipeline} become only relevant when a \ac{PE} that is dependent on this pipeline requires the assignment of a new task, the update of that pipeline can be postponed. This reduces the time a pipe is locked and therefore decreases the risk of lock contention. It is also possible to combine both approaches -- multiple \emph{Pipes} and postponed Pipe updates -- to even further reduce the possibility of lock contention.
+
+\subsection{Centralized Scheduling}%
+\label{sec:prop:computation:centralized}
+
+In contrast to the decentralized scheduling, the whole task set is managed by every \ac{PE} with the centralized scheduling approach. This method has the advantage that it is not prone to the risk of, \eg{}, inefficiencies in load balancing. However, it introduces a bottleneck as every \ac{PE} runs through the same code in the same dataset resulting in possible contention with a rising number of cores on that data set. Still, for a small number of cores, this approach is superior to the decentralized scheduling approach~\cite{Nabelsee-2016-Centralized}.
+
+This scheduling architecture is also supported by \cobas{}. For a simple topology with only one Component that has one incoming and several outgoing \emph{Pipes}, this is evident. Even the example given in \cref{sec:arch:example} resembles a centralized scheduling approach, because in the example, outgoing \emph{Pipelines} from the load balancing Component get updated the moment they are modified.
+
+\subsection{Hierarchical Scheduling}%
+\label{sec:prop:computation:hierarchical}
+
+\begin{figure}[t!] \centering
+	\includetikz{figures/chapter6-composition/hierarchy}
+	\caption[A hierarchical scheduler Topology.]{A hierarchical scheduler Topology. The upper part of the hierarchy is only accessed by \ac{PE}~1 and~2, while the lower part is only accessed by \ac{PE}~3 and~4.}%
+	\label{fig:feature:hierarchy}
+\end{figure}
+
+As both centralized and decentralized scheduling have their advantages and disadvantages, it might be beneficial to employ hierarchical scheduling approaches that combine these two. This scheme is also supported by \cobas{} as illustrated in \cref{fig:feature:hierarchy}. The scheduler implementation can be partitioned in such a way that certain parts will be only used by a certain set of \acp{PE}. In the example, the upper part of the Topology is solely executed by \ac{PE}~1 and~2 and the lower part solely executed by \ac{PE}~3 and~4.
+
+\subsection{Foreign Scheduling}%
+\label{sec:prop:computation:foreign}
+
+For general purpose \acp{PE} like, \eg{}, \acp{CPU}, it is common that the \ac{PE} does not only execute the tasks, but also runs the scheduler logic. This is not possible for processing accelerators like, \eg{}, \acp{GPU} and might also be an inferior solution for many-core systems.
+
+Processing accelerators are optimized for and restricted with regard to a certain kind of computation. This makes them unusable to enforce a scheduling policy most of the time. The schedule for this sort of \ac{PE} is computed on a different, general purpose \ac{PE} that is capable of executing the scheduler logic. Tasks are then deployed from that foreign \ac{PE} to the special purpose \ac{PE}.
+
+In the case of many-core systems having hundreds or thousands of cores, this approach might also become feasible for general purpose \acp{PE}. In such a system, the computational power of one \ac{PE} might become negligible compared to the whole system. Therefore, it might be possible to dedicate a single core just to the scheduler logic. This has several benefits. It reduces the overhead on the other cores as they do not have to be interrupted periodically\footnote{A similar approach is already employed in current operating systems when only one task is assigned to a core~\cite{Linux-2015-NoHZ}.}.
+
+\section{Non-Cache-Coherent or Distributed Memory}%
+\label{sec:compo:distributed}
+
+The challenges of none-cache-coherent systems and systems with distributed memory were discussed in \cref{sec:env}. The \cobas{} architecture can support such systems in several ways. The first and straight forward way is when the foreign scheduling scheme described in \cref{sec:prop:computation:foreign} is employed. As the whole scheduler logic would run on one distinct \ac{PE}, the lack of cache coherency would not involve the \cobas{} framework at all or only the \emph{Runtime System Adapter}. However, as already discussed in \cref{sec:prop:computation:foreign}, this approach is only feasible for systems within which the number of \acp{PE} exceeds the number of tasks or when the scheduler has to be invoked only rarely.
+
+Also, a distributed scheduling for a non-cache-coherent or distributed memory system can be employed. Both the notification and Pipe system can easily be implemented on a message based semantic, making cache coherency and shared memory not mandatory. As notifications are messages by definition, it is evident that they can be transported through, \eg{}, a \ac{NoC}. However, it is important to mention that the payload of the notification has to be accessible in the receiving core, \ie{}, pointers that are only valid on the remote core have to be avoided. As for \emph{Pipes}, it is not obvious, but also feasible. All operations on the Pipes can be restricted to a certain set, which can then be used for a proxy pattern so that the main data can be held on the remote core.
+
+Special care has also to be taken regarding the Topologies. As Component instances may have private data, single Component instances cannot be accessed by cores that do not have shared access to that data. Assume, \eg{}, a system every core of which has its private memory and data sharing outside this scope is realized only through message passing. In that system, every Component instance has to be assigned to exactly one core. As a consequence, that would mean that the Load-Balancing Component used in the example in \cref{sec:arch:example} would not be possible and that the whole Topology would need to be decentralized.
+
+\begin{figure}[t!]
+	\centering
+	\begin{subfigure}[b]{0.375\textwidth}\centering
+		\includetikz{figures/chapter6-composition/distributed-mem-arch}
+		\caption{Example for a distributed memory system with two PEs.}%
+		\label{fig:feature:remote1}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.575\textwidth}\centering
+		\includetikz{figures/chapter6-composition/distributed-mem-topo}
+		\caption{Topology for a distributed memory system with two PEs.}%
+		\label{fig:feature:remote2}
+	\end{subfigure}
+	\caption{Example for a CoBaS based scheduler with distributed memory.}%
+	\label{fig:feature:remote}
+\end{figure}
+
+An example for coping with this challenge in \cobas{} is outlined in \cref{fig:feature:remote}. Assume a simple system consisting of two cores each with private memory and connection only through message passing (Figure~\ref{fig:feature:remote1}). To avoid data sharing in Components among the two cores, each Component instance is only accessed by one core. In the example, each core is assigned a \emph{Decentralized Load-Balancing Component} that ensures the load-balancing among the two cores and a \emph{Round-Robin Component} that enforces a round-robin scheduling policy on each core (Figure~\ref{fig:feature:remote2}). Over- or underload situations could be signaled by the load-balancing Components via a notification. In an overload situation, the load-balancing Component can submit tasks to the Pipe that is connected to the remote load-balancing Component causing the task to be dispatched on the remote core the next time it is scheduled. Note that the migration of the task context is not within the scope of the \cobas{} framework.
+
+
+\section{Adaptability}
+
+It was already pointed out in \cref{sec:arch:topologies:adative} how the \cobas{} architecture reacts to changes in the hardware configuration through adaptive Topologies. This section shows in more detail how this goal is accomplished by the properties and features of the \cobas{} framework on a sophisticated example. Take for example a \ac{CPU} that has an additional \ac{FPGA} fabric on die like the Xilinx Zynq~\cite{Xilinx-2016-Zynq} or the upcoming Intel Broadwell~EP Xeon processors with Altera Arria~10~GX \ac{FPGA} on package~\cite{HemsothIntel-2016-BroadwellFPGA}. Assume further that the \ac{FPGA} part of such a \ac{CPU} is programmed with two additional cores that can execute different \acp{ISA} \textalpha{} and \textbeta{} to, \eg{}, execute proprietary legacy binaries that are not available for the \ac{ISA} of the hard wired cores. Also, the system is running an operating system supporting several \acp{ISA} like, \eg{}, Popcorn Linux~\cite{Barbalace-2015-PopcornLinux}.
+
+A possible scheduler layout for such a system with \cobas{} is depicted in \cref{fig:feature:adapt}. The figure follows the same notion as in \cref{sec:arch:example}; however, not every task has its distinct color but the colors represent the \ac{ISA} a task belongs to:
+\begin{itemize*}
+	\item  Tasks that can only be execute on the native cores: \arraytaskball{red}{4pt}.
+	\item Tasks that can only be executed on an \ac{ISA}~\textalpha{} core: \arraytaskball{green}{4pt}.
+	\item Tasks that can only be executed on an \ac{ISA}~\textbeta{} core: \arraytaskball{blue}{4pt}.
+\end{itemize*}
+
+\begin{figure}[!htp]
+	\centering
+	\begin{subfigure}[b]{0.95\textwidth}\centering
+		\includetikz{figures/chapter6-composition/adaptive-topo1}
+		\caption[An unbalanced system situation.]{An unbalanced system situation where the core for ISA~\textalpha{} is underused and the core for ISA~\textbeta{} is overloaded. The ISA distributor notifies the system about the two occurrences.}%
+		\label{fig:feature:adapt1}
+	\end{subfigure}
+	\\ \vspace{0.25cm}
+	\begin{subfigure}[b]{0.95\textwidth}\centering
+		\includetikz{figures/chapter6-composition/adaptive-topo2}
+		\caption[Modified scheduler to counteract the unbalanced situation.]{Modified scheduler to counteract the unbalanced situation. Based on the notification of the ISA Distributor, the system was reconfigured and the scheduler layout was modified by a Dynamic or Adaptive Topology.}%
+		\label{fig:feature:adapt2}
+	\end{subfigure}%
+	\caption[Scheduler modification caused by hardware changes.]{Scheduler modification caused by hardware changes.}%
+	\label{fig:feature:adapt}
+\end{figure}
+
+In the current situation, the \ac{FPGA} is configured with one core for \ac{ISA}~\textalpha{} and~\textbeta{} each and the system has two native cores. The scheduler consists of an \emph{ISA Distributor} that distributes the tasks according to their \ac{ISA}: the native tasks in the upper output Pipe of the ISA Distributor, the \ac{ISA}~\textalpha{} tasks in the middle Pipe, and the \ac{ISA}~\textbeta{} tasks in the lower Pipe. The native tasks are balanced among the two native cores and scheduled in a round-robin manner, whereas the none-native tasks are also scheduled in a round-robin manner but need no load-balancing as there is only one core for each.
+
+As there are no tasks for \ac{ISA}~\textalpha{} in the current situation, the respective core is underutilized. The underutilization causes the ISA Distributor to create a notification (\circled{1} in \cref{fig:feature:adapt1}) that is forwarded to the Runtime System Adapter by the \cobas{} Broker (\circled{2} in \cref{fig:feature:adapt1}). Furthermore, the ISA Distributor detects an overload situation at the core for \ac{ISA}~\textbeta{} that causes it to generate a notification as well (\circled{3} in \cref{fig:feature:adapt1}) that is also forwarded to the Runtime System Adapter (\circled{4} in \cref{fig:feature:adapt1}).
+
+Depending on how the \ac{FPGA} is managed by the system, several possibilities exist to react to this situation. The \ac{FPGA} could be managed by the runtime system itself, the Runtime System Adapter, or even by a Component. Regardless of this, we assume that the \ac{FPGA} will be reconfigured based on the notifications of the ISA Distributor in a way that it no longer has one core for \ac{ISA}~\textalpha{} and~\textbeta{} each but only two cores for \ac{ISA}~\textbeta{}. This change can be announced to an Adaptive Topology that will modify the scheduler layout as depicted in \cref{fig:feature:adapt2}. As for \ac{ISA}~\textbeta{} now also two cores are available, it will create a new instance of the same Load-Balancing Component as for the native cores and a second Round-Robin Component instance. It can also remove the Round-Robin instance responsible for the \ac{ISA}~\textalpha{} core as it is currently not needed.
+
+This example shows how the characteristics of reusability and adaptability in \cobas{} can realize a reaction to changes to the underlying hardware architecture. Note that this is only one example for handling the situation with \cobas{}. Among other possible changes, the ISA Distribution Component instance could also have been replaced by one only differentiating between the currently available \acp{ISA}.
+
+\section{Hardware Assisted Scheduling Acceleration}%
+\label{sec:prop:fpga}
+
+So far, this dissertation considered \acp{FPGA} only as a processing resource that has to be managed by the scheduler. However, due to its versatile nature, it can be used to accelerate the scheduler execution itself and several hardware schedulers or hardware accelerated schedulers have already been proposed~\cite{Agron-2004-FPGAScheduler, Hildebrandt-2000-FPGAScheduler, Hildebrandt-1999-FPGAScheduler, Burleson-1999-FPGAScheduler, Gaitan-2015-FPGAScheduler}. With the broader introduction of \ac{FPGA} technology into commodity hardware, it can be expected that this approach might become widespread. Therefore, the support for this kind of technology is desirable for the \cobas{} architecture.
+
+\begin{figure}[b!] \centering \vspace{5mm}
+	\includetikz{figures/chapter6-composition/hw-accel-component}
+	\caption[Hardware accelerated CoBaS Component.]{Hardware accelerated \cobas{} Component.}%
+	\label{fig:feature:fpga}
+\end{figure}
+
+The Component-Based approach already has a functional separation and encapsulation of certain aspects of the scheduler implementation. With its well-defined interface, a \cobas{} Component can be expected to be easily implemented in hardware with a very thin software layer. Take again, for example, the Zynq All Programmable \ac{SoC}~\cite{Xilinx-2016-Zynq} that combines two general purpose processing cores with a \ac{FPGA} fabric and a shared memory between the cores and the \ac{FPGA}. Using such an architecture, it is plausible that a hardware accelerated Component can be constructed. An example for such a Component is depicted in \cref{fig:feature:fpga}. The task list of the incoming Pipe is mapped to a memory region that is accessible by the \ac{FPGA}. The hardware logic can check this memory for changes. Alternatively, the FPGA could also be triggered by a Pipe update through a thin software layer. The scheduling algorithm can then be performed in hardware by the \ac{FPGA}. However, submitting the changes to the task set to the outgoing Pipe is not as straight forward as with a software based Component as the \ac{FPGA} cannot execute the framework \ac{API}. This means that the \ac{FPGA} either needs to create the necessary data structures in memory by itself, which could be provided via a hardware macro, or it requires the assistance of a general purpose \ac{PE} to update the outgoing pipe.
+
+Accessing the notification system of \cobas{} needs more software support. The access has two aspects, outgoing notifications and requests and incoming notifications and replies. The incoming data flow can be handled by a thin software layer on its own. When the Broker delivers a notification or reply, it can invoke the software layer that, \eg{}, modifies the state of an incoming line of the hardware Component or a memory address that is monitored by the Component. The realization of the outgoing data flow is more complicated. As the Broker needs to be executed to distribute the events, it needs a general purpose \ac{PE} to do so. To achieve this goal, the hardware Component could assemble the notification or request in memory and trigger an inter-processor interrupt on a general purpose \ac{PE} that submits the notification or request to the Broker.
+
+Having a Component constructed in Hardware has some similarities to implementing the Components in a programming language different to that of the framework itself. This problem is discussed in more detail during the quantitative evaluation, specifically in \cref{sec:studies:language}.

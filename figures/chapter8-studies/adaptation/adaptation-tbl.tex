@@ -1,0 +1,105 @@
+\begin{table}[h!]
+	\setlength{\tabcolsep}{4pt}
+	\setlength{\aboverulesep}{1pt}
+	\setlength{\belowrulesep}{1pt}
+	
+	\centering
+	\caption[Adaptation experiment results.]{Adaptation experiment results. The mean runtimes and confidence intervals are given in seconds. Each experiment was repeated \num{100} times (\cf~\cref{sec:studies:performance:results}).}
+	\label{tbl:performance:data}
+	
+	\begin{subtable}{\textwidth}\centering
+	\caption[\,Results for the round-robin scheduling policy.]{Results for the round-robin scheduling policy.}
+	\label{tbl:performance:data:rr}
+	{\small
+	\pgfplotstabletypeset[
+		col sep=comma,
+	    columns={pipes,hq-short, Ehq-short, hq-mid, Ehq-mid, hq-long, Ehq-long},
+		columns/pipes/.style		= {column type=c,  column name=},
+		columns/hq-short/.style		= {sci, sci zerofill, precision=2, sci sep align={c}, column type/.add={}{}		  , column name={Runtime}},
+		columns/Ehq-short/.style	= {sci, sci zerofill, precision=2, sci sep align={c}, column type/.add={>{\rpm}}{}, column name={95\% CI}},
+		columns/hq-mid/.style		= {sci, sci zerofill, precision=2, sci sep align={c}, column type/.add={}{}		  , column name={Runtime}},
+		columns/Ehq-mid/.style		= {sci, sci zerofill, precision=2, sci sep align={c}, column type/.add={>{\rpm}}{}, column name={95\% CI}},
+		columns/hq-long/.style		= {sci, sci zerofill, precision=2, sci sep align={c}, column type/.add={}{}		  , column name={Runtime}},
+		columns/Ehq-long/.style		= {sci, sci zerofill, precision=2, sci sep align={c}, column type/.add={>{\rpm}}{}, column name={95\% CI}},
+		every odd row/.style={before row={\rowcolor[gray]{.85}}},
+		every head row/.style={
+		    before row={
+		        \toprule
+		        \multirow{2}{*}{\raisebox{-2pt}{Threads}}
+		        & \multicolumn{4}{c}{Short}
+		        & \multicolumn{4}{c}{Middle}
+		        & \multicolumn{4}{c}{Long} \\ \cmidrule(lr){2-5} \cmidrule(lr){6-9} \cmidrule(lr){10-13}
+		    },
+		    after row=\midrule
+		},
+		every last row/.style={after row=\bottomrule},
+	]{figures/chapter8-studies/adaptation/adaptation.dat}
+	}
+	\end{subtable}
+
+	\vspace{0.5cm}
+
+	\begin{subtable}{\textwidth}\centering
+	\caption[\,Results for the CFS policy.]{Results for the CFS policy.}
+	\label{tbl:performance:data:cfs}
+	{\small
+
+	\pgfplotstabletypeset[
+		col sep=comma,
+	    columns={pipes,cfs-short, Ecfs-short, cfs-mid, Ecfs-mid, cfs-long, Ecfs-long},
+		columns/pipes/.style		= {column type=c,  column name=},
+		columns/cfs-short/.style	= {sci, sci zerofill, precision=2, sci sep align={c}, column type/.add={}{}		   , column name={Runtime}},
+		columns/Ecfs-short/.style	= {sci, sci zerofill, precision=2, sci sep align={c}, column type/.add={>{\rpm}}{} , column name={95\% CI}},
+		columns/cfs-mid/.style		= {sci, sci zerofill, precision=2, sci sep align={c}, column type/.add={}{}		   , column name={Runtime}},
+		columns/Ecfs-mid/.style		= {sci, sci zerofill, precision=2, sci sep align={c}, column type/.add={>{\rpm}}{} , column name={95\% CI}},
+		columns/cfs-long/.style		= {sci, sci zerofill, precision=2, sci sep align={c}, column type/.add={}{}		   , column name={Runtime}},
+		columns/Ecfs-long/.style	= {sci, sci zerofill, precision=2, sci sep align={c}, column type/.add={>{\rpm}}{} , column name={95\% CI}},
+		every odd row/.style={before row={\rowcolor[gray]{.85}}},
+		every head row/.style={
+		    before row={
+		        \toprule
+		        \multirow{2}{*}{\raisebox{-2pt}{Threads}}
+		        & \multicolumn{4}{c}{Short}
+		        & \multicolumn{4}{c}{Middle}
+		        & \multicolumn{4}{c}{Long} \\ \cmidrule(lr){2-5} \cmidrule(lr){6-9} \cmidrule(lr){10-13}
+		    },
+		    after row=\midrule
+		},
+		every last row/.style={after row=\bottomrule},
+	]{figures/chapter8-studies/adaptation/adaptation.dat}
+	}
+	\end{subtable}
+
+	\vspace{0.5cm}
+
+	\begin{subtable}{\textwidth}\centering
+	\caption[\,Results for the optimized scheduling policy.]{Results for the optimized scheduling policy.}
+	\label{tbl:performance:data:opt}
+	{\small
+
+	\pgfplotstabletypeset[
+		col sep=comma,
+	    columns={pipes,opt-short, Eopt-short, opt-mid, Eopt-mid, opt-long, Eopt-long},
+		columns/pipes/.style		= {column type=c,  column name=},
+		columns/opt-short/.style	= {sci, sci zerofill, precision=2, sci sep align={c}, column type/.add={}{}		 , column name={Runtime}},
+		columns/Eopt-short/.style	= {sci, sci zerofill, precision=2, sci sep align={c}, column type/.add={>{\rpm}}{} , column name={95\% CI}},
+		columns/opt-mid/.style		= {sci, sci zerofill, precision=2, sci sep align={c}, column type/.add={}{}		 , column name={Runtime}},
+		columns/Eopt-mid/.style		= {sci, sci zerofill, precision=2, sci sep align={c}, column type/.add={>{\rpm}}{} , column name={95\% CI}},
+		columns/opt-long/.style		= {sci, sci zerofill, precision=2, sci sep align={c}, column type/.add={}{}		 , column name={Runtime}},
+		columns/Eopt-long/.style	= {sci, sci zerofill, precision=2, sci sep align={c}, column type/.add={>{\rpm}}{}, column name={95\% CI}},
+		every odd row/.style={before row={\rowcolor[gray]{.85}}},
+		every head row/.style={
+		    before row={
+		        \toprule
+		        \multirow{2}{*}{\raisebox{-2pt}{Threads}}
+		        & \multicolumn{4}{c}{Short}
+		        & \multicolumn{4}{c}{Middle}
+		        & \multicolumn{4}{c}{Long} \\ \cmidrule(lr){2-5} \cmidrule(lr){6-9} \cmidrule(lr){10-13}
+		    },
+		    after row=\midrule
+		},
+		every last row/.style={after row=\bottomrule},
+	]{figures/chapter8-studies/adaptation/adaptation.dat}
+	}
+	\end{subtable}
+\end{table}

@@ -1,0 +1,31 @@
+\begin{scaletikzpicturetowidth}{0.7\textwidth}
+\begin{tikzpicture}[scale=\tikzscale, every node/.style={transform shape}]
+	\begin{scope}[shift={(9,0.5)}]
+		\draw[fill=gray!30] (0,0,0) -- ++(0,0,-1) -- ++(0,-2,0) -- ++(0,0,1) -- cycle;
+		\draw[fill=gray!30] (0,0,0) -- ++(-2,0,0) -- ++(0,0,-1) -- ++(2,0,0) -- cycle;
+		\draw[] (0,0,0) -- ++(-2,0,0) -- ++(0,-2,0) -- ++(2,0,0) -- cycle;
+		\node[] at (-0.5*2,-0.5*2,0) {\LARGE \sffamily PE};
+	\end{scope}
+
+	\begin{scope}[shift={(0,0)}]
+		\foreach \i in {0,...,6}
+			\draw[fill=gray!30] ([xshift=-\i*10pt]4,0) rectangle ([xshift=-(\i+1)*10pt]4,-1);
+		\draw[thick](0,0) -- ++(4,0) -- ++(0,-1) -- ++(-4,0);
+		\node[above] at (2,0) {\Large \sffamily ready queue};
+	\end{scope}
+
+	\begin{scope}[shift={(0,-4)}]
+		\foreach \i in {0,...,6}
+			\draw[fill=gray!30] ([xshift=\i*10pt]0,0) rectangle ([xshift=(\i+1)*10pt]0,-1);
+		\draw[thick](4,0) -- ++(-4,0) -- ++(0,-1) -- ++(4,0);
+		\node[above] at (2,0) {\Large \sffamily blocked queue};
+	\end{scope}
+
+	\draw[statea, ->, thick] (9.1,0)    -- ++(2,0) node [pos=0.5, above] {exit};
+	\draw[statea, ->, thick] (4,-0.5)   -- ++(3,0) node [pos=0.5, above] {dispatch};
+	\draw[statea, ->, thick] (-3,-0.5)  -- ++(3,0) node [pos=0.5, above] {enter};
+	\draw[statea, ->, thick] (9.1,-1)   -- ++(0.75,0) -- ++(0,-2) -- ++(-11.4,0) node [pos=0.5, above] {relinquish};	
+	\draw[statea, ->, thick] (9.1,-0.5) -- ++(1.25,0) -- ++(0,-4) -- ++(-6.4,0)  node [pos=0.5, above] {block};
+	\draw[statea, ->, thick] (0,-4.5)   -- ++(-1.5,0) -- ++(0,4);	
+\end{tikzpicture}
+\end{scaletikzpicturetowidth}

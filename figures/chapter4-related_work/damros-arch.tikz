@@ -1,0 +1,24 @@
+\begin{scaletikzpicturetowidth}{0.95\textwidth}
+	\begin{tikzpicture}[scale=\tikzscale, every node/.style={transform shape}]
+		\draw (0,0) rectangle ++(11.5,1.5);
+		\draw[rounded corners=0.25em] (0.25,0.25) rectangle ++(3,1) node[pos=0.5] {\Large Application~1};
+		\draw[rounded corners=0.25em] (3.5 ,0.25) rectangle ++(3,1) node[pos=0.5] {\Large Application~2};
+		\node at (7.375,0.75) {\Large \textbullet~\textbullet~\textbullet};
+		\draw[rounded corners=0.25em] (8.25,0.25) rectangle ++(3,1) node[pos=0.5] {\Large Application~$i$};
+		
+		\draw (0,2.5) rectangle ++(11.5,7);
+		\draw (0.5,3) rectangle ++(10.5,1.5) node[pos=0.5] {\Large \breakC{Base Kernel Core\\(supports Reflection)}};
+		\draw[rounded corners=0.25em] (0.25,7) rectangle ++(3,2) node[pos=0.5] {\Large \breakC{Reflective\\System\\Module~1}};
+		\draw[rounded corners=0.25em] (3.5 ,7) rectangle ++(3,2) node[pos=0.5] {\Large \breakC{Reflective\\System\\Module~2}};
+		\node at (7.375,8) {\Large \textbullet~\textbullet~\textbullet};
+		\draw[rounded corners=0.25em] (8.25,7) rectangle ++(3,2) node[pos=0.5] {\Large \breakC{Reflective\\System\\Module~$n$}};
+		
+		\draw[very thick, line cap=round] (0.25,5.75) -- ++(11,0);
+		
+		\draw[<->, thick] (5.75,1.5) -- ++(0,1.5) node[pos=0.4, anchor=west] {\large Reflection Interface};
+		\draw[<->, thick] (5.75,4.5) -- ++(0,1.25) node[pos=0.5, anchor=west] {\large Reflection Interface};
+		\draw[<->, thick] (1.75,5.75) -- ++(0,1.25);
+		\draw[<->, thick] (5,5.75) -- ++(0,1.25);
+		\draw[<->, thick] (9.75,5.75) -- ++(0,1.25);
+	\end{tikzpicture}
+\end{scaletikzpicturetowidth}

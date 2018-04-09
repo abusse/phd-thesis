@@ -1,0 +1,32 @@
+\begin{scaletikzpicturetowidth}{0.8\textwidth}
+	\begin{tikzpicture}[scale=\tikzscale, every node/.style={transform shape}]
+		\path [fill=BlueBackground] (-2.5,0) rectangle ++(15,4);
+		\path [fill=RedBackground]  (-2.5,0) rectangle ++(15,-4);
+		\path [draw, style=dashed, very thick] (-2.5,0) -- ++(15,0);
+		
+		\node[anchor=center, align=center, anchor=north west] at (-2.25,3.75) {\Large\textbf{\textsf{PE~1 and~2}}};
+		\node[anchor=center, align=center, anchor=south west] at (-2.25,-3.75) {\Large\textbf{\textsf{PE~3 and~4}}};
+		
+		\path[draw, fill=Component] (0,-1) rectangle ++(2,2)  node[pos=0.5] {\breakC{Load-\\Balancing}};
+		\path[draw, fill=Component] (4,1)  rectangle ++(2,2)  node[pos=0.5] {\breakC{Load-\\Balancing}};
+		\path[draw, fill=Component] (4,-1) rectangle ++(2,-2) node[pos=0.5] {\breakC{Load-\\Balancing}};
+
+		\path[draw, fill=Component] (8,2.5)  rectangle ++(2,1)  node[pos=0.5] {\breakC{Round-\\Robin}};
+		\path[draw, fill=Component] (8,0.5)  rectangle ++(2,1)  node[pos=0.5] {\breakC{Round-\\Robin}};
+		\path[draw, fill=Component] (8,-0.5) rectangle ++(2,-1) node[pos=0.5] {\breakC{Round-\\Robin}};
+		\path[draw, fill=Component] (8,-2.5) rectangle ++(2,-1) node[pos=0.5] {\breakC{Round-\\Robin}};
+		
+		\path[->, draw] (-2,0.33) -- ++(2,0);
+		\path[->, draw] (-2,-0.33) -- ++(2,0);
+		\path[->, draw] (2,0.33) -- (4,2);
+		\path[->, draw] (2,-0.33) -- (4,-2);
+		\path[->, draw] (6,2.33) -- (8,3);
+		\path[->, draw] (6,1.66) -- (8,1);
+		\path[->, draw] (6,-2.33) -- (8,-3);
+		\path[->, draw] (6,-1.66) -- (8,-1);
+		\path[->, draw] (10,3) -- ++(2,0);
+		\path[->, draw] (10,1) -- ++(2,0);
+		\path[->, draw] (10,-1) -- ++(2,0);
+		\path[->, draw] (10,-3) -- ++(2,0);
+	\end{tikzpicture}
+\end{scaletikzpicturetowidth}

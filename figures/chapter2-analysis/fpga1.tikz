@@ -1,0 +1,7 @@
+\begin{tikzpicture}[scale=1.0, every node/.style={transform shape}]
+	\path[draw, fill=red!15, thick] (0,0) rectangle ++(5,3);
+	\node[anchor=north west] at (0.1,2.9) {\textsf{FPGA}};
+	
+	\path[draw, fill=olive!30, line width=0.5pt] (0.25,0.25) rectangle ++(2,2) node[pos=0.5, anchor=center, align=center] {\breakC{Core~0\\ISA~\textalpha{}}};
+	\path[draw, fill=CPU,      line width=0.5pt] (2.75,0.25) rectangle ++(2,2) node[pos=0.5, anchor=center, align=center] {\breakC{Core~1\\ISA~\textbeta{}}};
+\end{tikzpicture}

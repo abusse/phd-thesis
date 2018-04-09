@@ -1,0 +1,109 @@
+%BEGIN-SIDEWAY
+
+\pgfplotsset{scaled y ticks=false}
+\pgfplotsset{cycle list/Dark2}
+\tikzset{every mark/.append style={scale=0.5}}
+
+% The spy package results in a second build of this figure that creates the 
+% labels twice. To avoid that we overwrite the tikz write command temporarly. 
+% Note that this will not work for labels that depend, e.g., on a page number.
+{
+\begingroup
+\let\writeold=\write
+\def\write{\immediate\writeold}
+
+\begin{tikzpicture}[spy using outlines={circle, magnification=3, connect spies}]
+	\begin{groupplot}[xtick={1,2,4,8,16,32,64,128},
+					  xmode=log,
+					  log basis x={2},
+					  ymode=log,
+					  grid=major,
+					  width = 0.33\textwidth,
+					  label style={font=\footnotesize},
+					  tick label style={font=\footnotesize},
+					  xticklabel=\pgfmathparse{2^\tick}\pgfmathprintnumber{\pgfmathresult},
+					  xlabel={Number of Threads}, 
+					  group style = {group size= 3 by 2, 
+									 horizontal sep=1.1cm, 
+									 vertical sep=1.8cm, 
+									 xlabels at=edge bottom,
+									 ylabels at=edge left,
+									 group name=speed-plot}
+					  ]
+
+% Plots for total runtime %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+		\nextgroupplot[ylabel={Runtime in $s$}, title={Low Workload},title style={yshift=-1ex},tension=0.1,cycle list name=Dark2] 
+			\addplot+[smooth, line width=0.75pt, mark=*] table [col sep=comma,x={pipes},y={opt-short},y error={Eopt-short}]{figures/chapter8-studies/adaptation/adaptation.dat};\label{plots:speed-plot3}
+			\addplot+[smooth, line width=0.75pt, mark=*] table [col sep=comma,x={pipes},y={hq-short} ,y error={Ehq-short}]{figures/chapter8-studies/adaptation/adaptation.dat};\label{plots:speed-plot1}
+			\addplot+[smooth, line width=0.75pt, mark=*] table [col sep=comma,x={pipes},y={cfs-short},y error={Ecfs-short}]{figures/chapter8-studies/adaptation/adaptation.dat};\label{plots:speed-plot2}
+
+		\nextgroupplot[title={Medium Workload},title style={yshift=-1ex},tension=0.1,cycle list name=Dark2] 
+			\addplot+[smooth, line width=0.75pt, mark=*] table [col sep=comma,x={pipes},y={opt-mid},y error={Eopt-mid}]{figures/chapter8-studies/adaptation/adaptation.dat};
+			\addplot+[smooth, line width=0.75pt, mark=*] table [col sep=comma,x={pipes},y={hq-mid} ,y error={Ehq-mid}]{figures/chapter8-studies/adaptation/adaptation.dat};
+			\addplot+[smooth, line width=0.75pt, mark=*] table [col sep=comma,x={pipes},y={cfs-mid},y error={Ecfs-mid}]{figures/chapter8-studies/adaptation/adaptation.dat};
+
+		\nextgroupplot[title={High Workload},title style={yshift=-1ex},tension=0.1,cycle list name=Dark2] 
+			\addplot+[smooth, line width=0.75pt, mark=*] table [col sep=comma,x={pipes},y={opt-long},y error={Eopt-long}]{figures/chapter8-studies/adaptation/adaptation.dat};
+			\addplot+[smooth, line width=0.75pt, mark=*] table [col sep=comma,x={pipes},y={hq-long} ,y error={Ehq-long}]{figures/chapter8-studies/adaptation/adaptation.dat};
+			\addplot+[smooth, line width=0.75pt, mark=*] table [col sep=comma,x={pipes},y={cfs-long},y error={Ecfs-long}]{figures/chapter8-studies/adaptation/adaptation.dat};
+				\coordinate (spypoint1) at (axis cs:1.1,0.07);
+				\coordinate (magnifyglass1) at (axis cs:3,80);
+				\spy [black, size=1.5cm] on (spypoint1) in node[fill=white] at (magnifyglass1);
+
+
+% Plots for the relative runtime %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+		\nextgroupplot[ylabel={Ratio}, tension=0.1,cycle list name=Dark2] \pgfplotsset{cycle list shift=1} 
+			\addplot+[smooth, line width=0.75pt, mark=*] table [col sep=comma,x={pipes},y={speedUpHQ-short}]{figures/chapter8-studies/adaptation/adaptation.dat};\label{plots:speed-plotA}
+			\addplot+[smooth, line width=0.75pt, mark=*] table [col sep=comma,x={pipes},y={speedUpCFS-short}]{figures/chapter8-studies/adaptation/adaptation.dat};\label{plots:speed-plotB}
+
+		\nextgroupplot[tension=0.1,cycle list name=Dark2] \pgfplotsset{cycle list shift=1} 
+			\addplot+[smooth, line width=0.75pt, mark=*] table [col sep=comma,x={pipes},y={speedUpHQ-mid}]{figures/chapter8-studies/adaptation/adaptation.dat};
+			\addplot+[smooth, line width=0.75pt, mark=*] table [col sep=comma,x={pipes},y={speedUpCFS-mid}]{figures/chapter8-studies/adaptation/adaptation.dat};
+
+		\nextgroupplot[tension=0.1,cycle list name=Dark2, ymax=180] \pgfplotsset{cycle list shift=1} 
+			\addplot+[smooth, line width=0.75pt, mark=*] table [col sep=comma,x={pipes},y={speedUpHQ-long}]{figures/chapter8-studies/adaptation/adaptation.dat};
+			\addplot+[smooth, line width=0.75pt, mark=*] table [col sep=comma,x={pipes},y={speedUpCFS-long}]{figures/chapter8-studies/adaptation/adaptation.dat};
+				\coordinate (spypoint2) at (axis cs:1.1,0.95);
+				\coordinate (magnifyglass2) at (axis cs:3,40);
+				\spy [black, size=1.5cm] on (spypoint2) in node[fill=white] at (magnifyglass2);
+
+	\end{groupplot}
+
+
+% Legend for total runtime %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+	\path (speed-plot c1r1.north west|-current bounding box.north) --
+		  coordinate(legendpos)
+		  (speed-plot c3r1.north east|-current bounding box.north);
+	\matrix[matrix of nodes,
+			anchor=south,
+			inner sep=0.2em,
+			line width=5pt]
+		at([yshift=1ex]legendpos) {\ref{plots:speed-plot2} & Vanilla Linux CFS &[5pt]
+								   \ref{plots:speed-plot1} & \cobas Round-Robin &[5pt]
+								   \ref{plots:speed-plot3} & \cobas Optimized\\};
+
+
+% Legend for the relative runtime %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+	\path (speed-plot c1r2.north west|-speed-plot c1r2.north)--
+		  coordinate(legendpos2)
+		  (speed-plot c3r2.north east|-speed-plot c1r2.north);
+	\matrix[matrix of nodes,
+			anchor=south,
+			inner sep=0.2em,
+			line width=5pt]
+		at([yshift=1ex]legendpos2) {\ref{plots:speed-plotB}& Vanilla Linux CFS~/~\cobas Optimized &[5pt]
+									\ref{plots:speed-plotA}& \cobas Round-Robin~/~\cobas Optimized\\};
+
+\end{tikzpicture}
+\endgroup
+}
+
+%END-SIDEWAY

@@ -1,0 +1,68 @@
+\pgfplotsset{scaled y ticks=false}
+\pgfplotsset{cycle list/Dark2}
+\tikzset{every mark/.append style={scale=0.5}}
+
+\begin{tikzpicture}
+	\begin{axis}[grid=major,
+				 legend columns=2,
+				 xmode=log,
+				 width = \textwidth,
+				 height = 0.5\textheight,
+				 tick label style={font=\footnotesize},
+				 xlabel={Scheduling Workload in Clock Cycles}, 
+				 ylabel={Performance Ratio},
+				 cycle list name=Dark2,
+				 xticklabel style={/pgf/number format/.cd,fixed,precision=3},
+				 xticklabel={%
+				 	\pgfmathfloatparsenumber{\tick}%
+				 	\pgfmathfloatexp{\pgfmathresult}%
+				 	\pgfmathprintnumber{\pgfmathresult}%
+				 },
+				 thick
+				 ]
+
+		\addplot+[smooth, mark=*] table [col sep=comma,x={burn},y={S1Stage}]{figures/chapter8-studies/overhead/pipe-overhead.dat};
+		\addlegendentry{\footnotesize 1~Instance}
+		\addplot+[smooth, mark=*] table [col sep=comma,x={burn},y={S2Stage}]{figures/chapter8-studies/overhead/pipe-overhead.dat};
+		\addlegendentry{\footnotesize 2~Instances}
+		\addplot+[smooth, mark=*] table [col sep=comma,x={burn},y={S3Stage}]{figures/chapter8-studies/overhead/pipe-overhead.dat};
+		\addlegendentry{\footnotesize 3~Instances}
+		\addplot+[smooth, mark=*] table [col sep=comma,x={burn},y={S4Stage}]{figures/chapter8-studies/overhead/pipe-overhead.dat};
+		\addlegendentry{\footnotesize 4~Instances}
+		\addplot+[smooth, mark=*] table [col sep=comma,x={burn},y={S5Stage}]{figures/chapter8-studies/overhead/pipe-overhead.dat};
+		\addlegendentry{\footnotesize 5~Instances}
+		\addplot+[smooth, mark=*] table [col sep=comma,x={burn},y={S6Stage}]{figures/chapter8-studies/overhead/pipe-overhead.dat};
+		\addlegendentry{\footnotesize 6~Instances}
+	\end{axis}
+	
+	\begin{axis}[grid=none,
+		mark=none,
+				 xmode=log,
+				 width = \textwidth,
+				 height = 0.5\textheight,
+				 tick label style={font=\footnotesize},
+				 xlabel={Scheduling Workload in $\mu{}s$}, 
+				 cycle list name=Dark2,
+				 axis x line*=top,
+				 hide y axis,
+				 axis line style = { draw = none },
+				 xtick={0.05,0.5,5},
+				 xticklabel style={/pgf/number format/.cd,fixed,precision=3},
+				 xticklabel={%
+				 	\pgfmathfloatparsenumber{\tick}%
+				 	\pgfmathfloatexp{\pgfmathresult}%
+				 	\pgfmathprintnumber{\pgfmathresult}%
+				 },
+				 thick
+				 ]
+
+		\addplot+[line width=0pt, smooth, mark=none] table [col sep=comma,x expr=\thisrow{burn}/2000,y={S1Stage}]{figures/chapter8-studies/overhead/pipe-overhead.dat};
+		\addplot+[line width=0pt, smooth, mark=none] table [col sep=comma,x expr=\thisrow{burn}/2000,y={S2Stage}]{figures/chapter8-studies/overhead/pipe-overhead.dat};
+		\addplot+[line width=0pt, smooth, mark=none] table [col sep=comma,x expr=\thisrow{burn}/2000,y={S3Stage}]{figures/chapter8-studies/overhead/pipe-overhead.dat};
+		\addplot+[line width=0pt, smooth, mark=none] table [col sep=comma,x expr=\thisrow{burn}/2000,y={S4Stage}]{figures/chapter8-studies/overhead/pipe-overhead.dat};
+		\addplot+[line width=0pt, smooth, mark=none] table [col sep=comma,x expr=\thisrow{burn}/2000,y={S5Stage}]{figures/chapter8-studies/overhead/pipe-overhead.dat};
+		\addplot+[line width=0pt, smooth, mark=none] table [col sep=comma,x expr=\thisrow{burn}/2000,y={S6Stage}]{figures/chapter8-studies/overhead/pipe-overhead.dat};
+		
+		\legend{}; % empty the legend as to not to print it
+	\end{axis}
+\end{tikzpicture}

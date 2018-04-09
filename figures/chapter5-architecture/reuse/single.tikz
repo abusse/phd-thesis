@@ -1,0 +1,11 @@
+\begin{scaletikzpicturetoheight}{0.75cm}
+	\begin{tikzpicture}[scale=\tikzscale, every node/.style={transform shape}]
+
+		\node[rectangle, draw, fill=Component, anchor=west, minimum height=1cm, minimum width=1.8cm, inner sep=0] at (2,0) (load) {\breakC{Round-\\Robin}};
+
+		\path [->, draw] (0,0)  -- node[anchor=south, align=center]{} (load);
+
+		\path [->, draw] (load) -- node[anchor=south, align=center]{} ++(2,0) node[anchor=west] {PE~0};
+
+	\end{tikzpicture}
+\end{scaletikzpicturetoheight}

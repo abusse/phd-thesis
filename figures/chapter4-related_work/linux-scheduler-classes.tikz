@@ -1,0 +1,20 @@
+\begin{scaletikzpicturetowidth}{\textwidth}
+	\begin{tikzpicture}[scale=\tikzscale, every node/.style={transform shape}, node distance=8em]
+	\node[font=\sffamily\bfseries] (entry) {kernel};
+	\begin{scope}[every node/.style={draw=black, very thick, text centered, text width=5em, minimum height=3em,transform shape}]
+		\node[below=1cm of entry] (stop) {Stop Task};
+		\node[right of=stop] (deadline) {Deadline};
+		\node[right of=deadline] (rt) {Real-Time};
+		\node[right of=rt] (cfs) {Completely Fair};
+		\node[right of=cfs] (idle) {Idle-Task};
+	\end{scope}
+	\node[font=\sffamily\bfseries, below=1cm of idle] (null) {null};
+
+	\draw[statea, ->, thick] (entry) -- (stop);
+	\draw[statea, ->, thick] (stop.east) -- (deadline.west);
+	\draw[statea, ->, thick] (deadline.east) -- (rt.west);
+	\draw[statea, ->, thick] (rt.east)-- (cfs.west);
+	\draw[statea, ->, thick] (cfs.east) -- (idle.west);
+	\draw[statea, ->, thick] (idle) -- (null);
+\end{tikzpicture}
+\end{scaletikzpicturetowidth}

@@ -1,0 +1,76 @@
+\begin{scaletikzpicturetowidth}{0.95\textwidth}
+\begin{tikzpicture}[scale=\tikzscale, every node/.style={transform shape}]
+	\begin{scope}[shift={(0,4.75)}]
+		\draw[fill=Component, thick] (0,-1)    rectangle ++(2,2) node[pos=0.5] {\breakC{Load-\\Balancing}};
+		\draw[fill=Component, thick] (4,1.5)   rectangle ++(2,1) node[pos=0.5] {\breakC{Head\\Queue}};
+		\draw[fill=Component, thick] (4,0.25)  rectangle ++(2,1) node[pos=0.5] {\breakC{Head\\Queue}};
+		\draw[fill=Component, thick] (4,-0.25) rectangle ++(2,-1) node[pos=0.5] {\breakC{Head\\Queue}};
+		\draw[fill=CPU, thick]       (4,-1.5)  rectangle ++(2,-1) node[pos=0.5] {\breakC{Head\\Queue}};
+		
+		\path[<-, draw, thick] (0,0.75)  -- ++(-1,0);
+		\path[<-, draw, thick] (0,0.25)  -- ++(-1,0);
+		\path[<-, draw, thick] (0,-0.25) -- ++(-1,0);
+		\path[<-, draw, thick] (0,-0.75) -- ++(-1,0);
+		
+		\path[->, draw, thick] (2,0.75)  -- (4,2);
+		\path[->, draw, thick] (2,0.25)  -- (4,0.75);
+		\path[->, draw, thick] (2,-0.25) -- (4,-0.75);
+		\path[->, draw, thick] (2,-0.75) -- (4,-2);
+		
+		\path[->, draw, thick] (6,2)     -- ++(1,0) node[anchor=west] {PE~0};
+		\path[->, draw, thick] (6,0.75)  -- ++(1,0) node[anchor=west] {PE~1};
+		\path[->, draw, thick] (6,-0.75) -- ++(1,0) node[anchor=west] {PE~2};
+		\path[->, draw, thick] (6,-2)    -- ++(1,0) node[anchor=west] {PE~3};
+	\end{scope}
+	
+	\begin{scope}[shift={(10,0)}]
+		\draw[fill=Component, thick] (0,-1)    rectangle ++(2,2) node[pos=0.5] {\breakC{Load-\\Balancing}};
+		\draw[fill=Component, thick] (4,1.5)   rectangle ++(2,1) node[pos=0.5] {\breakC{Head\\Queue}};
+		\draw[fill=Component, thick] (4,0.25)  rectangle ++(2,1) node[pos=0.5] {\breakC{Head\\Queue}};
+		\draw[fill=Component, thick] (4,-0.25) rectangle ++(2,-1) node[pos=0.5] {\breakC{Head\\Queue}};
+		\draw[fill=CPU, thick]       (4,-1.5)  rectangle ++(2,-1) node[pos=0.5] {\breakC{FCFS}};
+		
+		\path[<-, draw, thick] (0,0.75)  -- ++(-1,0);
+		\path[<-, draw, thick] (0,0.25)  -- ++(-1,0);
+		\path[<-, draw, thick] (0,-0.25) -- ++(-1,0);
+		\path[<-, draw, thick] (0,-0.75) -- ++(-1,0);
+		
+		\path[->, draw, thick] (2,0.75)  -- (4,2);
+		\path[->, draw, thick] (2,0.25)  -- (4,0.75);
+		\path[->, draw, thick] (2,-0.25) -- (4,-0.75);
+		\path[->, draw, thick] (2,-0.75) -- (4,-2);
+		
+		\path[->, draw, thick] (6,2)     -- ++(1,0) node[anchor=west] {PE~0};
+		\path[->, draw, thick] (6,0.75)  -- ++(1,0) node[anchor=west] {PE~1};
+		\path[->, draw, thick] (6,-0.75) -- ++(1,0) node[anchor=west] {PE~2};
+		\path[->, draw, thick] (6,-2)    -- ++(1,0) node[anchor=west] {PE~3};
+	\end{scope}
+	
+	\begin{scope}[shift={(0,-4.75)}]
+		\draw[fill=Component, thick] (0,-1)    rectangle ++(2,2) node[pos=0.5] {\breakC{Load-\\Balancing}};
+		\draw[fill=Component, thick] (4,1.5)   rectangle ++(2,1) node[pos=0.5] {\breakC{Head\\Queue}};
+		\draw[fill=Component, thick] (4,0.25)  rectangle ++(2,1) node[pos=0.5] {\breakC{Head\\Queue}};
+		\draw[fill=Component, thick] (4,-0.25) rectangle ++(2,-1) node[pos=0.5] {\breakC{Head\\Queue}};
+		\draw[fill=CPU, thick]       (4,-1.5)  rectangle ++(2,-1) node[pos=0.5] {\breakC{LCFS}};
+		
+		\path[<-, draw, thick] (0,0.75)  -- ++(-1,0);
+		\path[<-, draw, thick] (0,0.25)  -- ++(-1,0);
+		\path[<-, draw, thick] (0,-0.25) -- ++(-1,0);
+		\path[<-, draw, thick] (0,-0.75) -- ++(-1,0);
+		
+		\path[->, draw, thick] (2,0.75)  -- (4,2);
+		\path[->, draw, thick] (2,0.25)  -- (4,0.75);
+		\path[->, draw, thick] (2,-0.25) -- (4,-0.75);
+		\path[->, draw, thick] (2,-0.75) -- (4,-2);
+		
+		\path[->, draw, thick] (6,2)     -- ++(1,0) node[anchor=west] {PE~0};
+		\path[->, draw, thick] (6,0.75)  -- ++(1,0) node[anchor=west] {PE~1};
+		\path[->, draw, thick] (6,-0.75) -- ++(1,0) node[anchor=west] {PE~2};
+		\path[->, draw, thick] (6,-2)    -- ++(1,0) node[anchor=west] {PE~3};
+	\end{scope}
+	
+	\path [draw, bend left=35] (9,6.5)       edge[->, very thick] node[anchor=south west, align=center] {\large\breakC{Reconfiguration \\ before Benchmark starts}} (13.5,3.5); 
+	\path [draw, bend left=35] (13.5,-3.5) edge[->, very thick] node[anchor=north west, align=center] {\large\breakC{Reconfiguration after \\ first half of the benchmark}} (9,-6.5); 
+	\path [draw]               (5,-1.75)    edge[->, very thick] node[anchor=east, align=center]       {\large\breakC{Reconfiguration after \\ second half of the benchmark}} (5,1.75);
+\end{tikzpicture}
+\end{scaletikzpicturetowidth}

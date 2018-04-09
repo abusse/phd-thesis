@@ -1,0 +1,224 @@
+\chapter[Analysis of the Functional Challenges]{Analysis of the \\ Functional Challenges}%
+\label{chap:analysis}
+
+The introduction gave an extensive overview of challenges that designers of system software in general and the developer of process schedulers, in particular, are facing. However, every area was only discussed briefly. This chapter discusses the functional challenges in more detail, especially with respect to the process scheduler. It covers the execution granularities of applications in the broadest sense in the first section. \Cref{sec:env} gives more detailed insights of the execution environments and the challenges that arise from them. \Cref{sec:flexibility} discusses to what extent a scheduler has to be flexible and dynamic to changes in the system. \Cref{sec:further_considerations} concludes this chapter with further considerations regarding process scheduling.
+
+\section{Execution Granularity}%
+\label{sec:analysis:exec}
+
+A system that is supposed to process several computational tasks is faced with the question in what granularity these should be managed and executed. This section shortly discusses the different approaches that are relevant today. However, it only gives a short introduction to the different concepts as a more detailed discussion would go beyond the scope of this dissertation. For more detailed explanations, please refer to the respective references mentioned throughout this sections.
+
+\subsection{Batch Jobs}%
+\label{sec:analysis:exec:batch}
+
+Batch processing is the simplest and oldest form of multi-program execution and assumes that data is processed without any user interaction. In batch processing, jobs are assigned to a queue. The computer executes the jobs in the queue one by one. Each of these jobs is entirely independent of the others and runs from the beginning to the end without interruption or user interaction. Even though already introduced in the 1950's, batch processing is still used today, for example in mainframe systems~\cite[273--290]{IBM-2011-Mainframe}.
+However, the idea of batch processing is also still realized in other operating systems like, \eg, Linux (\cf~\cref{sec:rw:linux_classes}).
+
+\subsection{Processes}%
+\label{sec:analysis:exec:process}
+
+As described above, batch processing is not intended for interactive program execution and assumes that tasks are executed from the beginning to the end. This made it complicated to implement multi-tasking as a task cannot be interrupted. That problem leads to the introduction of the concept of a process. Compared to a batch job, a process represents not only the program code and input data but also the current state of the job~\cite[130\psq]{Stallings-2011-OperatingSystems}. With further advancements in memory architecture, each process was assigned a dedicated address space, which is the only address region a process can access. Therefore, the kernel gets widely protected against direct manipulation by processes and processes are protected from each other as well. Saving the job state made it possible to interrupt a process at any point in execution and no longer rely on cooperative multitasking, which required the program to yield the CPU.
+
+\subsection{Threads}%
+\label{sec:analysis:exec:threads}
+
+Further advancements in computer architecture and software engineering lead to a point where several parts of a program could be executed concurrently. Therefore, a program did no longer necessarily consist of only one set of instructions that had to be processed sequentially, but several sets of instructions that could be executed concurrently or even in parallel in the case of multi-core systems. However, as mentioned in \CHECK{Section~\ref{sec:analysis:exec:process}}, processes are only allowed to communicate and share data with each other through the help of the kernel as they are protected from each other. This separation is feasible for programs that do not share any or very little data but leads to a significant overhead if several processes belong to one program, thus possibly sharing a significant amount of data.
+
+To solve this issue, the concept of threads or light-weighted processes was introduced. Threads, usually, reside in a process, so one process can have one or several threads. Still, every thread has its state, but the threads in one process share their address space. This sharing allows direct communication between the threads without the involvement of the kernel. Threads can be implemented in user space, making them opaque for the operating system, or can be supported by the kernel. In the latter case, the operating system can handle the scheduling of the threads, whereas in the former case the scheduling has to be performed entirely by the user space code, often trough a library like, \eg, \acp{Pthread}~\cite{POSIX}. A more detailed discussion of both threads per se and user and kernel space implementation is done, \eg, by \textcite[177\psq]{Stallings-2011-OperatingSystems}.
+
+\subsection{Virtual Machines}%
+\label{sec:analysis:exec:vm}
+
+Even though virtualization was already introduced in the mainframe domain in 1967 with the IBM~System/360~Model~67~\cite[57]{IBM-2010-zEnterprise}, it became mainstream in the 1990's with commodity hardware. Virtual machines can be managed either by a dedicated hypervisor (type-1 hypervisor) or by an operating system acting as a hypervisor (type-2 hypervisor)~\cite{Popek-1974-VM}. However, the impact on the scheduling problem of virtual machines is only minor regarding the differences between type-1 and type-2 hypervisors. Note that the overall scheduling problem might become more complex having a mixture of user processes and processes belonging to the hypervisor.
+
+The scheduling of virtual machines on a single host can be compared to the scheduling of processes. In type-2 hypervisors, virtual machines are often treated as such (\cf~\cref{fig:req:relation}). For example, the \ac{KVM}~\cite{kvm} assigns to every virtual core a dedicated thread. With virtual machines running an operating system that possibly runs several tasks itself, a parallel can be drawn to processes that run several threads. However, virtual machines have additional requirements regarding scheduling, especially in a multi-core context. As the guest does not know that it is virtualized, it assumes that all of its cores are available the whole time. If this assumption gets violated, the guest suffers from severe performance degradation. Therefore, hypervisors prefer to schedule all \acp{PE} of a virtual machine at the same time~\cite{VMware-2013-vSphereScheduler,Schoenherr-2012-Cosched}. Furthermore, virtual machines are completely opaque to the hypervisor, where threads are sometimes visible to the operating system. This opaqueness makes the scheduling more complicated as the host cannot leverage knowledge of task relations inside the guest. Current research shows that this knowledge could improve the overall system scheduling~\cite{Busse-2015-PartialCoSched}.
+
+Looking at virtual machines from a broader perspective shows another scheduling problem. Contrary to processes in general\footnote{Note that the live migration of processes between different hosts is ongoing research~\cite{criu} especially in the context of operating-system-level virtualization.}, virtual machines can be migrated from one computer to another while executing. Migration can increase both reliability and scalability of virtual machines. They can be, for example, evacuated from a host when it is failing or going towards an overload situation. Especially the latter scenario is a typical scheduling problem as a certain number of virtual machine hosts (\acp{PE}) have to be assigned to virtual machine guests (jobs) with different properties.
+
+\begin{figure}[t!] \centering
+	\includetikz{figures/chapter2-analysis/relation}
+	\caption{Simple relation between virtual machines, processes, and threads.}%
+	\label{fig:req:relation}
+\end{figure}
+
+\subsection{Granularity Relations}
+
+The discussion above already implied a relation between the various degrees of granularity. \Cref{fig:req:relation} illustrates that threads are commonly encapsulated in processes and processes might be encapsulated in a virtual machine. However depending on the underlying hardware architecture or \ac{ISA} respectively, this relation can be nested as depicted in \cref{fig:req:vm_nested}. The virtual \acp{PE} are embedded in threads of the host operating system. Therefore, a thread can, as of today, opaquely hold other processes and threads. The simple configuration in \cref{fig:req:relation} already is a challenge regarding the scheduling~\cite{Busse-2015-PartialCoSched}, where a situation as illustrated in \cref{fig:req:vm_nested} makes the situation even more complex from the perspective of process scheduling.
+
+\begin{figure}[t!] \centering
+	\includetikz{figures/chapter2-analysis/vm_nested}%
+	\caption{Nested virtual machines.}
+	\label{fig:req:vm_nested}
+\end{figure}
+
+\section{Execution Environment}%
+\label{sec:env}
+
+The future challenges for scheduling arising from changes in hardware architecture were already introduced in \cref{sec:intro:challenges}. This chapter discusses the actual implications for the scheduler that results from such changes in detail. At this point, naturally, only certain developments can be considered. \Cref{fig:req:metro} depicts a fictional architecture incorporating several components that poses challenges for the scheduler and scheduling policies in the future. This design can be considered as a kind of worst case scenario for current runtime systems. It combines several challenges in one system:
+\begin{itemize*}
+	\item Many-Cores
+	\item Heterogeneity
+	\item Specialized computing elements
+	\item Reconfigurable computing
+\end{itemize*}
+
+
+\begin{figure}[t!] \centering
+	\includetikz{figures/chapter2-analysis/metropolis}
+	\caption[The fictional Metropolis architecture.]{The fictional \emph{Metropolis}  architecture~\cite{Singh-2007-Metropolis}, depicting several architectural challenges that are or will become relevant for future scheduler and scheduling policies.}%
+	\label{fig:req:metro}
+\end{figure}
+
+\subsection{Many-Cores}%
+\label{sec:env:many-core}
+
+In literature, there is no precise definition for many-core systems; however, it is widely accepted that systems with several tens or more cores can be considered as such a system (\cf~\textcite[3]{Vajda-2011-ProgrammingManyCore}). Increasing the number of cores on one chip above a certain level introduces new challenges for the hardware developer. On the one hand, it must be ensured that the cores have some way to interact with each other. On the other hand, every core has to have appropriate access to memory to work to its full potential. As the memory bandwidth cannot be scaled infinitely, caches become more important.
+
+\subsubsection{Interconnects}
+
+\begin{figure}[t!]
+	\centering
+	\begin{subfigure}[b]{0.45\textwidth}\centering
+		\includetikz{figures/chapter2-analysis/bus}\vspace{0.5cm}
+		\caption{Bus Interconnect}%
+		\label{fig:req:bus}
+	\end{subfigure}%
+	\hfill
+	\begin{subfigure}[b]{0.45\textwidth}\centering
+		\includetikz{figures/chapter2-analysis/crossbar}
+		\caption{Crossbar Interconnect}%
+		\label{fig:req:crossbar}
+	\end{subfigure}\vspace{1cm}
+	\begin{subfigure}[b]{0.45\textwidth}\centering
+		\includetikz{figures/chapter2-analysis/ring}\vspace{0.25cm}
+		\caption{Ring Interconnect}%
+		\label{fig:req:ring}
+	\end{subfigure}%
+	\hfill
+	\begin{subfigure}[b]{0.45\textwidth}\centering
+		\includetikz{figures/chapter2-analysis/mesh}
+		\caption{Mesh Interconnect}%
+		\label{fig:req:mesh}
+	\end{subfigure}
+	\caption{Multi-Core interconnect architectures}\label{fig:req:interconnects}
+\end{figure}
+
+The interaction between different \acp{PE} on a chip can be achieved by various means. The four most fundamental ways are depicted in \cref{fig:req:interconnects}. The most basic one is a shared bus that connects every \ac{PE} to the memory and to one another (\cf~\cref{fig:req:bus}). Such an architecture allows the communication between cores through the memory or directly. An example is the front side bus. The programming and resource allocation for those kind of multi-core systems is very simple. However, having a common bus for several cores communicating with each other directly or indirectly through memory introduces a critical bottleneck. Therefore, this interconnect architecture scales only for a very limited number of cores and will most likely not be found in future many-core systems.
+
+A more sophisticated approach is the crossbar interconnect (\cf~\cref{fig:req:crossbar}). This interconnect allows the direct communication between different cores or memory controllers depending on the particular architecture. An example for multi-core systems utilizing a crossbar is the SPARC architecture~\cite{SPARC-1992}. In this specific architecture, the crossbar only connects the cores to the memory and not the cores to one another. Compared to the shared bus, the crossbar approach does not show a severe performance degradation when the number of cores rises. Still, it remains a relatively simple programming model as every core has a similar connection to the memory or the other cores. However, the crossbar architecture will probably only have limited use for many-core systems as the hardware complexity of the crossbar itself rises significantly with the complexity of both wiring and switching being \(\mathcal{O}(n^2)\), where \(n\) is the number of elements connected to the crossbar.
+
+Another approach for on-chip interconnects is a ring (\cf~\cref{fig:req:ring}). The ring interconnect, for example, is used in Intel's \ac{MIC} architecture~\cite{Chrysos-2012-XeonPhiBus}. With the ring-based interconnect, the communication of a \ac{PE} is limited to its direct neighbors. As a consequence, to communicate with non-neighboring elements, several hops are necessary. This topology results in different communication times between cores and memory controllers depending on the distance. In contrast to the previously presented interconnects, the ring architecture is suitable for a many-core system, \eg, the \ac{MIC} architecture having up to 61~cores~\cite{Intel-2015-XeonPhiDatasheet}.
+
+Figure~\ref{fig:req:mesh} depicts the on-chip interconnect approach of a mesh. The mesh is the most commonly used topology for a \ac{NoC}. Examples for such interconnects in the multi- and many-core area are the Adapteva Epiphany multi-core architecture~\cite{Adapteva-2013-Epiphany} or the announced EZChip TILE-Mx processor~\cite{Doud-2015-TILE-Mx}. The mesh approach is very scalable and most likely to be used for future many-core architectures. However, other topologies for a \ac{NoC} are researched and discussed, \eg, by \textcite{Sewell-2012-SwizlleSwitch}. Depending on the concrete topology of the \ac{NoC}, the communication between cores becomes even more complex as there are now potentially several ways to reach another \ac{PE}. The main challenge is to find a process placement, scheduling, and communication routing with as little congestion on the links as possible at the same time.
+
+Another aspect that has to be taken into account regarding the different interconnects is the memory. The memory is either directly connected to the \acp{PE} or it is connected to controllers that are attached to the interconnects as separate elements. In both scenarios with a sophisticated interconnect, a \ac{NUMA} behavior will be most likely. For the scheduler, \ac{NUMA} introduces another degree of complexity as the scheduling does not only have to consider the optimal placement regarding communication between \acp{PE} but also regarding the access to the working set that is held in memory.
+
+\subsubsection{Caches}
+
+The memory wall~\cite{Wulf-1995-MemoryWall} already poses a challenge for single-core systems as the computational power rises much faster than the memory bandwidth. With multi- and many-core systems, the situation becomes increasingly problematic as the memory bandwidth demand rises even faster. The common approach to solve the issue of insufficient memory bandwidth is the use of caches. The use of caches in multi-core systems, yet, introduces a new challenge to the hardware designer stemming from the fact that caches create a copy of data. If two copies exist and they are modified by different cores, data inconsistencies most certainly occur. To avoid inconsistencies, hardware designers today try to maintain cache coherency, meaning the modification of data at one point is reflected on other copies.
+
+Even though many of today's many-core architectures employ a cache coherent, shared memory model like~\cite{Intel-2012-XeonPhiManual,Doud-2015-TILE-Mx,Balkind-2016-OpenPiton} and it is argued that cache coherency will not vanish~\cite{Martin-2012-CacheCoherence}, examples exist or are researched that do not employ cache coherence~\cite{Intel-2010-SCC} or ensure cache coherency only amongst a particular group of \acp{PE}~\cite{Fu-2015-CDR}. Having such islands of coherency makes the task scheduling even more challenging. The scheduler has to assess which task groups and possibly tasks of that task group profit most from placing them on such an island. It can be expected that the impact to performance is significant regarding this placement.
+
+
+\subsection{Heterogeneity}
+
+The aspect of heterogeneity in computer architecture covers a wide range. It can range from a difference in performance characteristics between cores over different instruction sets to entirely different programming models. This heterogeneity also leads to various challenges regarding the design of a scheduling policy. Those differences will be discussed subsequently based on three examples, representing a limited selection of what is possible.
+
+\subsubsection{Heterogeneous Performance}
+
+Heterogeneity regarding performance is mostly caused by the need to conserve energy while still maintaining performance capabilities when needed or during the absence of strict energy limitations. Such a system, in the simplest case, consists of one or more \acp{LPC} and one or more \acp{HPC}. The \ac{LPC} shows a better energy efficiency than the \ac{HPC}, which is achieved, for example, by using transistors with a higher energy efficiency~\cite{Nvidia-2011-Tegra} or by a more efficient microarchitecture~\cite{ARM-2013-bigLITTLEarch}.
+
+Such a system can run with an unoptimized scheduler. However, it will result in a bad performance regarding both computation and energy. A low priority background task might get scheduled on a \ac{HPC}, thus wasting energy, and highly computational intensive tasks are possibly scheduled on a \ac{LPC}, resulting in a slow program progress. Therefore, an adapted scheduling policy is needed. The decision whether to run a task on a \ac{LPC} or \ac{HPC} is not trivial as previous research shows~\cite{Nabelsee-2016-Centralized,Saez-2015-ACFS}. It depends on many different factors, \eg, whether the system is running on battery, what the tasks characteristics are, or which tasks might be relevant to the user. The situation becomes increasingly complex as the number of efficiency domains rises.
+
+\subsubsection{Heterogeneous Instruction Set Architectures}%
+\label{sec:env:hetero_isa}
+
+Heterogeneity regarding the \ac{ISA} means that the cores of a multi- or many-core system have different instruction sets. This heterogeneity can, again, be introduced to conserve energy, but the reasons can also be more diverse. For example, it is possible that a certain number of cores can only be reached with a simplified or reduced instruction set on the limited chip area or that the \ac{ISA} is optimized for certain tasks. An actual example of such a system is the Parallela platform~\cite{Parallella-2014-Manual}, which combines a dual-core ARM~A9~processor with an Epiphany processor that consists of 16~or 64~cores that can only execute the entirely different Epiphany instruction set.
+
+This kind of heterogeneity introduces the same challenges as systems with heterogeneous performance do; yet, it also introduces new challenges beyond the aforementioned. Today, it is common that the core that needs to have assigned a new task also executes the scheduler logic. With a different instruction set, this becomes difficult or even impossible. Take for example a dual-core system with two distinct \acp{ISA}~\textalpha{}~and~\textbeta{}. As it is a multi-core system, some load balancing or task distribution has to be conducted. So, either there is a load balancer code path that can be executed by both cores or the load balancing is only performed on one core or \ac{ISA} respectively. The former approach is very challenging, as it requires two sets of code and, even more critical, the same representation of the processed data. This might be difficult or even impossible depending on the actual differences of the two \acp{ISA}. Potentially simpler is the second solution where the load balancing is only conducted on one core or \ac{ISA}. Still, the challenge exists that information and, therefore, data, in possibly different representations have to be exchanged between the two architectures.
+
+\subsubsection{Heterogeneous Programming Models}
+
+The most extreme case for heterogeneous systems are systems that have very different programming models for their cores. This is a reality today, for example, in \ac{GPGPU} programming. There, the host uses a \ac{SISD} or \ac{MIMD} programming approach whereas the \ac{GPU} uses a \ac{SIMD} programming approach\footnote{Refer to \textit{Flynns Taxonomy}~\cite{Flynn-1972-taxonomy} for explanation of the programming models.}. Different programming models make it particularly difficult to schedule tasks as some of the cores might not even be able to execute the scheduler code, which is, for example, the case with \ac{GPGPU} programming. Furthermore, the \acp{PE} have different requirements regarding the computation granularity. For example, saving the register set of a \ac{GPU} for a task switch became only available with the latest generation of \acp{GPU} and is not very sophisticated.
+
+\subsection{Specialized Computing Elements}
+
+Specialized computing elements are hardware that is designed to fulfill a very particular purpose like graph reduction, encryption, or hashing. It is disputable whether they can be considered as \acp{PE} or have to be treated as special I/O devices. They cannot execute a complete task and are used from a coding point of view in a very small part of a program. Still, the execution time of a task might have a significant percentage dedicated to the specialized computing element depending on the complexity of the function it realizes.
+
+Today, it is not clear how specialized computing elements will evolve and how much autonomy they will have. Currently, they commonly need a conventional \ac{PE} that feeds them data into and instructs them how to process it. So, it is possible that they will be handled like \ac{DMA} controllers today, but also that they have to be considered by the scheduler like any other \ac{PE}.
+
+\subsection{Reconfigurable Computing}%
+\label{sec:analysis:environment:reconf}
+
+Reconfigurable computing is mainly based on \ac{FPGA} technology. \Cref{sec:intro:anycore} already discussed their properties. This section takes a closer look at the requirements arising from the design of scheduling policies. First, \acp{FPGA} can be used like specialized computing elements, which were discussed in the previous subsection. However, as the designation of reconfigurable computing implies, they can be reconfigured to fulfill different purposes at runtime. For example, a \ac{FPGA} can be changed from being a graph reduction processor to an encryption processor.
+
+However, the capabilities and possible applications of \ac{FPGA} technology go far beyond that. It is also possible to create complete \acp{CPU} in a \ac{FPGA}. So, a possible scenario, for example, could be a heterogeneous system regarding the \acp{ISA} of its cores with an additional \ac{FPGA}. The \ac{FPGA} could be configured to act as a CPU of a certain \ac{ISA} depending on the current task requirements. Take, for example, again the situation with two \acp{ISA}~\textalpha{}~and~\textbeta{}. Now, if the scheduler detects a high load on the core that executes \ac{ISA}~\textbeta{}, it could reconfigure the \ac{FPGA} from acting as a CPU running \ac{ISA}~\textalpha{} (Figure~\ref{fig:req:fpga1}) to act as a CPU that executes \ac{ISA}~\textbeta{} (Figure~\ref{fig:req:fpga2}). As even current \acp{FPGA} are so big that they can implement more than one CPU core, the situation can get increasingly complex. Take the same example, but the \ac{FPGA} is able to act not only as a CPU executing \ac{ISA}~\textalpha{}~or~\textbeta{}, but, for instance, as two cores of \ac{ISA}~\textalpha{} and four cores of \ac{ISA}~\textbeta{}. This capability would result in many different configurations, making it necessary for the scheduler to be highly adaptive.
+
+\begin{figure*}[b!]
+	\centering
+	\begin{subfigure}[t]{0.48\textwidth}\centering
+		\includetikz{figures/chapter2-analysis/fpga1}
+		\caption{Initial configuration with two cores and two ISAs.}%
+		\label{fig:req:fpga1}
+	\end{subfigure}
+	\hfill
+	\begin{subfigure}[t]{0.48\textwidth}\centering
+		\includetikz{figures/chapter2-analysis/fpga2}
+		\caption{Reconfigured FPGA with two cores and one ISA.}%
+		\label{fig:req:fpga2}
+	\end{subfigure}%
+	\caption{System reconfiguration due to a changed load situation.}%
+	\label{fig:req:fpga}
+\end{figure*}
+
+Another application for \ac{FPGA} technology could be the augmentation of existing instruction sets with new instructions that are executed in hardware in the \ac{FPGA}. With this approach, a new complex instruction is created that would originally need several instructions of the native \ac{ISA}.
+
+
+During the execution of the task with the new instruction, the process will run partially on the FPGA, if it is or will be configured to execute the new instruction for the task. If it is not available, the execution can fall back with, \eg, a trap to the original code with several instructions. Again, this technique introduces new challenges for the scheduler. It has to decide when to execute such a task based on the current configuration of the \ac{FPGA}, whether it is worth to reconfigure the \ac{FPGA} for the current task set, and manage the utilization of the \ac{FPGA} by several tasks. Again as in the \ac{CPU} example above, several new instructions can be created in the \ac{FPGA} concurrently. The augmentation of existing \acp{ISA} with specialized instructions was researched for example by~\textcite{Pittman-2006-eMIPS}. The resulting scheduling problem was discussed by~\textcite{Sheldon-2010-eMIPSSched} on the example of the NetBSD~\cite{NetBSD} operating system.
+
+Besides the impact of the specialized hardware configuration for the task, the scheduler has to take into account the time to reconfigure the \ac{FPGA} and possibly weigh up the reconfiguration against the processing of data on the \ac{FPGA}. This consideration becomes even more complex as the reconfiguration time is not constant and depends on many aspects like the actual \ac{FPGA} technology, vendor, or the size of the area that has to be reconfigured. The reconfiguration time is already identified as an issue having hardware supported tasks and ranges today in a magnitude of hundreds of microseconds (\cf~\textcite{Duhem-2011-FaRM}).
+
+\section{Scheduler Flexibility}%
+\label{sec:flexibility}
+
+The scheduler flexibility considers how good the scheduler can react to changes in the requirements. Literature traditionally defines static and dynamic scheduling, where the former one is, today, almost exclusively relevant in real-time scheduling (\cf~\textcite{Ramamritham-1994-RTTypes}). A static scheduling policy is the least flexible of all scheduling policies. It requires that all tasks and \acp{PE} are known before the runtime of the system. The schedule is created offline and then hard coded to the system. Such a policy cannot handle the introduction of new tasks or changes regarding the \acp{PE}, \eg, a core fails and can no longer execute tasks. Even though such a scheduling approach is very limited, it is common in embedded and real-time environments, because it is simple to implement and easy to analyze.
+
+Dynamic scheduling is common to most modern operating systems. It determines the task order at runtime and allows the creation and the removal of processes at runtime as well. Furthermore, current dynamic scheduling policies can compensate the removal or addition of cores, which is, from an architectural point of view, not complicated. Failed cores, for example, can just be ignored in future scheduling decisions and new cores can easily be added to the list of available \acp{PE}. Note that the exact implementation of this behavior is, depending on the actual operating system architecture, not necessarily simple.
+
+With new architectures, as described earlier, the flexibility of dynamic scheduling will not be enough. The limits are already assessable looking at the challenges introduced by heterogeneous many-core systems. Even though it is possible to create a standard dynamic scheduling policy for heterogeneous multi-core systems, this needs specific tailoring to the particular system. Even though it is often feasible to parametrize those scheduling policies, this might not be sufficient for future architectures. Parametrization is only feasible to a certain extent as long as the systems do not differ severely. For example, for a heterogeneous system with differences in processing efficiency of the \acp{PE}, it is feasible to be able to parametrize the number of efficiency domains or the exact impact on energy consumption. However, it would be unrewarding to simply parametrize difference in programming models as this would result in the main differences in the handling of the task.
+
+In case simple parametrization is not sufficient, an \emph{adaptive} scheduling approach is necessary. An adaptive approach allows significant changes to the scheduler and scheduling policy during runtime. The adaption process can also include the injection of new code paths on demand. It enables the runtime system to change the scheduler whenever necessary and creates new possibilities regarding scheduling optimization. For example, it would be possible to ship a computation accelerator with its own specifically tailored scheduling policy and integrate that policy into the runtime systems' native scheduler.
+
+\section{Further Considerations}%
+\label{sec:further_considerations}
+
+Besides the main challenges discussed in the previous sections, other problems exist that cannot be classified. Following, those challenges are discussed briefly.
+
+\subsection{Self and Foreign Hosted Scheduling}%
+\label{sec:selfforeign}
+
+The task assignment to \acp{PE} can, in general, happen in two ways. Either the \ac{PE} selects the process that it wants to execute next from the ready list by itself, or it is assigned a new task by another \ac{PE}. In a single-core system, of course, only the former approach is feasible as no other \ac{PE} can perform the selection. Because several current operating systems evolved from a single core operating system, the choice of the next task by the \ac{PE} itself is a very common approach. The task assignment by another \ac{PE} is mostly found when the \ac{PE} itself is not capable of executing the scheduler routine, which is the case, for example, with \ac{GPGPU} computing.
+
+Decentralized scheduler implementations can be considered as a hybrid approach to self and foreign hosted scheduling. Within this method, every \ac{PE} gets assigned a certain number of tasks by a load balancing mechanism that can be executed by the \ac{PE} itself or by another \ac{PE}. The \ac{PE} then selects only tasks from the set of tasks it was previously assigned.
+
+\subsection{Multikernel Operating Systems}
+
+The multikernel approach was proposed by \textcite{Baumann-2009-Multikernel} to cope with some of the upcoming challenges presented, among other things, in \cref{sec:intro:challenges}. \Citeauthor{Baumann-2009-Multikernel} described a new architecture for operating systems that considers many-core systems rather as a network than a system with shared resources. Even though a system running a multikernel operating system has shared resources and communication capabilities, \eg, through shared memory, the operating system will allow communication between cores only through explicit message passing. It is argued that such an architecture is more apt for many-core systems. This claim can be backed by the fact that some of the current many-core architectures use a \ac{NoC} to communicate. This makes it natural to construct the operating system from the beginning with such a network in mind.
+
+\Citeauthor{Baumann-2009-Multikernel} argue that a multikernel operating system is independent of the underlying communication architecture~\cite[\ppno~38\psq(9\psq)]{Baumann-2009-Multikernel}, which would, in theory, mean that such an operating system could use many different communication methods, \eg, shared memory or a \ac{NoC}. The approach is very close to cluster operating systems that also manage a bigger number of \acp{PE}, often through message passing. However, nodes with more than one \ac{PE} each are not considered as multiple systems, whereas in a multikernel operating system, every \ac{PE} is managed by one kernel individually. Another aspect of multikernel operating systems are heterogeneous \acp{ISA}, which are not considered by cluster operating systems. Besides the Barrelfish operating system~\cite{Barrelfish}, which is one of the first multikernel operating systems, Popcorn Linux was introduced lately~\cite{Barbalace-2015-PopcornLinux}. It can also be seen as a multikernel operating system. However, it does not consider every core strictly as a single system but mostly as individual \ac{ISA} domains.
+
+The research regarding the scheduler architecture for such systems is still limited. \Textcite[Ch.~3]{Peter-2012-BarrelfishSched} describes the scheduling in the Barrelfish operating system. With the current implementation, task placement and scheduling are divided. While the task placement is conducted in a centralized manner, the scheduling itself is carried out on every core individually.
+
+\subsection{Cross-Cutting Concerns}
+
+Concerns in software design are, in general, everything that has to be considered during the design including features, nonfunctional requirements, design idioms, and implementation mechanisms~\cite{Robillard-2007-Concerns}. Software engineering tries to separate the concerns and assigns them to distinct design entities like, \eg, modules~\cite{Parnas-1972-DecompositionCriteria}. This approach can also be observed in operating systems, where, for example, the process scheduler is often a distinct subsystem. However, this \emph{separation of concerns}~\cite{Huersch-1995-SeparationOfConcerns} is not always possible. \emph{Cross-cutting concerns}~\cite{Kiczales-1997-AOP} exist that are a common challenge in software architecture in general and system software architecture in particular.
+
+\begin{figure}[t!] \centering
+	\includetikz{figures/chapter2-analysis/cross_cutting}
+	\caption{Hard real-time as an example for a cross-cutting concern.}%
+	\label{fig:analysis:cross}
+\end{figure}
+
+Take the example of hard realtime requirements. \Cref{fig:analysis:cross} depicts a common system stack with the hardware, the operating system with its various subsystems, and the application. The concern \emph{hard real-time} cannot be addressed by a single layer in this exemplary stack. All parts have to be aware of it. The hardware has to be deterministic, the operating system has to be real-time capable, and the application has to provide information like, \eg, its runtime and deadline to enforce a real-time scheduling. For the operating system to be real-time capable, most of its subsystems have to be real-time capable as well. For example, the hardware abstraction layer has to have deterministic code paths, the process scheduler has to employ a real-time scheduling algorithm, and the handler for, \eg, timers has to execute with an upper bound of time. Real-Time is one extreme example that touches all layers of the operating system. However, other concerns exist that touch only a subset. Take for instance the work by \textcite{Richling-2009-MultiCoreScheduling} or \textcite{Schoenherr-2010-HVFS}. They have shown that the cross-cutting concern of energy consumption can be handled by a closer integration of the scheduler and the systems energy governor, while also improving system performance.
+
+As cross-cutting concerns due to their nature have to be handled in different parts of a system, it will not be possible to have a solution regarding these issues that is restricted to the scheduler. In general, two options exist to handle cross-cutting concerns: integration and information distribution. Integration would be contradictory to the concept of separation of concerns and is, therefore, often not applicable. Hence, most of the time information distribution and communication between several software entities is the only solution.

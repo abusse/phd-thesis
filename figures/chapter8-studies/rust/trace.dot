@@ -1,0 +1,28 @@
+digraph G {
+{}
+hq_pipe_update -> _raw_spin_lock [label="[2.57%]SSS\nSSS67874.50SSS\nSSS8971\nS67133.00S"];
+rust_pipe_update -> rust_int2 [label="[5.44%]SSS\nSSS157940.00SSS\nSSS7897\nS67133.00S"];
+lb_pipe_update -> hq_pipe_update [label="[21.05%]SSS\nSSS2645314.50SSS\nSSS8971\nS67133.00S", weight=2];
+hq_pipe_update -> term_pipe_update [label="[28.49%]SSS\nSSS753771.00SSS\nSSS8971\nS67133.00S", weight=5];
+rust_pipe_update -> rust_lock_pipe [label="[4.08%]SSS\nSSS118455.00SSS\nSSS7897\nS67133.00S"];
+rust_pipe_update -> rust_unlock_pipe [label="[1.63%]SSS\nSSS47382.00SSS\nSSS7897\nS67133.00S"];
+rust_pipe_update -> term_pipe_update [label="[22.86%]SSS\nSSS663366.50SSS\nSSS7897\nS67133.00S", weight=8];
+rust_int2 [label="_<core__option__Option<T>>::unwrap::\nCalls: 7897\nTotal: 157940.00\nAvg: 20000.00", style=filled, fillcolor="#00F806"];
+hq_pipe_update [label="hq_pipe_update\nCalls: 8971\nTotal: 2645314.50\nAvg: 294873.98", style=filled, fillcolor="#00936B"];
+
+rust_lock_pipe [label="rust_lock_pipe\nCalls: 7897\nTotal: 118455.00\nAvg: 15000.00", style=filled, fillcolor="#00FA04"];
+rust_unlock_pipe [label="rust_unlock_pipe\nCalls: 7897\nTotal: 47382.00\nAvg: 6000.00", style=filled, fillcolor="#00FD01"];
+rust_int1 [label="core::ptr::_<impl *mut T>::offset::\nCalls: 7898\nTotal: 67133.00\nAvg: 8500.00", style=filled, fillcolor="#00FC02"];
+term_pipe_update [label="term_pipe_update\nCalls: 16868\nTotal: 1417137.50\nAvg: 84013.37", style=filled, fillcolor="#00C539"];
+rust_pipe_update [label="rust_pipe_update\nCalls: 7897\nTotal: 2902351.50\nAvg: 367525.83", style=filled, fillcolor="#008975"];
+lb_pipe_update [label="lb_pipe_update\nCalls: 16870\nTotal: 12566461.50\nAvg: 744899.91", style=filled, fillcolor="#FF0000"];
+_raw_spin_lock [label="_raw_spin_lock\nCalls: 314234\nTotal: 2403429.00\nAvg: 7648.53", style=filled, fillcolor="#009D61"];
+lb_pipe_update -> rust_pipe_update [label="[23.10%]SSS\nSSS2902351.50SSS\nSSS7897\nS67133.00S", weight=2];
+term_pipe_update -> _raw_spin_lock [label="[8.35%]SSS\nSSS118334.50SSS\nSSS16868\nS67133.00S", weight=0];
+lb_pipe_update -> _raw_spin_lock [label="[0.96%]SSS\nSSS120610.50SSS\nSSS16870\nS67133.00S", weight=1];
+rust_pipe_update -> rust_int1 [label="[2.31%]SSS\nSSS67133.00SSS\nSSS7898\nS67133.00S"];
+rust_lock_pipe -> _raw_spin_lock [label="[46.67%]SSS\nSSS55279.00SSS\nSSS7897\nS67133.00S", weight=2];
+
+
+lb_pipe_update -> rust_int1 [style="invis"];
+}

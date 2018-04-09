@@ -1,0 +1,64 @@
+\pgfplotsset{scaled y ticks=false}
+\pgfplotsset{cycle list/Set1-4}
+
+\begin{tikzpicture}
+	\begin{axis}[xtick={1,2,4,8,16,32,64,128,254},
+					  grid=major,
+					  width = \textwidth,
+					  height = 0.75\textwidth,
+					  y tick label style={/pgf/number format/.cd,sci,precision=5},
+					  ymode=log,
+					  xmode=log,
+					  ymax=140000000,
+					  log basis x={2},
+					  label style={font=\normalsize},
+					  tick label style={font=\normalsize},
+					  xticklabel=\pgfmathparse{2^\tick}\pgfmathprintnumber{\pgfmathresult},
+					  xlabel={Scheduling Pipes}, 
+					  ylabel={Simulation Ticks},
+					  every axis y label/.style={at={(0,0.5)}, xshift=-3.5em, rotate=90, font=\normalsize},
+					  title={\code{activate_task}},
+					  title style={yshift=6ex}
+					  ]
+
+% Plots %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	
+		\addplot+[smooth, line width=1pt, mark=none, error bars/.cd, y dir=both,y explicit] table [col sep=comma,x={pipes},y={activate_task},y error=Eactivate_task]{figures/evaluation/scalability/data/m5out-254c-0b.dat};\label{plots:plot-m5out-254c1}
+		\addplot+[smooth, line width=1pt, mark=none, error bars/.cd, y dir=both,y explicit] table [col sep=comma,x={pipes},y={activate_task},y error=Eactivate_task]{figures/evaluation/scalability/data/m5out-254c-500b.dat};\label{plots:plot-m5out-254c2}
+		\addplot+[smooth, line width=1pt, mark=none, error bars/.cd, y dir=both,y explicit] table [col sep=comma,x={pipes},y={activate_task},y error=Eactivate_task]{figures/evaluation/scalability/data/m5out-254c-1000b.dat};\label{plots:plot-m5out-254c3}
+		\legend{\SI{0   }{\micro\second} Workload,\SI{1.25}{\micro\second} Workload,\SI{2.5 }{\micro\second} Workload}
+	\end{axis}
+
+	\begin{axis}[xtick={1,2,4,8,16,32,64,128,254},
+					  grid=major,
+					  width = \textwidth,
+					  height = 0.75\textwidth,
+					  y tick label style={/pgf/number format/.cd,sci,precision=5},
+				 xlabel={Cores per Scheduling Pipe (rounded)}, 
+				 axis x line*=top,
+					  ymode=log,
+					  xmode=log,
+					  ymax=140,
+					  log basis x={2},
+					  log ticks with fixed point,
+					  label style={font=\normalsize},
+					  tick label style={font=\normalsize},
+					  xticklabel=\pgfmathparse{round(254/(2^\tick))}\pgfmathprintnumber{\pgfmathresult},
+					  ylabel={Real Time in \,$\mu{}s$},
+					  axis line style=transparent,
+					  ylabel near ticks, yticklabel pos=right
+					  ]
+
+
+% Ticks on the right side in uS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+		\addplot+[line width=0pt, mark=none] table [col sep=comma,x={pipes}, y expr=\thisrow{activate_task}/1000000]{figures/evaluation/scalability/data/m5out-254c-0b.dat};
+		\addplot+[line width=0pt, mark=none] table [col sep=comma,x={pipes}, y expr=\thisrow{activate_task}/1000000]{figures/evaluation/scalability/data/m5out-254c-500b.dat};
+		\addplot+[line width=0pt, mark=none] table [col sep=comma,x={pipes}, y expr=\thisrow{activate_task}/1000000]{figures/evaluation/scalability/data/m5out-254c-1000b.dat};
+
+	\end{axis}
+
+
+\end{tikzpicture}

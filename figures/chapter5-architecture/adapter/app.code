@@ -1,0 +1,8 @@
+		|\thread{1}|
+syscall(TASK_CREATE,...);
+		|\thread{1}|
+syscall(TASK_PRIO,...);
+		|\thread{1}|
+syscall(SCHED_NOTIFY,
+        TOPIC_ISA,...);
+		|\thread{1}|

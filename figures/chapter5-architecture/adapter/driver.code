@@ -1,0 +1,8 @@
+	cobas_task_prio(...);
+		|\hspace{0.5cm}\thread{0.7}|
+}
+
+accelerator_init(...) {
+	sys_task_create(...);
+	cobas_task_isa(...);
+		|\hspace{0.5cm}\thread{0.7}|

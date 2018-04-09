@@ -1,0 +1,20 @@
+\begin{scaletikzpicturetowidth}{0.75\textwidth}
+\begin{tikzpicture}[scale=\tikzscale, every node/.style={transform shape},
+					pstate/.style={ellipse, draw=black, minimum height=3em, text centered}]
+	\node[pstate, thick, text width=2.25cm, minimum height=1.25cm] (ready)   at (0,0)   {\Large \sffamily schedulable};
+	\node[pstate, thick, text width=2.25cm, minimum height=1.25cm] (running) at (7,-3)   {\Large \sffamily running};
+	\node[pstate, thick, text width=2.25cm, minimum height=1.25cm] (blocked) at (7,3) {\Large \sffamily unconsidered};
+	
+	\draw[->, thick] (ready)   edge[statea, bend left =20] node[pos=0.6, anchor=south west] {dispatch}  (running);
+	\draw[<-, thick] (ready)   edge[statea, bend right=20] node[anchor=south west] {relinquish}(running);
+	\draw[<-, thick] (ready)   edge[statea, bend left =20] node[anchor=north west] {consider}(blocked);
+	\draw[->, thick] (ready)   edge[statea, bend right=20] node[pos=0.6, anchor=north west] {unconsider}(blocked);
+	\draw[->, thick] (running) edge[statea] node[anchor=west] {unconsider}(blocked);
+
+	\draw[thick] (ready.west)   edge[statea, <-] node[anchor=south] {admit} ++(-2,0);
+	\draw[thick] (running.east) edge[statea, ->] node[anchor=south] {exit}  ++(2,0);
+	\draw[thick] (blocked.east) edge[statea, ->] node[anchor=south] {exit}  ++(2,0);
+	\node (temp) at (0,-5) {};
+	\draw[thick, <-, shorten <=2pt] (running.east |- temp) ++(2,0) -- node[pos=0.25, anchor=south] {exit}  ++(-4,0) to [bend left=35] (ready.south);
+\end{tikzpicture}
+\end{scaletikzpicturetowidth}

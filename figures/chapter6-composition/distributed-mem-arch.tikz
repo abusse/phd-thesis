@@ -1,0 +1,16 @@
+\begin{scaletikzpicturetowidth}{0.75\textwidth}
+\begin{tikzpicture}[scale=\tikzscale, every node/.style={transform shape}]	
+	\path[draw, fill=CPU] (0,1)  rectangle ++(2,2)  node[pos=0.5] {\Large PE~1};
+	\path[draw, fill=CPU] (0,-1) rectangle ++(2,-2) node[pos=0.5] {\Large PE~2};
+
+	\path[draw, fill=Memory] (3,1)  rectangle ++(2,2)  node[pos=0.5] {\Large \breakC{Local\\Memory}};
+	\path [-, draw, thick] (2,2) -- ++(1,0);
+	\path[draw, fill=Memory] (3,-1) rectangle ++(2,-2) node[pos=0.5] {\Large \breakC{Local\\Memory}};
+	\path [-, draw, thick] (2,-2) -- ++(1,0);
+	
+	\path [<->, draw, very thick] (1,-1) -- node[anchor=south, align=center, rotate=90]{\small Message} node[anchor=north, align=center, rotate=90]{\small Passing} ++(0,2);
+	
+	% dummy paths for alignment
+	\path (0,-3.5) rectangle (4,3.5);
+\end{tikzpicture}
+\end{scaletikzpicturetowidth}

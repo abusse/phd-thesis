@@ -1,0 +1,18 @@
+\begin{scaletikzpicturetowidth}{0.5\textwidth}
+\begin{tikzpicture}[scale=\tikzscale, every node/.style={transform shape}]
+	\draw[line width=0.5pt] (0,0.25)   -- ++(7,0)   -- ++(0,0.75) -- ++(-7,0)   -- cycle;
+	\node[align=center] at  (3,0.625) {\Large Hardware};
+	\draw[line width=0.5pt] (0,1.1)    -- ++(7,0)   -- ++(0,2.65) -- ++(-7,0)   -- cycle;
+	\draw[line width=0.5pt] (1.4,1.2)  -- ++(5.5,0) -- ++(0,0.75) -- ++(-5.5,0) -- cycle;
+	\node[align=center] at  (3.65,1.575) {\small Hardware Abstraction Layer};
+	\draw[line width=0.5pt] (1.4,2.05) -- ++(5.5,0) -- ++(0,0.75) -- ++(-5.5,0) -- cycle;
+	\node[align=center] at  (3.65,2.425) {\small Process Scheduler};
+	\draw[line width=0.5pt] (1.4,2.9)  -- ++(5.5,0) -- ++(0,0.75) -- ++(-5.5,0) -- cycle;
+	\node[align=center] at  (3.65,3.275) {\small Timer, Locks, etc.};
+	\node[rotate=90]    at  (0.7,2.425) {\Large \breakC{Operating \\ System}};
+	\draw[line width=0.5pt] (0,3.85)   -- ++(7,0)   -- ++(0,0.75) -- ++(-7,0)   -- cycle;
+	\node[align=center] at  (3,4.225) {\Large Application};
+
+	\node[ellipse, rotate=90, draw, fill=red!50, minimum width = 5cm, minimum height = 0.8cm] at (6.25,2.425){Hard Real-Time};
+\end{tikzpicture}
+\end{scaletikzpicturetowidth}
